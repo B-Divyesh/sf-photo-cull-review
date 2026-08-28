@@ -34,7 +34,12 @@ export async function scanFiles(
     try {
       const path = file.webkitRelativePath || file.name;
       const isImage = SUPPORTED_IMAGES.has(file.type);
-      const visual = isImage ? await readVisual(file) : {};
+      const sha256 = await hashFile(file);
+      let visual: Pick<MediaAsset, 'thumbnail' | 'perceptualHash'> = {};
+      if (isImage) {
+        try { visual = await readVisual(file); }
+        catch { /* Exact matching remains available when a browser cannot decode a preview. */ }
+      }
       assets.push({
         id: stableId(path, file.size, file.lastModified),
         name: file.name,
@@ -43,7 +48,7 @@ export async function scanFiles(
         mime: file.type,
         size: file.size,
         lastModified: file.lastModified,
-        sha256: await hashFile(file),
+        sha256,
         ...visual,
         decision: 'undecided',
       });

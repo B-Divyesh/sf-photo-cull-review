@@ -68,10 +68,10 @@ function welcomeView(): string {
         <h1>Decide what leaves.<br><em>Before anything moves.</em></h1>
         <p class="lede">Find byte-for-byte duplicates and likely bursts, compare them on a calm review desk, then export a move plan. Your originals are never changed.</p>
         <div class="hero-actions">
-          <label class="button primary" for="folder-input">Choose a photo folder</label>
+          <button class="button primary" data-action="choose-folder">Choose a photo folder</button>
           <span class="button-note">JPEG, PNG, WebP, GIF, BMP, MP4, MOV, M4V, WebM</span>
         </div>
-        <input class="visually-hidden" id="folder-input" type="file" multiple webkitdirectory accept="image/jpeg,image/png,image/webp,image/gif,image/bmp,video/mp4,video/quicktime,video/webm,video/x-m4v">
+        <input class="visually-hidden" id="folder-input" type="file" aria-label="Choose a photo folder" multiple webkitdirectory accept="image/jpeg,image/png,image/webp,image/gif,image/bmp,video/mp4,video/quicktime,video/webm,video/x-m4v">
         <p class="trust-line"><span aria-hidden="true">●</span> Local hashes & thumbnails <span aria-hidden="true">·</span> No deletion access</p>
         ${globalError ? `<p class="error" role="alert">${escapeHtml(globalError)}</p>` : ''}
       </div>
@@ -103,11 +103,11 @@ function workspaceView(): string {
   const completeGroups = data.groups.filter((item) => item.assetIds.every((id) => assetById(id)?.decision !== 'undecided')).length;
   return `<main id="main" class="workspace">
     <section class="workspace-head">
-      <div><p class="eyebrow">${escapeHtml(data.scan?.rootName ?? 'Local folder')} · ${formatDate(data.scan?.scannedAt)}</p><h1>Your review desk</h1><p>${data.scan?.scanned.toLocaleString()} files indexed locally. ${data.groups.length ? `${data.groups.length} candidate groups need a human decision.` : 'No duplicate or burst groups were found.'}</p></div>
+      <div><p class="eyebrow">${escapeHtml(data.scan?.rootName ?? 'Local folder')} · ${formatDate(data.scan?.scannedAt)}</p><h1 tabindex="-1">Your review desk</h1><p>${data.scan?.scanned.toLocaleString()} files indexed locally. ${data.groups.length ? `${data.groups.length} candidate groups need a human decision.` : 'No duplicate or burst groups were found.'}</p></div>
       <div class="head-actions">
         <button class="button secondary" data-action="export-csv">Export move manifest</button>
         <button class="text-button" data-action="export-json">Back up workspace</button>
-        <label class="text-button import-label" for="import-input">Restore workspace</label><input class="visually-hidden" id="import-input" type="file" accept="application/json">
+        <button class="text-button import-label" data-action="choose-import">Restore workspace</button><input class="visually-hidden" id="import-input" type="file" aria-label="Choose a workspace backup" accept="application/json">
       </div>
     </section>
     ${globalError ? `<p class="error page-error" role="alert">${escapeHtml(globalError)}</p>` : ''}
@@ -150,7 +150,7 @@ function groupView(group: ReviewGroup, reviewCount: number): string {
         <button class="text-button" data-action="undo" ${data.history.length ? '' : 'disabled'}>Undo last decision</button>
         <button class="button primary" data-action="next">${data.activeGroup === data.groups.length - 1 ? 'Finish review' : 'Next group →'}</button>
       </div>
-      <p class="shortcut-hint">Keyboard: <kbd>K</kbd> keep first undecided · <kbd>R</kbd> review first undecided · <kbd>←</kbd><kbd>→</kbd> groups</p>
+      <p class="shortcut-hint">Keyboard: <kbd>K</kbd> keep · <kbd>R</kbd> review · <kbd>S</kbd> skip group · <kbd>←</kbd><kbd>→</kbd> groups</p>
       ${reviewCount ? `<p class="plan-count">${reviewCount} marked for the review folder so far.</p>` : ''}
     </div>
   </section>`;
@@ -233,6 +233,8 @@ function updateScanProgress(complete: number, total: number, name: string): void
 function handleAction(event: Event): void {
   const action = (event.currentTarget as HTMLElement).dataset.action;
   if (action === 'open-license') document.querySelector<HTMLDialogElement>('#license-dialog')?.showModal();
+  if (action === 'choose-folder') document.querySelector<HTMLInputElement>('#folder-input')?.click();
+  if (action === 'choose-import') document.querySelector<HTMLInputElement>('#import-input')?.click();
   if (action === 'reset') void resetWorkspace();
   if (action === 'export-csv') exportManifest();
   if (action === 'export-json') exportWorkspace();
@@ -268,7 +270,13 @@ function undoDecision(): void {
 
 function navigateGroup(delta: number): void {
   const next = data.activeGroup + delta;
-  if (next >= data.groups.length) { data.activeGroup = data.groups.length; void saveData(data); render(); document.querySelector('h2')?.focus(); return; }
+  if (next >= data.groups.length) {
+    const incomplete = data.groups.findIndex((group) => group.assetIds.some((id) => assetById(id)?.decision === 'undecided'));
+    if (incomplete >= 0) {
+      data.activeGroup = incomplete; void saveData(data); render(); focusGroupTitle(); showToast('A group still has undecided files. Review each candidate before finishing.'); return;
+    }
+    data.activeGroup = data.groups.length; void saveData(data); render(); document.querySelector('h2')?.focus(); return;
+  }
   data.activeGroup = Math.max(0, next); void saveData(data); render(); focusGroupTitle();
 }
 
@@ -324,6 +332,7 @@ function handleShortcut(event: KeyboardEvent): void {
   if (target.matches('input, textarea, select, button, a') || target.closest('dialog')) return;
   if (event.key === 'ArrowLeft') { event.preventDefault(); navigateGroup(-1); }
   if (event.key === 'ArrowRight') { event.preventDefault(); navigateGroup(1); }
+  if (event.key.toLowerCase() === 's') { event.preventDefault(); navigateGroup(1); }
   if (event.key.toLowerCase() === 'k' || event.key.toLowerCase() === 'r') {
     const group = data.groups[data.activeGroup];
     const undecided = group?.assetIds.map(assetById).find((asset) => asset?.decision === 'undecided');
