@@ -124,10 +124,13 @@ export function buildGroups(assets: MediaAsset[]): ReviewGroup[] {
 }
 
 function stableId(path: string, size: number, modified: number): string {
-  let hash = 2166136261;
+  let hash = 14695981039346656037n;
   const source = `${path}:${size}:${modified}`;
-  for (let i = 0; i < source.length; i += 1) hash = Math.imul(hash ^ source.charCodeAt(i), 16777619);
-  return `asset-${(hash >>> 0).toString(16)}`;
+  for (let i = 0; i < source.length; i += 1) {
+    hash ^= BigInt(source.charCodeAt(i));
+    hash = BigInt.asUintN(64, hash * 1099511628211n);
+  }
+  return `asset-${hash.toString(16).padStart(16, '0')}`;
 }
 
 async function readVisual(file: File): Promise<Pick<MediaAsset, 'thumbnail' | 'perceptualHash'>> {
