@@ -1,0 +1,10 @@
+{
+  "slug": "photo-cull-review",
+  "title": "Photo Cull Review",
+  "territory": "utilities",
+  "user": "Households with large photo archives who need to safely decide which duplicate, burst, and unwanted media can be removed before backup costs and browsing noise grow further.",
+  "smallest_useful_product": "Desktop-local PWA that indexes selected folders, groups exact hashes and visually similar burst candidates, presents side-by-side keep decisions, and exports a move-to-review-folder manifest.",
+  "monetization": "one-time",
+  "constraints": "Local-only thumbnails and hashes; never alter originals; make moves explicit and reversible; perceptual hashing must be explained as a suggestion, not identity proof.",
+  "artifact_class": "pwa-offline"
+}
