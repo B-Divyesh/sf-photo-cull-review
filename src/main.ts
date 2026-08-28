@@ -1,0 +1,363 @@
+import './styles.css';
+import { clearData, loadData, saveData } from './db';
+import { captureLicenseFromUrl, checkoutUrl, hasOptimisticUnlock, storeLicense, verifyLicense } from './license';
+import { FREE_FILE_LIMIT, scanFiles } from './scanner';
+import type { AppData, Decision, MediaAsset, ReviewGroup } from './types';
+import { EMPTY_DATA } from './types';
+
+const app = document.querySelector<HTMLDivElement>('#app')!;
+if (!app) throw new Error('App root is missing.');
+
+let data: AppData = structuredClone(EMPTY_DATA);
+let paid = false;
+let busy = true;
+let globalError = '';
+let toastTimer = 0;
+
+void init();
+
+async function init(): Promise<void> {
+  captureLicenseFromUrl();
+  paid = hasOptimisticUnlock();
+  try { data = await loadData(); }
+  catch (error) { globalError = message(error); }
+  busy = false;
+  render();
+  bindGlobalEvents();
+  if (paid) {
+    const verified = await verifyLicense();
+    if (verified !== paid) { paid = verified; render(); }
+  }
+  registerServiceWorker();
+}
+
+function render(): void {
+  const offline = !navigator.onLine;
+  app.innerHTML = `
+    ${offline ? '<div class="offline-banner" role="status">Offline — your saved review is still available on this device.</div>' : ''}
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="Photo Cull Review home">
+        <img src="/icons/icon.svg" alt="" width="34" height="34"><span>Photo Cull Review</span>
+      </a>
+      <nav aria-label="Primary">
+        <button class="text-button" data-action="open-license">${paid ? 'Archive pass active' : 'Archive pass'}</button>
+        ${data.scan ? '<button class="text-button" data-action="reset">New scan</button>' : ''}
+      </nav>
+    </header>
+    ${busy ? loadingView() : data.scan ? workspaceView() : welcomeView()}
+    <footer class="site-footer">
+      <p>Private by design. No photos leave this browser.</p>
+      <nav aria-label="Legal"><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a></nav>
+      <p class="provenance">Original generated archive illustration · © 2026 Sociobot</p>
+    </footer>
+    <div class="toast" role="status" aria-live="polite" aria-atomic="true" hidden></div>
+    ${licenseDialog()}
+  `;
+  bindViewEvents();
+}
+
+function loadingView(): string {
+  return '<main id="main" class="loading"><p class="eyebrow">Opening the archive desk</p><h1>Loading your local review…</h1></main>';
+}
+
+function welcomeView(): string {
+  return `<main id="main">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">A local, reversible photo cull</p>
+        <h1>Decide what leaves.<br><em>Before anything moves.</em></h1>
+        <p class="lede">Find byte-for-byte duplicates and likely bursts, compare them on a calm review desk, then export a move plan. Your originals are never changed.</p>
+        <div class="hero-actions">
+          <label class="button primary" for="folder-input">Choose a photo folder</label>
+          <span class="button-note">JPEG, PNG, WebP, GIF, BMP, MP4, MOV, M4V, WebM</span>
+        </div>
+        <input class="visually-hidden" id="folder-input" type="file" multiple webkitdirectory accept="image/jpeg,image/png,image/webp,image/gif,image/bmp,video/mp4,video/quicktime,video/webm,video/x-m4v">
+        <p class="trust-line"><span aria-hidden="true">●</span> Local hashes & thumbnails <span aria-hidden="true">·</span> No deletion access</p>
+        ${globalError ? `<p class="error" role="alert">${escapeHtml(globalError)}</p>` : ''}
+      </div>
+      <figure class="hero-art">
+        <picture><source media="(max-width: 640px)" srcset="/assets/archive-room-mobile.webp"><img src="/assets/archive-room.webp" width="1280" height="853" alt="An imagined moonlit archive where a red thread connects photographic slides across paper dunes" fetchpriority="high" decoding="async"></picture>
+        <figcaption>Every frame stays where it is. The red thread is only a review plan.</figcaption>
+      </figure>
+    </section>
+    <section class="method" aria-labelledby="method-title">
+      <p class="eyebrow">The cautious path</p><h2 id="method-title">Evidence, then judgment, then a plan.</h2>
+      <ol class="method-list">
+        <li><span>01</span><h3>Index locally</h3><p>Complete SHA-256 hashes find exact files. A small visual hash suggests nearby burst frames.</p></li>
+        <li><span>02</span><h3>Review every group</h3><p>See why files were grouped. Mark each one keep or move to review; suggestions never become facts.</p></li>
+        <li><span>03</span><h3>Export, don’t delete</h3><p>Download a CSV move manifest for a separate review folder. Your source archive remains untouched.</p></li>
+      </ol>
+    </section>
+    <section class="pricing" aria-labelledby="price-title">
+      <div><p class="eyebrow">For the big archive</p><h2 id="price-title">Archive pass</h2><p>Free for folders up to ${FREE_FILE_LIMIT} supported files. A one-time US$19 pass unlocks unlimited scans and stays useful every cleanup season.</p></div>
+      <div class="price-action"><strong>US$19 <small>one time</small></strong><a class="button secondary" href="${checkoutUrl()}">Buy archive pass</a><button class="text-button" data-action="open-license">Restore a license</button></div>
+    </section>
+  </main>`;
+}
+
+function workspaceView(): string {
+  const group = data.groups[data.activeGroup];
+  const decided = data.assets.filter((asset) => asset.decision !== 'undecided').length;
+  const candidates = new Set(data.groups.flatMap((item) => item.assetIds)).size;
+  const reviewCount = data.assets.filter((asset) => asset.decision === 'review').length;
+  const completeGroups = data.groups.filter((item) => item.assetIds.every((id) => assetById(id)?.decision !== 'undecided')).length;
+  return `<main id="main" class="workspace">
+    <section class="workspace-head">
+      <div><p class="eyebrow">${escapeHtml(data.scan?.rootName ?? 'Local folder')} · ${formatDate(data.scan?.scannedAt)}</p><h1>Your review desk</h1><p>${data.scan?.scanned.toLocaleString()} files indexed locally. ${data.groups.length ? `${data.groups.length} candidate groups need a human decision.` : 'No duplicate or burst groups were found.'}</p></div>
+      <div class="head-actions">
+        <button class="button secondary" data-action="export-csv">Export move manifest</button>
+        <button class="text-button" data-action="export-json">Back up workspace</button>
+        <label class="text-button import-label" for="import-input">Restore workspace</label><input class="visually-hidden" id="import-input" type="file" accept="application/json">
+      </div>
+    </section>
+    ${globalError ? `<p class="error page-error" role="alert">${escapeHtml(globalError)}</p>` : ''}
+    <section class="summary" aria-label="Review progress">
+      <div><strong>${completeGroups}</strong><span>of ${data.groups.length} groups reviewed</span></div>
+      <div><strong>${decided}</strong><span>of ${candidates} candidates decided</span></div>
+      <div><strong>${formatBytes(data.assets.filter((asset) => asset.decision === 'review').reduce((sum, asset) => sum + asset.size, 0))}</strong><span>marked for review folder</span></div>
+      <div class="progress-wrap"><span class="visually-hidden">${candidates ? Math.round((decided / candidates) * 100) : 100}% decided</span><div class="progress"><i style="width:${candidates ? (decided / candidates) * 100 : 100}%"></i></div></div>
+    </section>
+    ${!data.groups.length ? noCandidatesView() : group ? groupView(group, reviewCount) : completedView(reviewCount)}
+  </main>`;
+}
+
+function noCandidatesView(): string {
+  return `<section class="empty-state"><div class="empty-mark" aria-hidden="true">✓</div><p class="eyebrow">Scan complete</p><h2>No candidates to review</h2><p>No exact duplicates or close-together similar images were found. Nothing has been moved or changed.</p><button class="button primary" data-action="reset">Scan another folder</button></section>`;
+}
+
+function completedView(reviewCount: number): string {
+  return `<section class="empty-state"><div class="empty-mark" aria-hidden="true">✓</div><p class="eyebrow">Review complete</p><h2>Your plan is ready</h2><p>${reviewCount} ${reviewCount === 1 ? 'file is' : 'files are'} marked to move into a separate review folder. Export the manifest, inspect it, and use your file manager to make the moves.</p><button class="button primary" data-action="export-csv">Export move manifest</button></section>`;
+}
+
+function groupView(group: ReviewGroup, reviewCount: number): string {
+  const groupAssets = group.assetIds.map(assetById).filter((item): item is MediaAsset => Boolean(item));
+  const exact = group.kind === 'exact';
+  return `<section class="review-stage" aria-labelledby="group-title">
+    <aside class="queue" aria-label="Candidate groups">
+      <div class="queue-head"><h2>Candidate groups</h2><span>${data.activeGroup + 1}/${data.groups.length}</span></div>
+      <ol>${data.groups.map((item, index) => {
+        const done = item.assetIds.every((id) => assetById(id)?.decision !== 'undecided');
+        return `<li><button class="queue-item ${index === data.activeGroup ? 'active' : ''}" data-group="${index}" ${index === data.activeGroup ? 'aria-current="step"' : ''}><span class="kind-mark ${item.kind}">${item.kind === 'exact' ? '=' : '≈'}</span><span><strong>${item.kind === 'exact' ? 'Exact copies' : 'Likely burst'}</strong><small>${item.assetIds.length} files · ${done ? 'Reviewed' : 'Needs review'}</small></span></button></li>`;
+      }).join('')}</ol>
+    </aside>
+    <div class="group-panel">
+      <div class="group-title-row"><div><p class="eyebrow">Group ${data.activeGroup + 1} of ${data.groups.length}</p><h2 id="group-title">${exact ? 'These files are exact copies' : 'These frames look related'}</h2></div><span class="evidence-stamp ${group.kind}">${exact ? 'Same bytes' : 'Suggestion'}</span></div>
+      <p class="explanation"><strong>Why grouped:</strong> ${escapeHtml(group.explanation)}</p>
+      ${exact ? '<p class="recommendation">Start by keeping the clearest path you recognize. Identical bytes mean image quality is the same.</p>' : '<p class="recommendation warning">Look closely at expressions, focus, and motion. Similarity is only a lead—keep every frame you value.</p>'}
+      <div class="asset-grid">${groupAssets.map(assetView).join('')}</div>
+      <div class="group-controls">
+        <button class="button secondary" data-action="previous" ${data.activeGroup === 0 ? 'disabled' : ''}>← Previous group</button>
+        <button class="text-button" data-action="undo" ${data.history.length ? '' : 'disabled'}>Undo last decision</button>
+        <button class="button primary" data-action="next">${data.activeGroup === data.groups.length - 1 ? 'Finish review' : 'Next group →'}</button>
+      </div>
+      <p class="shortcut-hint">Keyboard: <kbd>K</kbd> keep first undecided · <kbd>R</kbd> review first undecided · <kbd>←</kbd><kbd>→</kbd> groups</p>
+      ${reviewCount ? `<p class="plan-count">${reviewCount} marked for the review folder so far.</p>` : ''}
+    </div>
+  </section>`;
+}
+
+function assetView(asset: MediaAsset, index: number): string {
+  return `<article class="asset ${asset.decision}" data-asset="${asset.id}">
+    <div class="asset-image">${asset.thumbnail ? `<img src="${asset.thumbnail}" alt="Preview of ${escapeHtml(asset.name)}" width="320" height="220">` : `<div class="video-placeholder" role="img" aria-label="No preview available for ${escapeHtml(asset.name)}"><span>${asset.mediaType === 'video' ? '▶' : '◇'}</span><small>${asset.mediaType === 'video' ? 'Video' : 'Preview unavailable'}</small></div>`}<span class="asset-number">${index + 1}</span></div>
+    <div class="asset-meta"><h3 title="${escapeHtml(asset.path)}">${escapeHtml(asset.name)}</h3><p>${formatBytes(asset.size)} · ${formatDate(asset.lastModified, true)}</p><p class="path">${escapeHtml(asset.path)}</p></div>
+    <fieldset><legend>Decision for ${escapeHtml(asset.name)}</legend>
+      <button class="decision keep ${asset.decision === 'keep' ? 'selected' : ''}" data-decision="keep" data-id="${asset.id}" aria-pressed="${asset.decision === 'keep'}"><span aria-hidden="true">✓</span> Keep</button>
+      <button class="decision review ${asset.decision === 'review' ? 'selected' : ''}" data-decision="review" data-id="${asset.id}" aria-pressed="${asset.decision === 'review'}"><span aria-hidden="true">↗</span> Move to review</button>
+    </fieldset>
+  </article>`;
+}
+
+function licenseDialog(): string {
+  return `<dialog id="license-dialog" aria-labelledby="license-title"><form method="dialog" class="dialog-close"><button aria-label="Close license dialog">×</button></form><p class="eyebrow">One-time unlock</p><h2 id="license-title">Archive pass</h2>${paid ? '<p class="license-good">✓ This device has an active archive pass.</p>' : `<p>Scan folders of any size for US$19 once. The free desk handles up to ${FREE_FILE_LIMIT} files, and exporting your plan is always free.</p><a class="button primary wide" href="${checkoutUrl()}">Buy archive pass</a><hr><form id="restore-form"><label for="license-token">Have a license? Paste it here</label><input id="license-token" name="license" autocomplete="off" required><button class="button secondary wide" type="submit">Verify and restore</button><p class="form-status" role="status" aria-live="polite"></p></form>`}<p class="legal-small">Sociobot/Dodo is the merchant of record. Refunds are handled there and revoke the license. <a href="/terms/">Terms</a> · <a href="/privacy/">Privacy</a></p></dialog>`;
+}
+
+function bindViewEvents(): void {
+  document.querySelector<HTMLInputElement>('#folder-input')?.addEventListener('change', handleFolder);
+  document.querySelector<HTMLInputElement>('#import-input')?.addEventListener('change', handleImport);
+  document.querySelectorAll<HTMLElement>('[data-action]').forEach((element) => element.addEventListener('click', handleAction));
+  document.querySelectorAll<HTMLButtonElement>('[data-group]').forEach((button) => button.addEventListener('click', () => {
+    data.activeGroup = Number(button.dataset.group); void saveData(data); render(); focusGroupTitle();
+  }));
+  document.querySelectorAll<HTMLButtonElement>('[data-decision]').forEach((button) => button.addEventListener('click', () => {
+    setDecision(button.dataset.id ?? '', button.dataset.decision as Decision);
+  }));
+  const restore = document.querySelector<HTMLFormElement>('#restore-form');
+  restore?.addEventListener('submit', handleLicenseRestore);
+}
+
+function bindGlobalEvents(): void {
+  window.addEventListener('online', render);
+  window.addEventListener('offline', render);
+  window.addEventListener('keydown', handleShortcut);
+}
+
+async function handleFolder(event: Event): Promise<void> {
+  const input = event.currentTarget as HTMLInputElement;
+  const files = Array.from(input.files ?? []);
+  if (!files.length) return;
+  globalError = '';
+  app.innerHTML = scanProgressView(files.length);
+  try {
+    const result = await scanFiles(files, paid, updateScanProgress);
+    data = {
+      version: 1,
+      assets: result.assets,
+      groups: result.groups,
+      scan: { scanned: result.assets.length, skipped: result.skipped + result.failures.length, scannedAt: Date.now(), rootName: result.rootName },
+      activeGroup: 0,
+      history: [],
+    };
+    await saveData(data);
+    if (result.failures.length) globalError = `${result.failures.length} file(s) could not be read and were skipped.`;
+    render();
+    document.querySelector('h1')?.focus();
+  } catch (error) {
+    globalError = message(error);
+    render();
+  }
+}
+
+function scanProgressView(total: number): string {
+  return `<header class="site-header"><span class="brand"><img src="/icons/icon.svg" alt="" width="34" height="34"><span>Photo Cull Review</span></span></header><main id="main" class="scan-screen"><div class="scan-orbit" aria-hidden="true"><i></i></div><p class="eyebrow">Local scan</p><h1>Reading evidence,<br>not changing files.</h1><p id="scan-name">Preparing ${total.toLocaleString()} files…</p><div class="scan-progress" role="progressbar" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="0" aria-label="Files scanned"><i></i></div><p class="scan-count">0 / ${total.toLocaleString()}</p><p class="scan-assurance">Keep this tab open. Hashes and small previews stay on this device.</p></main>`;
+}
+
+function updateScanProgress(complete: number, total: number, name: string): void {
+  const bar = document.querySelector<HTMLElement>('.scan-progress');
+  const count = document.querySelector<HTMLElement>('.scan-count');
+  const label = document.querySelector<HTMLElement>('#scan-name');
+  if (bar) { bar.setAttribute('aria-valuenow', String(complete)); bar.querySelector<HTMLElement>('i')?.style.setProperty('width', `${(complete / total) * 100}%`); }
+  if (count) count.textContent = `${complete.toLocaleString()} / ${total.toLocaleString()}`;
+  if (label) label.textContent = name;
+}
+
+function handleAction(event: Event): void {
+  const action = (event.currentTarget as HTMLElement).dataset.action;
+  if (action === 'open-license') document.querySelector<HTMLDialogElement>('#license-dialog')?.showModal();
+  if (action === 'reset') void resetWorkspace();
+  if (action === 'export-csv') exportManifest();
+  if (action === 'export-json') exportWorkspace();
+  if (action === 'previous') navigateGroup(-1);
+  if (action === 'next') navigateGroup(1);
+  if (action === 'undo') undoDecision();
+}
+
+async function resetWorkspace(): Promise<void> {
+  if (data.scan && !confirm('Start a new scan? This clears the saved workspace and decisions on this device. Export a workspace backup first if you need it.')) return;
+  await clearData();
+  data = structuredClone(EMPTY_DATA); globalError = ''; render();
+}
+
+function setDecision(id: string, decision: Decision): void {
+  const asset = assetById(id);
+  if (!asset || asset.decision === decision) return;
+  data.history.push({ at: Date.now(), assetId: id, from: asset.decision, to: decision });
+  asset.decision = decision;
+  void saveData(data);
+  render();
+  document.querySelector<HTMLButtonElement>(`[data-id="${CSS.escape(id)}"][data-decision="${decision}"]`)?.focus();
+  showToast(decision === 'keep' ? `${asset.name} marked keep.` : `${asset.name} added to the review-folder plan.`);
+}
+
+function undoDecision(): void {
+  const last = data.history.pop();
+  if (!last) return;
+  const asset = assetById(last.assetId);
+  if (asset) asset.decision = last.from;
+  void saveData(data); render(); showToast('Last decision undone.');
+}
+
+function navigateGroup(delta: number): void {
+  const next = data.activeGroup + delta;
+  if (next >= data.groups.length) { data.activeGroup = data.groups.length; void saveData(data); render(); document.querySelector('h2')?.focus(); return; }
+  data.activeGroup = Math.max(0, next); void saveData(data); render(); focusGroupTitle();
+}
+
+function focusGroupTitle(): void {
+  const title = document.querySelector<HTMLElement>('#group-title');
+  title?.setAttribute('tabindex', '-1'); title?.focus();
+}
+
+function exportManifest(): void {
+  const selected = data.assets.filter((asset) => asset.decision === 'review');
+  if (!selected.length) { showToast('Mark at least one file “Move to review” before exporting.'); return; }
+  const headers = ['source_path','review_path','size_bytes','sha256','group_type','reason'];
+  const rows = selected.map((asset) => {
+    const group = data.groups.find((item) => item.assetIds.includes(asset.id));
+    return [asset.path, `_photo-review/${asset.path}`, asset.size, asset.sha256, group?.kind ?? '', group?.explanation ?? 'Manual review choice'];
+  });
+  const csv = [headers, ...rows].map((row) => row.map(csvCell).join(',')).join('\n');
+  download(`photo-cull-move-manifest-${dateStamp()}.csv`, `# PLAN ONLY — Photo Cull Review never moved or deleted these files.\n${csv}`, 'text/csv');
+  showToast(`Exported a plan for ${selected.length} file${selected.length === 1 ? '' : 's'}.`);
+}
+
+function exportWorkspace(): void {
+  download(`photo-cull-workspace-${dateStamp()}.json`, JSON.stringify({ exportedAt: new Date().toISOString(), product: 'photo-cull-review', data }, null, 2), 'application/json');
+  showToast('Workspace backup exported.');
+}
+
+async function handleImport(event: Event): Promise<void> {
+  const input = event.currentTarget as HTMLInputElement;
+  const file = input.files?.[0];
+  if (!file) return;
+  try {
+    const parsed = JSON.parse(await file.text()) as { product?: string; data?: AppData };
+    if (parsed.product !== 'photo-cull-review' || parsed.data?.version !== 1 || !Array.isArray(parsed.data.assets) || !Array.isArray(parsed.data.groups)) throw new Error('This is not a Photo Cull Review workspace backup.');
+    data = parsed.data; await saveData(data); globalError = ''; render(); showToast('Workspace restored.');
+  } catch (error) { globalError = message(error); render(); }
+}
+
+async function handleLicenseRestore(event: SubmitEvent): Promise<void> {
+  event.preventDefault();
+  const form = event.currentTarget as HTMLFormElement;
+  const token = new FormData(form).get('license')?.toString().trim() ?? '';
+  const status = form.querySelector<HTMLElement>('.form-status');
+  if (!token) return;
+  storeLicense(token); if (status) status.textContent = 'Checking license…';
+  paid = await verifyLicense(true);
+  if (paid) { render(); showToast('Archive pass restored on this device.'); }
+  else if (status) status.textContent = 'That license is not active for this product. Check the token and try again.';
+}
+
+function handleShortcut(event: KeyboardEvent): void {
+  if (!data.scan || event.metaKey || event.ctrlKey || event.altKey) return;
+  const target = event.target as HTMLElement;
+  if (target.matches('input, textarea, select, button, a') || target.closest('dialog')) return;
+  if (event.key === 'ArrowLeft') { event.preventDefault(); navigateGroup(-1); }
+  if (event.key === 'ArrowRight') { event.preventDefault(); navigateGroup(1); }
+  if (event.key.toLowerCase() === 'k' || event.key.toLowerCase() === 'r') {
+    const group = data.groups[data.activeGroup];
+    const undecided = group?.assetIds.map(assetById).find((asset) => asset?.decision === 'undecided');
+    if (undecided) { event.preventDefault(); setDecision(undecided.id, event.key.toLowerCase() === 'k' ? 'keep' : 'review'); }
+  }
+}
+
+function registerServiceWorker(): void {
+  if (!('serviceWorker' in navigator)) return;
+  const register = (): void => {
+    void navigator.serviceWorker.register('/sw.js').then((registration) => {
+      registration.addEventListener('updatefound', () => {
+        const worker = registration.installing;
+        worker?.addEventListener('statechange', () => { if (worker.state === 'installed' && navigator.serviceWorker.controller) showToast('An update is ready. Reload to use it.'); });
+      });
+    }).catch(() => { /* The app remains fully usable without installation. */ });
+  };
+  if (document.readyState === 'complete') register();
+  else window.addEventListener('load', register, { once: true });
+}
+
+function showToast(text: string): void {
+  window.clearTimeout(toastTimer);
+  const toast = document.querySelector<HTMLElement>('.toast');
+  if (!toast) return;
+  toast.textContent = text; toast.hidden = false;
+  toastTimer = window.setTimeout(() => { toast.hidden = true; }, 4200);
+}
+
+function assetById(id: string): MediaAsset | undefined { return data.assets.find((asset) => asset.id === id); }
+function message(error: unknown): string { return error instanceof Error ? error.message : 'Something went wrong. Try again.'; }
+function formatBytes(bytes: number): string { if (!bytes) return '0 B'; const units = ['B','KB','MB','GB','TB']; const index = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1); return `${(bytes / 1024 ** index).toFixed(index ? 1 : 0)} ${units[index]}`; }
+function formatDate(value?: number, time = false): string { if (!value) return 'Unknown date'; return new Intl.DateTimeFormat(undefined, time ? { dateStyle: 'medium', timeStyle: 'short' } : { dateStyle: 'medium' }).format(value); }
+function dateStamp(): string { return new Date().toISOString().slice(0, 10); }
+function csvCell(value: string | number): string { return `"${String(value).replaceAll('"', '""')}"`; }
+function escapeHtml(value: string): string { return value.replace(/[&<>'"]/g, (char) => ({ '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;' })[char] ?? char); }
+function download(name: string, contents: string, type: string): void { const url = URL.createObjectURL(new Blob([contents], { type })); const anchor = document.createElement('a'); anchor.href = url; anchor.download = name; anchor.click(); window.setTimeout(() => URL.revokeObjectURL(url), 1000); }

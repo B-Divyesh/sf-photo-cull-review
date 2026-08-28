@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Photo Cull Review aperture mark">
+  <rect width="512" height="512" rx="96" fill="#171713"/>
+  <path d="M99 91h314v330H99z" fill="#f4eedc"/>
+  <path d="m158 162 99-57 99 57v188l-99 57-99-57z" fill="#24384a"/>
+  <circle cx="257" cy="256" r="76" fill="#f4eedc"/>
+  <path d="M92 355c95-30 191-30 328 0" fill="none" stroke="#b53a2f" stroke-width="19" stroke-linecap="round"/>
+</svg>
