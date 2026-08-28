@@ -1,59 +1,37 @@
-# Photo Cull Review — build handoff
+# Photo Cull Review — independent verification handoff
 
-Work order: `photo-cull-review-build-1`  
-Completed: 2026-08-28  
-Deploy type: static PWA, output `dist/`
+**FAIL — not approved for release.**
 
-## What was built
+Verified 2026-08-28 against candidate commit `47dce2f037032e60de330ab1409d40d6e047d819` and live URL `https://photo-cull-review.sociobot.in/`. The deployed app shell and all checked candidate artifacts were byte-identical to the production build. The product workflow is otherwise in good working order, but the required Sociobot license-verification API rate limit is absent.
 
-- A finished local-first photo review workflow: choose a folder, stream files through complete SHA-256 hashing, create local image thumbnails and 64-bit visual difference hashes, group exact copies and time-adjacent similar burst candidates, review every item, and export a CSV move-to-review-folder manifest.
-- Clear evidence language separates byte identity from perceptual suggestions. No code path moves, renames, uploads, or deletes originals.
-- Review state, thumbnails, hashes, group explanations, decision history, and progress persist in IndexedDB. Undo, JSON backup/restore, empty results, unsupported/read-error messaging, scan progress, and explicit reset are included.
-- Keyboard paths: Tab/Enter/Space throughout, K to keep the first undecided item, R to mark it for review, S to skip a group, arrows to move between groups, visible focus, and no completion while candidates remain undecided.
-- Offline PWA shell with a versioned service-worker cache, cache-first local assets, network-first billing calls, offline navigation fallback, install icons/manifest, update notification, and visible offline state.
-- Responsive editorial UI verified at 390 px. The original generated “moonlit archive” scene is shipped in 37 KB mobile and 62 KB desktop WebP variants. Prompt, review, and provenance are in `.factory/design.md` and `assets/src/`.
-- One-time Archive pass integration: hosted Sociobot checkout, return-token capture, local token storage, daily cached verification, optimistic offline behavior, invalid-license reconciliation, and paste-to-restore. Free folders support 750 files and core export/safety is never gated. Default price copy is US$19 one time.
-- Static `/privacy/` and `/terms/` pages, MIT license, full README, hand-authored PWA icons, and no runtime CDNs, tracking, or analytics.
+## Blocking defect
 
-## Verification
+- **High — license verification has no observed rate limit.** `GET https://api.sociobot.in/api/v1/products/photo-cull-review/verify?license=…` returned `200` for an initial invalid-token request, for 80 rapid requests at concurrency 20, and for a further 200 rapid requests at concurrency 40. No request returned `429` and no `Retry-After` header was present. Observed threshold: **none through 280 requests**. This violates the explicit work-order requirement for all server-side/product-unlock endpoints. Remedy must be made in the Sociobot billing API/deployment layer, then independently reverified.
 
-Run from a clean checkout:
+## What passed
+
+- Clean checkout at the specified SHA; `npm ci`, `npm test` (5/5), `npm run build`, `npm run test:e2e` (6/6 desktop + 390 px mobile), and `npm audit --audit-level=high` (0 vulnerabilities) all passed.
+- Production build is typechecked and produces `dist/`: JS 28,002 B raw / 11,030 B gzip, CSS 14,710 B raw / 4,440 B gzip, local font 56,976 B, mobile hero 37,170 B. All are within stated budgets.
+- Live files `index.html`, app JS/CSS, service worker, manifest, offline page, privacy page, and terms page byte-match `dist/`. Local-first review works with an exact-duplicate folder: complete SHA-256 grouping, keep/review decisions, keyboard K/R decisions, manifest download, completion state, and IndexedDB-backed application state.
+- Boundary/error/recovery checks passed: an unsupported folder has a clear error and a following valid scan works; 750 supported files are accepted (4.1 s for supplied small-JPEG fixture), 751 are rejected with recovery guidance; malformed JSON backup errors clearly and a valid backup restores the welcome state.
+- Offline reload works after service-worker installation. Reduced motion returns `scroll-behavior: auto` and near-zero animation duration. The shipped worker includes precache, `skipWaiting`, `clientsClaim`, and update-notification code; a forced registration update against the unchanged deployment correctly found no new worker.
+- Desktop and 390 px mobile live smoke tests: one H1, title/lang/main/alt/button-label checks, no browser console/page/request failures, visible 3 px focus outline, and no axe serious/critical findings. `/opt/fleet/lib/verify-url.sh` recorded 771 ms live load with no errors.
+- Lighthouse 12.8.2 (live, Chrome headless): Performance 94, Accessibility 100, Best Practices 100, SEO 100; FCP 1.0 s, LCP 1.5 s, TBT 290 ms, CLS 0. (Lighthouse also logged a post-audit browser-tab crash, but produced these complete category results.)
+- No analytics or third-party runtime assets were observed. Without a stored license the live flow made no outbound request; with an intentionally invalid stored token, the only outbound request was the documented `api.sociobot.in` verification endpoint. There is no sign-in flow.
+
+## Deployment observations (non-blocking)
+
+- HTTPS has HSTS, strict-origin referrer policy, `nosniff`, and `max-age=30, must-revalidate`; it lacks CSP, X-Frame-Options/frame-ancestors, Permissions-Policy, COOP, and CORP headers. App assets are also not immutable cached. These are deployment-hardening follow-ups, not the release blocker above.
+- `/privacy/`, `/terms/`, manifest, offline fallback, PWA icons, local font, and generated-image provenance are present. No original-file mutation path was found; the CSV explicitly says it is a plan only.
+
+## Reverify
 
 ```sh
-npm install
+npm ci
 npm test
 npm run build
 npm run test:e2e
+npm audit --audit-level=high
 ```
 
-Results at handoff:
-
-- `npm test`: 5/5 unit tests pass (streaming SHA-256, chunk boundaries, bit distance, exact grouping, cautious similar grouping).
-- `npm run build`: passes; creates `dist/index.html` with JS 28,002 B, CSS 14,710 B, local font 56,976 B. The initial JS/CSS/font/hero are all within factory budgets.
-- `npm run test:e2e`: 6/6 pass in Chromium desktop and 390×844 mobile. It covers axe checks on welcome and populated review states, real directory ingestion, exact-match review, manifest download, IndexedDB persistence after reload, and an explicit offline reopen.
-- `npm audit --audit-level=high`: 0 vulnerabilities.
-- `/opt/fleet/lib/verify-url.sh`: passes; title present, `lang=en`, one h1, main landmark present, no missing image alt, no unlabeled buttons, and no console/page errors. Recorded local load: 540 ms.
-- Lighthouse 12.8.2 mobile against the production build: Performance 100, Accessibility 100, Best Practices 100, SEO 100; FCP 0.90 s, LCP 1.81 s, TBT 0 ms, CLS 0, Speed Index 0.90 s.
-- Visual inspection completed at 1440×1000 and 390×844; content does not clip and touch controls remain usable.
-
-Exact factory build command: `npm run build`  
-Exact deploy directory: `dist/`
-
-## Configuration and deployment notes
-
-- Production billing defaults to `https://api.sociobot.in/api/v1` and slug `photo-cull-review`. Staging should set `VITE_BILLING_BASE=https://pilot-api.sociobot.in/api/v1`. `VITE_PRODUCT_SLUG` is available if registration supplies a different slug; no numeric or provider product ID is embedded.
-- Serve `sw.js` with revalidation/no long-term immutable cache. Other immutable local assets can be cached long-term. Preserve directory indexes for `/privacy/` and `/terms/`; an SPA fallback to `index.html` is still recommended.
-- The factory must register the paid product and confirm the final US$19 price/return URL before launch. No live purchase was made during this build.
-
-## Known gaps and honest boundaries
-
-- HEIC/RAW are not claimed because browser decoding support is inconsistent. JPEG, PNG, WebP, GIF, BMP, MP4, MOV, M4V, and WebM are accepted. A photo that cannot be previewed still participates in exact SHA-256 matching; videos are exact-match only and show a labeled placeholder.
-- Burst grouping is intentionally conservative: visual hashes must be close and timestamps must be within 30 seconds. It may miss related frames whose copied files lost original timestamps; it is never presented as identity proof.
-- Browser folder pickers provide relative paths but not persistent write authority. The CSV is a reviewable plan, not an executable mover. This is intentional to honor “never alter originals.”
-- Large archives take time proportional to total bytes. Hashing is streamed to bound memory, but the tab must remain open during a scan. A future version could move hashing into workers for parallel throughput.
-
-## Suggested next steps
-
-1. Register the production and test billing products, verify hosted checkout return behavior, and confirm price copy.
-2. Pilot with several 500+ asset household archives and track only opt-in qualitative outcomes externally; the app itself intentionally has no analytics.
-3. Evaluate opt-in EXIF capture-time parsing and a Web Worker hash pool if pilot archives show copied timestamps or main-thread throughput are limiting recall.
+After rate limiting is deployed, burst the verification endpoint with at least 200 requests and record the first `429` plus its `Retry-After` header before changing this verdict.
