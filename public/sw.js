@@ -1,8 +1,10 @@
-const CACHE = 'photo-cull-shell-v1';
+const CACHE = 'photo-cull-shell-v3';
 const SHELL = [
-  '/', '/index.html', '/offline.html', '/manifest.webmanifest', '/assets/app.js', '/assets/app.css',
+  '/', '/index.html', '/offline.html', '/manifest.webmanifest', '/assets/app-v2.js', '/assets/app-v2.css',
   '/icons/icon.svg', '/icons/icon-192.png', '/icons/icon-512.png', '/icons/icon-maskable-512.png',
-  '/assets/newsreader-latin.woff2', '/assets/archive-room.webp', '/assets/archive-room-mobile.webp'
+  '/assets/newsreader-latin.woff2', '/assets/archive-room.webp', '/assets/archive-room-mobile.webp',
+  '/samples/picnic-wide.svg', '/samples/sparklers-close.svg', '/samples/sparklers-wide.svg',
+  '/privacy/', '/terms/'
 ];
 
 self.addEventListener('install', (event) => {

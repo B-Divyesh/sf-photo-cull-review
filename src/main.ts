@@ -1,5 +1,5 @@
 import './styles.css';
-import { clearData, loadData, saveData } from './db';
+import { clearData, loadData, saveData, useStorageNamespace } from './db';
 import { captureLicenseFromUrl, checkoutUrl, hasOptimisticUnlock, storeLicense, verifyLicense } from './license';
 import { FREE_FILE_LIMIT, scanFiles } from './scanner';
 import type { AppData, Decision, MediaAsset, ReviewGroup } from './types';
@@ -7,6 +7,9 @@ import { EMPTY_DATA } from './types';
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
 if (!app) throw new Error('App root is missing.');
+
+const demoMode = new URL(location.href).searchParams.get('demo') === '1';
+useStorageNamespace(demoMode ? 'demo' : 'real');
 
 let data: AppData = structuredClone(EMPTY_DATA);
 let paid = false;
@@ -17,9 +20,18 @@ let toastTimer = 0;
 void init();
 
 async function init(): Promise<void> {
-  captureLicenseFromUrl();
-  paid = hasOptimisticUnlock();
-  try { data = await loadData(); }
+  if (!demoMode) {
+    captureLicenseFromUrl();
+    paid = hasOptimisticUnlock();
+  }
+  if (demoMode) document.title = 'Demo — Photo Cull Review';
+  try {
+    data = await loadData();
+    if (demoMode && !data.scan) {
+      data = createDemoData();
+      await saveData(data);
+    }
+  }
   catch (error) { globalError = message(error); }
   busy = false;
   render();
@@ -35,6 +47,7 @@ function render(): void {
   const offline = !navigator.onLine;
   app.innerHTML = `
     ${offline ? '<div class="offline-banner" role="status">Offline — your saved review is still available on this device.</div>' : ''}
+    ${demoMode ? '<aside class="demo-banner" aria-label="Demo mode"><strong>Demo — sample data, separate from your workspace</strong><span>Changes stay only in this sample.</span><button class="text-button" data-action="reset-demo">Reset demo</button><a href="/" data-action="start-real">Start for real</a></aside>' : ''}
     <header class="site-header">
       <a class="brand" href="/" aria-label="Photo Cull Review home">
         <img src="/icons/icon.svg" alt="" width="34" height="34"><span>Photo Cull Review</span>
@@ -48,7 +61,7 @@ function render(): void {
     <footer class="site-footer">
       <p>Private by design. No photos leave this browser.</p>
       <nav aria-label="Legal"><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a></nav>
-      <p class="provenance">Original generated archive illustration · © 2026 Sociobot</p>
+      <p class="provenance">Original generated archive illustration · v1.0.1 · © 2026 Sociobot</p>
     </footer>
     <div class="toast" role="status" aria-live="polite" aria-atomic="true" hidden></div>
     ${licenseDialog()}
@@ -68,11 +81,12 @@ function welcomeView(): string {
         <h1>Decide what leaves.<br><em>Before anything moves.</em></h1>
         <p class="lede">Find byte-for-byte duplicates and likely bursts, compare them on a calm review desk, then export a move plan. Your originals are never changed.</p>
         <div class="hero-actions">
-          <button class="button primary" data-action="choose-folder">Choose a photo folder</button>
+          <a class="button primary" href="/?demo=1">Try it with sample data</a>
+          <button class="button secondary" data-action="choose-folder">Choose your photo folder</button>
           <span class="button-note">JPEG, PNG, WebP, GIF, BMP, MP4, MOV, M4V, WebM</span>
         </div>
         <input class="visually-hidden" id="folder-input" type="file" aria-label="Choose a photo folder" multiple webkitdirectory accept="image/jpeg,image/png,image/webp,image/gif,image/bmp,video/mp4,video/quicktime,video/webm,video/x-m4v">
-        <p class="trust-line"><span aria-hidden="true">●</span> Local hashes & thumbnails <span aria-hidden="true">·</span> No deletion access</p>
+        <ul class="trust-facts" aria-label="Product facts"><li>Photos stay on this device</li><li>Works offline after the first visit</li><li>Free for up to ${FREE_FILE_LIMIT} files</li></ul>
         ${globalError ? `<p class="error" role="alert">${escapeHtml(globalError)}</p>` : ''}
       </div>
       <figure class="hero-art">
@@ -236,11 +250,27 @@ function handleAction(event: Event): void {
   if (action === 'choose-folder') document.querySelector<HTMLInputElement>('#folder-input')?.click();
   if (action === 'choose-import') document.querySelector<HTMLInputElement>('#import-input')?.click();
   if (action === 'reset') void resetWorkspace();
+  if (action === 'reset-demo') void resetDemo();
+  if (action === 'start-real') {
+    event.preventDefault();
+    void clearData().finally(() => { location.href = '/'; });
+  }
   if (action === 'export-csv') exportManifest();
   if (action === 'export-json') exportWorkspace();
   if (action === 'previous') navigateGroup(-1);
   if (action === 'next') navigateGroup(1);
   if (action === 'undo') undoDecision();
+}
+
+async function resetDemo(): Promise<void> {
+  if (!demoMode) return;
+  await clearData();
+  data = createDemoData();
+  await saveData(data);
+  globalError = '';
+  render();
+  document.querySelector<HTMLElement>('h1')?.focus();
+  showToast('Sample review reset.');
 }
 
 async function resetWorkspace(): Promise<void> {
@@ -329,7 +359,12 @@ async function handleLicenseRestore(event: SubmitEvent): Promise<void> {
 function handleShortcut(event: KeyboardEvent): void {
   if (!data.scan || event.metaKey || event.ctrlKey || event.altKey) return;
   const target = event.target as HTMLElement;
-  if (target.matches('input, textarea, select, button, a') || target.closest('dialog')) return;
+  if (target.matches('input, textarea, select, a') || target.closest('dialog')) return;
+  // A shortcut decision deliberately keeps focus on its matching decision
+  // button after the view is redrawn. Keep the review shortcuts available
+  // there so a user can work through a group without moving focus by hand.
+  // Other buttons retain their native keyboard behaviour.
+  if (target.matches('button:not([data-decision])')) return;
   if (event.key === 'ArrowLeft') { event.preventDefault(); navigateGroup(-1); }
   if (event.key === 'ArrowRight') { event.preventDefault(); navigateGroup(1); }
   if (event.key.toLowerCase() === 's') { event.preventDefault(); navigateGroup(1); }
@@ -370,3 +405,24 @@ function dateStamp(): string { return new Date().toISOString().slice(0, 10); }
 function csvCell(value: string | number): string { return `"${String(value).replaceAll('"', '""')}"`; }
 function escapeHtml(value: string): string { return value.replace(/[&<>'"]/g, (char) => ({ '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;' })[char] ?? char); }
 function download(name: string, contents: string, type: string): void { const url = URL.createObjectURL(new Blob([contents], { type })); const anchor = document.createElement('a'); anchor.href = url; anchor.download = name; anchor.click(); window.setTimeout(() => URL.revokeObjectURL(url), 1000); }
+
+function createDemoData(): AppData {
+  const captured = Date.UTC(2025, 6, 19, 15, 42);
+  const assets: MediaAsset[] = [
+    { id: 'demo-picnic-1', name: 'IMG_2041.jpg', path: 'Family Picnic/IMG_2041.jpg', mediaType: 'image', mime: 'image/jpeg', size: 4_281_004, lastModified: captured, sha256: '8ca4d5901f13e8cbdd47efc129e6599ea2ca8f1c4fae4d4bea85fb99d03fc459', thumbnail: '/samples/picnic-wide.svg', decision: 'undecided' },
+    { id: 'demo-picnic-copy', name: 'IMG_2041 copy.jpg', path: 'Family Picnic/Phone imports/IMG_2041 copy.jpg', mediaType: 'image', mime: 'image/jpeg', size: 4_281_004, lastModified: captured + 2_000, sha256: '8ca4d5901f13e8cbdd47efc129e6599ea2ca8f1c4fae4d4bea85fb99d03fc459', thumbnail: '/samples/picnic-wide.svg', decision: 'undecided' },
+    { id: 'demo-sparklers-1', name: 'DSC_7718.jpg', path: 'Summer Evening/DSC_7718.jpg', mediaType: 'image', mime: 'image/jpeg', size: 6_104_322, lastModified: captured + 8_000, sha256: 'bc11c3832ddf35a026c7b46f62c1b3a4284746d41eb3012151c9a0bed70bf491', perceptualHash: '003e7c7c7e3c1800', thumbnail: '/samples/sparklers-close.svg', decision: 'undecided' },
+    { id: 'demo-sparklers-2', name: 'DSC_7719.jpg', path: 'Summer Evening/DSC_7719.jpg', mediaType: 'image', mime: 'image/jpeg', size: 6_220_815, lastModified: captured + 11_000, sha256: 'ff11b36933275c4eb041120d6c41722c225b99b5c2805d6281e5183aecdd5d2f', perceptualHash: '003e7c7e7e3c1800', thumbnail: '/samples/sparklers-wide.svg', decision: 'undecided' },
+  ];
+  return {
+    version: 1,
+    assets,
+    groups: [
+      { id: 'demo-exact', kind: 'exact', assetIds: ['demo-picnic-1', 'demo-picnic-copy'], explanation: 'Same file size and complete SHA-256 hash (8ca4d5901f…). These files are byte-for-byte identical.' },
+      { id: 'demo-similar', kind: 'similar', assetIds: ['demo-sparklers-1', 'demo-sparklers-2'], explanation: 'Made within 3 seconds and visually close by a 64-bit difference hash. This suggests a burst—it does not prove the photos are duplicates.' },
+    ],
+    scan: { scanned: 4, skipped: 0, scannedAt: captured, rootName: 'Sample family archive' },
+    activeGroup: 0,
+    history: [],
+  };
+}

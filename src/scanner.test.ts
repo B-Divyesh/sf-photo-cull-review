@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildGroups } from './scanner';
+import { buildGroups, scanFiles } from './scanner';
 import type { MediaAsset } from './types';
 
 function asset(id: string, sha256: string, perceptualHash?: string, lastModified = 0): MediaAsset {
@@ -14,7 +14,7 @@ describe('candidate grouping', () => {
     expect(groups[0]?.assetIds).toEqual(['a', 'b']);
   });
 
-  it('only suggests similar photos taken close together', () => {
+  it('@claim:similar-suggestions only suggests similar photos taken close together', () => {
     const groups = buildGroups([
       asset('a', 'one', '0000000000000000', 1_000),
       asset('b', 'two', '000000000000000f', 2_000),
@@ -23,5 +23,12 @@ describe('candidate grouping', () => {
     expect(groups).toHaveLength(1);
     expect(groups[0]?.kind).toBe('similar');
     expect(groups[0]?.assetIds).toEqual(['a', 'b']);
+  });
+
+  it('@claim:free-limit accepts 750 supported files and rejects 751 before scanning', async () => {
+    const files = Array.from({ length: 751 }, (_, index) => new File([String(index)], `clip-${index}.mp4`, { type: 'video/mp4' }));
+    const accepted = await scanFiles(files.slice(0, 750), false, () => undefined);
+    expect(accepted.assets).toHaveLength(750);
+    await expect(scanFiles(files, false, () => undefined)).rejects.toThrow('free archive desk scans up to 750');
   });
 });

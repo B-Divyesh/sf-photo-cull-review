@@ -4,6 +4,8 @@ Photo Cull Review is a cautious, local-first review desk for households with cro
 
 Live product: <https://photo-cull-review.sociobot.in>
 
+Try the isolated sample at <https://photo-cull-review.sociobot.in/?demo=1>. It opens a four-file family archive without reading or writing your real workspace.
+
 ## What it does
 
 - Streams complete files through local SHA-256 hashing to find exact copies without loading a large video whole into memory.

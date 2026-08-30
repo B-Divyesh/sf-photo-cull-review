@@ -1,0 +1,58 @@
+[
+  {
+    "id": "exact-duplicates",
+    "claim": "Finds byte-for-byte duplicate media with complete SHA-256 hashes.",
+    "where": "landing page, review workspace, README",
+    "test": "npm run test:e2e -- --grep @claim:exact-duplicates",
+    "sandbox": "fresh browser context; upload shipped duplicate JPEG fixtures; assert exact-copy group"
+  },
+  {
+    "id": "similar-suggestions",
+    "claim": "Suggests visually close photos captured within 30 seconds without calling them duplicates.",
+    "where": "landing page, review workspace, README",
+    "test": "npm test -- --testNamePattern @claim:similar-suggestions",
+    "sandbox": "three synthetic image records; assert only the visually close, time-adjacent pair is suggested"
+  },
+  {
+    "id": "csv-export",
+    "claim": "Exports a CSV move-to-review-folder plan without changing originals.",
+    "where": "landing page, workspace, README, terms",
+    "test": "npm run test:e2e -- --grep @claim:csv-export",
+    "sandbox": "shipped duplicate fixtures; make decisions; inspect downloaded CSV and compare source SHA-256 before and after"
+  },
+  {
+    "id": "workspace-persistence",
+    "claim": "Saves the review workspace on this device across reloads.",
+    "where": "workspace, README, privacy",
+    "test": "npm run test:e2e -- --grep @claim:workspace-persistence",
+    "sandbox": "fresh browser context; make two decisions; reload and assert the saved review count"
+  },
+  {
+    "id": "offline-reload",
+    "claim": "The installed app reopens offline after the first visit.",
+    "where": "README, offline status",
+    "test": "npm run test:e2e -- --grep @claim:offline-reload",
+    "sandbox": "dedicated fresh browser context; wait for service-worker control; go offline; reload and assert shell and status"
+  },
+  {
+    "id": "local-only",
+    "claim": "Free review data stays in the browser and sends no cross-origin requests.",
+    "where": "landing page, footer, README, privacy",
+    "test": "npm run test:e2e -- --grep @claim:local-only",
+    "sandbox": "fresh demo context; record every request while making decisions; assert the sole origin is the local product origin"
+  },
+  {
+    "id": "demo-sandbox",
+    "claim": "Sample decisions use a separate demo workspace that can be reset or discarded.",
+    "where": "first-screen action, demo banner, README",
+    "test": "npm run test:e2e -- --grep @claim:demo-sandbox",
+    "sandbox": "open ?demo=1 from a fresh context; decide, reset, leave demo, and assert the real workspace is empty"
+  },
+  {
+    "id": "free-limit",
+    "claim": "The free product accepts up to 750 supported files and rejects 751 before scanning.",
+    "where": "pricing, license dialog, README, terms",
+    "test": "npm test -- --testNamePattern @claim:free-limit",
+    "sandbox": "750 and 751 in-memory supported video files; assert boundary behavior without network or real media"
+  }
+]

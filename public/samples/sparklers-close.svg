@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 440" role="img" aria-labelledby="t d">
+  <title id="t">Sparklers at dusk, close frame</title><desc id="d">A hand-drawn sample burst frame used to demonstrate similarity review.</desc>
+  <rect width="640" height="440" fill="#24384a"/><path d="M0 340Q180 300 330 343T640 317V440H0Z" fill="#171713"/><circle cx="495" cy="73" r="28" fill="#f4eedc" opacity=".85"/><g stroke="#efc66b" stroke-linecap="round"><path d="m287 255 90-120" stroke-width="8"/><path d="m367 147-55-30m60 21 11-66m-3 74 67-20m-73 29 45 52m-55-54-62 39" stroke-width="6"/></g><g fill="#f4eedc"><circle cx="325" cy="88" r="5"/><circle cx="421" cy="92" r="4"/><circle cx="453" cy="170" r="5"/><circle cx="299" cy="165" r="4"/></g><path d="M265 440q1-116 65-144 69 23 71 144" fill="#75490f"/>
+</svg>

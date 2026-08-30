@@ -1,2 +1,3 @@
 User-agent: *
 Allow: /
+Sitemap: https://photo-cull-review.sociobot.in/sitemap.xml

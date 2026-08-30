@@ -4,10 +4,15 @@ import { EMPTY_DATA } from './types';
 const DB_NAME = 'photo-cull-review';
 const STORE = 'workspace';
 const KEY = 'current';
+let namespace: 'real' | 'demo' = 'real';
+
+export function useStorageNamespace(next: 'real' | 'demo'): void {
+  namespace = next;
+}
 
 function openDatabase(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, 1);
+    const request = indexedDB.open(namespace === 'demo' ? `${DB_NAME}-demo` : DB_NAME, 1);
     request.onupgradeneeded = () => {
       const db = request.result;
       if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE);
