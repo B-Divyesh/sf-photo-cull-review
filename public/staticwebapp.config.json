@@ -13,10 +13,6 @@
       "headers": { "Cache-Control": "no-cache, no-store, must-revalidate" }
     }
   ],
-  "navigationFallback": {
-    "rewrite": "/index.html",
-    "exclude": ["/assets/*", "/icons/*", "/samples/*", "/*.{css,js,png,jpg,svg,webp,ico,woff2,json,txt,xml,webmanifest}"]
-  },
   "responseOverrides": {
     "404": { "rewrite": "/404.html" }
   },
