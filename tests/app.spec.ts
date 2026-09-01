@@ -223,6 +223,8 @@ test('@claim:license-verification-request verifies a supplied license with the o
 test('@claim:demo-sandbox sample decisions stay separate and reset without setup', async ({ page }) => {
   await page.goto('/?demo=1');
   await expect(page.getByRole('heading', { name: 'Your review desk' })).toBeVisible();
+  const accessibility = await new AxeBuilder({ page }).analyze();
+  expect(accessibility.violations.filter((violation) => ['serious', 'critical'].includes(violation.impact ?? ''))).toEqual([]);
   await page.getByRole('heading', { name: 'Your review desk' }).focus();
   await page.keyboard.press('k');
   await expect(page.getByRole('button', { name: /^Keep$/ }).first()).toHaveAttribute('aria-pressed', 'true');
