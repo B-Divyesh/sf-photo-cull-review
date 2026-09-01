@@ -12,7 +12,7 @@ Try the isolated sample at <https://photo-cull-review.sociobot.in/?demo=1>. It o
 - Compares compact visual fingerprints and JPEG capture times to suggest photos taken in one burst. It never uses file modification dates for this suggestion.
 - Saves thumbnails, file details, groups, and decisions in your browser. Your review survives refreshes and remains available offline.
 - Exports a CSV move plan and a restorable JSON workspace backup. Exporting is never paywalled.
-- Folders with up to 750 supported files are free. A validated one-time US$19 Archive pass scans larger folders.
+- Folders with up to 750 supported files are free. A validated one-time US$12 Archive pass scans larger folders.
 
 Supported inputs are JPEG, PNG, WebP, GIF, BMP, MP4, MOV, M4V, and WebM. Images show previews. Videos are checked only for exact copies and do not show previews.
 

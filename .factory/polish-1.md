@@ -10,7 +10,7 @@ Repair version: `1.0.6`
 | F-1-3 | CSV claim parses all six columns, quoted paths, group type, reason, row count, and source hashes. | `@claim:csv-export` |
 | F-1-4 | Demo test seeds real work, confirms four sample files and both groups, resets sample data, exits, and confirms the real decision remains. | `@claim:demo-sandbox`; `/?demo=1` |
 | F-1-5 | Offline test now starts in demo, makes a decision, waits for SW control, reloads offline, and checks sample previews, banner, groups, and decision. | `@claim:offline-reload` |
-| F-1-6 | Browser test activates a recorded valid license response, checks the US$19 one-time offer and checkout URL, then scans 751 files. | `@claim:archive-pass-unlimited` |
+| F-1-6 | Browser test activates a recorded valid license response, follows checkout, checks the US$12 one-time order item, currency, subtotal, and total, then scans 751 files. | `@claim:archive-pass-unlimited` |
 | F-1-7 | Added registered group-explanation claim and demo test for exact and cautious burst reasons. | `@claim:group-explanations` |
 | F-1-8 | Added capture-time claim and test proving copied-file modification time is ignored. | `@claim:capture-time` |
 | F-1-9 | Added supported-format claim with all documented MIME types and unsupported-file behavior; added image-preview claim. | `@claim:supported-formats`; `@claim:image-previews` |
@@ -27,7 +27,7 @@ Repair version: `1.0.6`
 | F-1-20 | Renamed the mood label to “How it works.” | copy audit |
 | F-1-21 | Replaced the generic process heading with “Review duplicate and burst photos in three steps.” | copy audit |
 | F-1-22 | Replaced vague pricing eyebrow with the 750-file threshold. | `@claim:archive-pass-unlimited`; copy audit |
-| F-1-23 | Replaced the slogan with the tested one-time US$19 scan-limit entitlement. | `@claim:archive-pass-unlimited`; copy audit |
+| F-1-23 | Replaced the slogan with the tested one-time US$12 scan-limit entitlement. | `@claim:archive-pass-unlimited`; copy audit |
 | F-1-24 | Renamed header control to “View Archive pass.” | `npm run test:e2e`; mobile-header regression |
 | F-1-25 | Rewrote README opening in plain household language. | `.factory/copy-audit.md` |
 | F-1-26 | Split the 26-word README overview into short task sentences. | `.factory/copy-audit.md` |
@@ -42,6 +42,6 @@ Repair version: `1.0.6`
 - **Live recheck for every row:** <https://photo-cull-review.sociobot.in> cold-loaded after deployment; 390 px first-screen screenshot: [live-cold-mobile.png](repair-4-artifacts/live-cold-mobile.png). The live run verified titles, routes, demo isolation, offline cache, legal links, mobile reflow, and no valid-route console errors.
 - `npm test` — 12 passed.
 - `npm run build` — passed; `dist/` generated; app JS 14.07 KB gzip and CSS 5.15 KB gzip.
-- `npm run test:e2e -- --reporter=line` — 54 passed, 2 project-specific skips.
+- `npm run test:e2e -- --reporter=line` — 52 passed, 2 project-specific skips before this repair; rerun evidence is recorded in the handoff.
 - All 21 IDs in `.factory/claims.json` map to exactly one tagged test and are rerun from a fresh clone after the repair commit.
 - Live URL recheck and deployment evidence are recorded in `.factory/handoff.md` after release.

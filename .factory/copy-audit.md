@@ -23,7 +23,7 @@ Counts treat prices, file formats, and hyphenated terms as one word. No sentence
 | Download a CSV move plan for a separate review folder. | 10 | Pass — `csv-export` |
 | Your source archive remains untouched. | 5 | Pass — `csv-export` |
 | Free for folders up to 750 supported files. | 8 | Pass — `free-limit` |
-| A one-time US$19 pass removes the 750-file scan limit. | 10 | Pass — `archive-pass-unlimited` |
+| A one-time US$12 pass removes the 750-file scan limit. | 10 | Pass — `archive-pass-unlimited` |
 
 ## README and legal pages
 

@@ -284,7 +284,7 @@ result.textReflow = {};
 }
 
 {
-  const paths = ['/', '/assets/app-v7.js', '/assets/app-v7.css', '/sw.js', '/manifest.webmanifest', '/missing-verification-route'];
+  const paths = ['/', '/assets/app-v8.js', '/assets/app-v8.css', '/sw.js', '/manifest.webmanifest', '/missing-verification-route'];
   result.responses = {};
   for (const path of paths) {
     const response = await fetch(`${base}${path}`, { redirect: 'manual' });
@@ -302,6 +302,25 @@ result.textReflow = {};
       xFrameOptions: response.headers.get('x-frame-options'),
     };
   }
+}
+
+{
+  const checkout = await fetch('https://api.sociobot.in/api/v1/products/photo-cull-review/checkout', { redirect: 'follow' });
+  const page = await checkout.text();
+  const valid = checkout.ok
+    && /^https:\/\/checkout\.dodopayments\.com\/session\//.test(checkout.url)
+    && page.includes('Photo Cull Review')
+    && page.includes('Pay in <!-- -->USD')
+    && page.includes('Subtotal</span><span class="text-text-secondary text-sm font-normal">$12.00')
+    && page.includes('Total</span><span class="text-text-primary text-md font-medium">$12.00');
+  if (!valid) throw new Error('Live checkout no longer matches the Photo Cull Review USD $12.00 contract.');
+  result.checkoutContract = {
+    checkoutUrl: checkout.url,
+    item: 'Photo Cull Review',
+    currency: 'USD',
+    subtotal: '$12.00',
+    total: '$12.00',
+  };
 }
 
 await browser.close();

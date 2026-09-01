@@ -1,6 +1,6 @@
 import './styles.css';
 import { clearData, loadData, saveData, useStorageNamespace } from './db';
-import { captureLicenseFromUrl, checkoutUrl, hasOptimisticUnlock, hasStoredLicense, storeLicense, verifyLicense } from './license';
+import { ARCHIVE_PASS_PRICE, captureLicenseFromUrl, checkoutUrl, hasOptimisticUnlock, hasStoredLicense, storeLicense, verifyLicense } from './license';
 import { FREE_FILE_LIMIT, scanFiles } from './scanner';
 import type { AppData, Decision, MediaAsset, ReviewGroup } from './types';
 import { EMPTY_DATA } from './types';
@@ -76,7 +76,7 @@ function render(): void {
     <footer class="site-footer">
       <p>Local photo review before anything moves.</p>
       <nav aria-label="Legal"><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a></nav>
-      <p class="provenance">Original generated archive illustration · Built by Param Factory · v1.0.6</p>
+      <p class="provenance">Original generated archive illustration · Built by Param Factory · v1.0.7</p>
     </footer>
     <div class="toast" role="status" aria-live="polite" aria-atomic="true" hidden></div>
     ${licenseDialog()}
@@ -119,8 +119,8 @@ function welcomeView(): string {
       </ol>
     </section>
     <section id="archive-pass" class="pricing" aria-labelledby="price-title">
-      <div><p class="eyebrow">For folders over ${FREE_FILE_LIMIT} files</p><h2 id="price-title">Archive pass</h2><p>Free for folders up to ${FREE_FILE_LIMIT} supported files. A one-time US$19 pass removes the ${FREE_FILE_LIMIT}-file scan limit.</p></div>
-      <div class="price-action"><strong>US$19 <small>one time</small></strong><a class="button secondary" href="${checkoutUrl()}">Buy archive pass</a><button class="text-button" data-action="open-license">Restore a license</button></div>
+      <div><p class="eyebrow">For folders over ${FREE_FILE_LIMIT} files</p><h2 id="price-title">Archive pass</h2><p>Free for folders up to ${FREE_FILE_LIMIT} supported files. A one-time ${ARCHIVE_PASS_PRICE} pass removes the ${FREE_FILE_LIMIT}-file scan limit.</p></div>
+      <div class="price-action"><strong>${ARCHIVE_PASS_PRICE} <small>one time</small></strong><a class="button secondary" href="${checkoutUrl()}">Buy archive pass</a><button class="text-button" data-action="open-license">Restore a license</button></div>
     </section>
   </main>`;
 }
@@ -199,7 +199,7 @@ function assetView(asset: MediaAsset, index: number): string {
 }
 
 function licenseDialog(): string {
-  return `<dialog id="license-dialog" aria-labelledby="license-title"><form method="dialog" class="dialog-close"><button aria-label="Close license dialog">×</button></form><p class="eyebrow">One-time pass</p><h2 id="license-title">Archive pass</h2>${paid ? '<p class="license-good">✓ This device has an active archive pass.</p>' : `<p>Scan folders of any size for US$19 once. The free desk handles up to ${FREE_FILE_LIMIT} files. Exporting your move plan is always free.</p><a class="button primary wide" href="${checkoutUrl()}">Buy Archive pass</a><hr><form id="restore-form"><label for="license-token">Have a license? Paste it here</label><input id="license-token" name="license" autocomplete="off" required><button class="button secondary wide" type="submit">Verify and restore</button><p class="form-status" role="status" aria-live="polite"></p></form>`}<p class="legal-small">Sociobot/Dodo is the merchant of record. Refunds are handled there and revoke the license. <a href="/terms/">Terms</a> · <a href="/privacy/">Privacy</a></p></dialog>`;
+  return `<dialog id="license-dialog" aria-labelledby="license-title"><form method="dialog" class="dialog-close"><button aria-label="Close license dialog">×</button></form><p class="eyebrow">One-time pass</p><h2 id="license-title">Archive pass</h2>${paid ? '<p class="license-good">✓ This device has an active archive pass.</p>' : `<p>Scan folders of any size for ${ARCHIVE_PASS_PRICE} once. The free desk handles up to ${FREE_FILE_LIMIT} files. Exporting your move plan is always free.</p><a class="button primary wide" href="${checkoutUrl()}">Buy Archive pass</a><hr><form id="restore-form"><label for="license-token">Have a license? Paste it here</label><input id="license-token" name="license" autocomplete="off" required><button class="button secondary wide" type="submit">Verify and restore</button><p class="form-status" role="status" aria-live="polite"></p></form>`}<p class="legal-small">Sociobot/Dodo is the merchant of record. Refunds are handled there and revoke the license. <a href="/terms/">Terms</a> · <a href="/privacy/">Privacy</a></p></dialog>`;
 }
 
 function licenseNoticeView(): string {
@@ -278,7 +278,7 @@ function handleAction(event: Event): void {
     event.preventDefault();
     void clearData().finally(() => { location.href = '/'; });
   }
-  if (action === 'export-csv') exportManifest();
+  if (action === 'export-csv') exportMovePlan();
   if (action === 'export-json') exportWorkspace();
   if (action === 'previous') navigateGroup(-1);
   if (action === 'next') navigateGroup(1);
@@ -338,7 +338,7 @@ function focusGroupTitle(): void {
   title?.setAttribute('tabindex', '-1'); title?.focus();
 }
 
-function exportManifest(): void {
+function exportMovePlan(): void {
   const selected = data.assets.filter((asset) => asset.decision === 'review');
   if (!selected.length) { showToast('Mark at least one file “Move to review” before exporting.'); return; }
   const headers = ['source_path','review_path','size_bytes','sha256','group_type','reason'];
@@ -347,7 +347,7 @@ function exportManifest(): void {
     return [asset.path, `_photo-review/${asset.path}`, asset.size, asset.sha256, group?.kind ?? '', group?.explanation ?? 'Manual review choice'];
   });
   const csv = [headers, ...rows].map((row) => row.map(csvCell).join(',')).join('\n');
-  download(`photo-cull-move-manifest-${dateStamp()}.csv`, `# PLAN ONLY — Photo Cull Review never moved or deleted these files.\n${csv}`, 'text/csv');
+  download(`photo-cull-move-plan-${dateStamp()}.csv`, `# PLAN ONLY — Photo Cull Review never moved or deleted these files.\n${csv}`, 'text/csv');
   showToast(`Exported a plan for ${selected.length} file${selected.length === 1 ? '' : 's'}.`);
 }
 

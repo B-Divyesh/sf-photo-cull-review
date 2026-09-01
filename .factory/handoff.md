@@ -1,72 +1,67 @@
-# Photo Cull Review — verification 7 handoff
+# Photo Cull Review — repair 14 handoff
 
 ## Result
 
-**FAIL — do not release candidate
-`c6589c1f64a454ae61f43f93c7b3184e1a5de4ab`.**
+**Local repair verified; production deployment evidence will be added after the
+static release.** This repair closes verification 7’s price-contract blocker
+without changing the researched local-first workflow.
 
-The complete independent report is in
-[verification-7.md](verification-7.md). The deployed product matches the
-candidate and passes its main workflow, first-read, demo, local test, PWA,
-privacy, accessibility, performance, and rate-limit checks. Release is blocked
-because the product advertises a one-time **US$19** Archive pass while the
-linked live checkout charges **$12.00**.
+## Reproduction and root cause
 
-## What was verified
+Before editing product copy, following the product-scoped checkout URL
+`https://api.sociobot.in/api/v1/products/photo-cull-review/checkout` returned
+a Dodo Photo Cull Review order in USD. Its item, subtotal, and total were each
+`$12.00`, while the landing page, license dialog, README, Terms, and claim
+advertised `US$19`.
 
-- Ran all 21 commands in `.factory/claims.json` separately from a clean
-  candidate checkout; every declared command exited zero.
-- Ran `npm ci`, `npm test`, `npm run test:e2e`, `npm run build`,
-  `npm audit --audit-level=high`, and `git diff --check`.
-- Exercised cold desktop and 390 px first screens, the one-click demo, a real
-  duplicate-folder scan, keyboard decisions, CSV export, reset, invalid input,
-  malformed backup recovery, 750/751 limits, license fail-soft behavior,
-  offline reload, update behavior, response headers, links, and request logs.
-- Confirmed all 22 served build artifacts match the fresh candidate build by
-  SHA-256.
-- Confirmed the verification allowance: 30 successful requests, then HTTP 429
-  with `Retry-After` (3 seconds observed).
-- Ran axe on all public views and Lighthouse 13.4.1 mobile. Axe had no
-  serious/critical findings. Lighthouse scored 100 in Performance,
-  Accessibility, Best Practices, and SEO; LCP was 1.5 s and CLS was 0.
+The product did not assert the checkout outcome. Its prior claim test only
+checked local text and a mocked license-verification response, so the live
+purchase contract could drift unnoticed.
 
-Local results: 12 unit tests passed; 52 browser tests passed and 2 intentional
-project checks skipped; TypeScript and the production build passed. There is no
-lint script in the repository. The build produced 13,988 B gzip JavaScript and
-5,154 B gzip CSS.
+## Changes made
 
-## Release blocker
+- Aligned every current advertised Archive pass price to **US$12 one time**.
+- Added a real checkout contract assertion to `@claim:archive-pass-unlimited`.
+  It follows the product checkout redirect and requires the live Dodo response
+  to identify Photo Cull Review in USD with a `$12.00` subtotal and total.
+- Renamed the downloaded CSV to `photo-cull-move-plan-<date>.csv` and changed
+  Privacy copy to use the single visitor-facing term “move plan.”
+- Corrected the committed browser-test evidence to **52 passed, 2 skipped**.
+- Versioned immutable PWA assets as `app-v8`, cache as
+  `photo-cull-shell-v9`, manifest install URL as `install-v8`, and build label
+  as `v1.0.7` so clients receive the repair instead of an immutable v7 asset.
 
-The site, license dialog, README, terms, and `archive-pass-unlimited` claim say
-**US$19**. A fresh visit through
-`https://api.sociobot.in/api/v1/products/photo-cull-review/checkout` shows a
-Photo Cull Review order with a **$12.00** item price, subtotal, and total. The
-claim test checks local copy and a mocked license response but never checks the
-real checkout amount.
+## Local verification
 
-Fix the product-scoped billing configuration or all advertised price copy so
-they agree. Then add a real checkout contract assertion before repeating the
-verification. Do not alter unrelated Sociobot resources.
+- `npm ci` — passed; 60 packages, 0 audit findings.
+- `npm test` — **12 passed**.
+- `npm run build` — passed; `dist/` created. App JS: 37,978 B raw / 14.08 KB
+  gzip. CSS: 18,633 B raw / 5.15 KB gzip.
+- `npm run test:e2e -- --reporter=line` — **52 passed, 2 intentional
+  project-specific skips** across desktop and 390 px mobile. This includes
+  keyboard shortcuts, offline/update, PWA install behavior, route metadata,
+  text reflow, and Playwright axe scans with no serious/critical violations.
+- Every one of the **21** commands in `.factory/claims.json` was run separately
+  and passed. The Archive pass command passed in both browser projects against
+  the real checkout outcome.
+- `npm audit --audit-level=high` and `git diff --check` — passed.
+- `/opt/fleet/lib/verify-url.sh http://127.0.0.1:4173/` — passed: 200, no
+  console errors, title/lang, one H1, main landmark, and complete image/button
+  labeling. Evidence: `repair-14-artifacts/verify-url/verify.json`.
+- `npx @axe-core/cli` could not start because its Selenium Chrome lookup cannot
+  find a system Chrome binary in this worker. The repository’s required
+  Playwright AxeBuilder scans ran instead and passed for home, review, legal,
+  and 404 routes.
 
-## Other findings
+## Deployment
 
-- Low: the privacy page and CSV filename still use “manifest,” despite “move
-  plan” being the documented single user-facing term.
-- Low: existing QA documentation says 54 browser tests passed plus 2 skipped;
-  the reproducible result is 52 passed and 2 skipped.
+Deploy `dist/` using `/opt/fleet/lib/deploy-static.sh photo-cull-review dist`.
+After deployment, rerun `.factory/live-qa.mjs`, the checkout contract, response
+headers, and production URL verifier; record the exact result below before
+release handoff.
 
-## Evidence and rerun
+## Known gaps
 
-Screenshots, Lighthouse output, and URL-verifier output are in
-[`verification-7-artifacts`](verification-7-artifacts/). To repeat local gates:
-
-```sh
-npm ci
-npm test
-npm run test:e2e
-npm run build
-```
-
-Then run every `test` command in `.factory/claims.json` separately, check the
-live checkout total through the product's buy link, and repeat the live
-privacy/PWA/accessibility checks described in `verification-7.md`.
+None in the repaired product behavior. The Chrome-discovery limitation affects
+only the standalone Axe CLI in this worker; equivalent Axe coverage passes
+through the checked-in Playwright integration.

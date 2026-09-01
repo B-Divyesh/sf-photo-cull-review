@@ -108,7 +108,7 @@ test('@claim:exact-duplicates @claim:csv-export @claim:workspace-persistence ind
   const downloadPromise = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Export move plan' }).first().click();
   const download = await downloadPromise;
-  expect(download.suggestedFilename()).toMatch(/move-manifest.*\.csv/);
+  expect(download.suggestedFilename()).toMatch(/move-plan.*\.csv/);
   const downloadedPath = await download.path();
   expect(downloadedPath).toBeTruthy();
   const plan = await readFile(downloadedPath!, 'utf8');
@@ -390,14 +390,24 @@ test('@claim:demo-sandbox sample decisions stay separate and reset without setup
   await expect(page.getByRole('button', { name: /^Keep$/ }).first()).toHaveAttribute('aria-pressed', 'true');
 });
 
-test('@claim:archive-pass-unlimited validates a license, shows its one-time US$19 price, and accepts 751 files', async ({ page }) => {
+test('@claim:archive-pass-unlimited validates a license, matches the live US$12 checkout contract, and accepts 751 files', async ({ page }) => {
   await page.route('https://api.sociobot.in/api/v1/products/photo-cull-review/verify?license=valid-claim-license', (route) => route.fulfill({
     contentType: 'application/json', body: JSON.stringify({ valid: true, reason: 'ok' }),
   }));
   await page.goto('/?license=valid-claim-license');
   await expect(page.getByRole('button', { name: 'Archive pass active' })).toBeVisible();
-  await expect(page.getByText('A one-time US$19 pass removes the 750-file scan limit.')).toBeVisible();
+  await expect(page.getByText('A one-time US$12 pass removes the 750-file scan limit.')).toBeVisible();
   await expect(page.getByRole('link', { name: 'Buy archive pass' })).toHaveAttribute('href', 'https://api.sociobot.in/api/v1/products/photo-cull-review/checkout');
+
+  const checkout = await page.request.get('https://api.sociobot.in/api/v1/products/photo-cull-review/checkout', { maxRedirects: 5 });
+  expect(checkout.ok()).toBe(true);
+  expect(checkout.url()).toMatch(/^https:\/\/checkout\.dodopayments\.com\/session\//);
+  const checkoutPage = await checkout.text();
+  expect(checkoutPage).toContain('Photo Cull Review');
+  expect(checkoutPage).toContain('Pay in <!-- -->USD');
+  expect(checkoutPage).toMatch(/Subtotal<\/span><span[^>]*>\$12\.00/);
+  expect(checkoutPage).toMatch(/Total<\/span><span[^>]*>\$12\.00/);
+
   await set751VideoFiles(page);
   await expect(page.getByRole('heading', { name: 'Your review desk' })).toBeVisible({ timeout: 30_000 });
   await expect(page.getByText('751 files indexed on this device.')).toBeVisible();

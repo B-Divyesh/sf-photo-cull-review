@@ -1,5 +1,6 @@
 const PRODUCT_SLUG = import.meta.env.VITE_PRODUCT_SLUG || 'photo-cull-review';
 const API_BASE = import.meta.env.VITE_BILLING_BASE || 'https://api.sociobot.in/api/v1';
+export const ARCHIVE_PASS_PRICE = 'US$12';
 const LICENSE_KEY = `sb_license:${PRODUCT_SLUG}`;
 const VERDICT_KEY = `${LICENSE_KEY}:verdict`;
 const DAY = 86_400_000;

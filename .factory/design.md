@@ -14,7 +14,7 @@ Headlines use self-hosted **Newsreader** (OFL, serif, editorial selection notes)
 
 ## Composition and interaction grammar
 
-Images sit in cream mounts with ink hairlines, never generic floating cards. Exact duplicates carry a square “same bytes” stamp. Similar bursts carry a softer circular “looks related” stamp and a plain-language explanation. The primary journey is linear: choose folder → inspect groups → mark keep/review → export manifest. Keyboard decisions use K (keep), R (review), S (skip), and arrow keys. All shortcuts have visible button equivalents. Decisions feel like moving a print across a light table: 180 ms transform/opacity, originating from the selected item.
+Images sit in cream mounts with ink hairlines, never generic floating cards. Exact duplicates carry a square “same bytes” stamp. Similar bursts carry a softer circular “looks related” stamp and a plain-language explanation. The primary journey is linear: choose folder → inspect groups → mark keep/review → export a move plan. Keyboard decisions use K (keep), R (review), S (skip), and arrow keys. All shortcuts have visible button equivalents. Decisions feel like moving a print across a light table: 180 ms transform/opacity, originating from the selected item.
 
 At 390 px, the brand and navigation use separate rows so every target keeps a 44 px edge and 8 px separation. “How it works” and “Archive pass” become the compact visible labels “How” and “Archive”; their accessible names stay complete. Review decisions stack at narrow widths so the light-table cards continue to reflow when text is enlarged to 200%.
 
