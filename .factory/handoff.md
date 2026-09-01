@@ -1,46 +1,54 @@
-# Photo Cull Review — review 1 handoff
+# Photo Cull Review — polish 1 handoff
 
 ## Result
 
-**FAIL.** The complete adversarial report is in [review-1.md](review-1.md).
+**PASS.** Repair commit `c6589c1f64a454ae61f43f93c7b3184e1a5de4ab` is deployed to <https://photo-cull-review.sociobot.in>.
 
-The first screen, one-click sample, local storage separation, live offline behavior, visual identity, valid routes, accessibility baseline, build, and all declared command executions pass. Acceptance remains blocked by incomplete claim assertions. Additional findings cover unlisted claims, route-change focus, and plain-language copy.
+The review’s 31 findings are closed in [polish-1.md](polish-1.md). The product remains a local-first offline PWA with its warm darkroom/contact-sheet visual system.
 
-## Work completed
+## What changed
 
-- Read the brief, design thesis, claims registry, demo notes, copy audit, README, product source, tests, and the earlier handoff.
-- Checked the live product in fresh 390 × 844 and 1440 × 900 browser contexts before scrolling.
-- Entered the sample in one click, made and reset a decision, exited to normal mode, checked IndexedDB namespaces, and recorded request origins.
-- Checked titles, descriptions, canonicals, social metadata, favicon, one-H1/one-main structure, deep links, Back behavior, 404 handling, internal links, response headers, 200% text reflow, keyboard focus, and serious/critical axe results.
-- Ran all 12 commands from `.factory/claims.json` exactly as listed.
-- Ran the full unit, build, browser, and live URL-verification gates.
-- Rechecked all six repair groups recorded in the earlier handoff on the live deployment and in code.
-- Changed no product code.
+- Strengthened all incomplete claims: full SHA-256 export checks, 30/31-second burst boundary, parsed CSV/JSON downloads, populated offline demo reload, real-data demo isolation, and UI-driven validated Archive pass behavior.
+- Added nine missing claim groups and their isolated tests. `.factory/claims.json` now has 21 entries, each with exactly one `@claim:<id>` test.
+- Rewrote the flagged first-screen, price, README, legal, and export wording in plain language. “Move plan” is now the one visitor-facing name for the CSV.
+- Moved focus to the new page heading after demo navigation and Back navigation.
+- Bumped the cache-safe PWA release to `1.0.6`: `app-v7` assets and `photo-cull-shell-v8` prevent the previous immutable app files from masking this repair.
 
-## Verification commands
+## Verification
+
+Fresh clone: `/tmp/photo-cull-review-clean-5JJJkK` at pushed commit `c6589c1`.
 
 ```sh
 npm ci
 npm test
 npm run build
-npm run test:e2e
-mkdir -p /tmp/photo-cull-review-review-1-verify
-/opt/fleet/lib/verify-url.sh https://photo-cull-review.sociobot.in /tmp/photo-cull-review-review-1-verify
+npm run test:e2e -- --reporter=line
+# then every command recorded in .factory/claims.json, one by one
 ```
 
-Run each `test` command in `.factory/claims.json` separately as recorded in the review.
+Results:
 
-## Results
+- Unit tests: 12 passed.
+- Build: passed; `dist/index.html` exists; app JS 14.07 KB gzip and CSS 5.15 KB gzip.
+- Browser/accessibility suite: 54 passed across Chromium and 390 px mobile; 2 project-specific skips.
+- Claims: 21/21 declared commands passed from the clean clone.
+- Live verifier: `/opt/fleet/lib/verify-url.sh https://photo-cull-review.sociobot.in /tmp/photo-cull-review-live-verify` passed. It found a title, `lang=en`, one h1, one main, complete image alt coverage, labelled buttons, and no errors on the landing route.
+- Live axe integration: no serious or critical issues on home, demo, Privacy, Terms, or 404.
+- Live cold check: desktop and 390 px first screens show the action and its outcome; no horizontal overflow; 44 px header targets; 200% text reflows on all public routes.
+- Live PWA check: `photo-cull-shell-v8` controls the demo; a saved demo reloads offline with the banner and review desk present.
+- Live focus check: demo forward navigation and browser Back both focus the destination h1.
+- Lighthouse mobile: Performance 100, Accessibility 100, Best Practices 100, SEO 100; LCP 1.5 s and CLS 0.
 
-- Unit checks: 11 passed.
-- Production build: passed; `dist/` produced; application JavaScript 13.87 KB gzip.
-- Browser checks: 36 passed; 2 intentional project skips.
-- Declared claim commands: 12/12 exited successfully.
-- Live URL verifier: passed with no console errors.
-- Live valid routes: HTTP 200; designed missing route: HTTP 404.
-- Serious/critical axe results: none on checked routes.
-- Findings: 6 blocking, 9 major, 16 minor.
+Live evidence: [cold mobile screenshot](repair-4-artifacts/live-cold-mobile.png), `/tmp/photo-cull-review-live-qa.json`, and `/tmp/photo-cull-review-lighthouse.json` from this repair run. The live QA captures only an expected browser console 404 for the intentionally missing-route check; valid routes had no console errors.
 
-## Remaining work
+## Deployment
 
-Resolve F-1-1 through F-1-31 in `.factory/review-1.md`, then repeat the complete checklist. The highest-priority work is to make the registered claim tests confirm full hashes, the 30-second boundary, CSV contents, populated offline demo state, preservation of seeded real data, and validated Archive pass/price behavior.
+```sh
+/opt/fleet/lib/deploy-static.sh photo-cull-review dist
+```
+
+The deployment reused only `sf-photo-cull-review` in resource group `sociobot` and its `photo-cull-review.sociobot.in` custom domain.
+
+## Known gaps
+
+None.

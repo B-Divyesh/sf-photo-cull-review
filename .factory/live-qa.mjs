@@ -284,7 +284,7 @@ result.textReflow = {};
 }
 
 {
-  const paths = ['/', '/assets/app-v6.js', '/assets/app-v6.css', '/sw.js', '/manifest.webmanifest', '/missing-verification-route'];
+  const paths = ['/', '/assets/app-v7.js', '/assets/app-v7.css', '/sw.js', '/manifest.webmanifest', '/missing-verification-route'];
   result.responses = {};
   for (const path of paths) {
     const response = await fetch(`${base}${path}`, { redirect: 'manual' });
