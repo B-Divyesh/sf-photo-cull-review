@@ -16,6 +16,7 @@ let paid = false;
 let busy = true;
 let globalError = '';
 let toastTimer = 0;
+const INVALID_BACKUP_MESSAGE = 'That file is not a Photo Cull Review backup. Choose a valid JSON backup exported from Photo Cull Review.';
 
 void init();
 
@@ -61,7 +62,7 @@ function render(): void {
     <footer class="site-footer">
       <p>Private by design. No photos leave this browser.</p>
       <nav aria-label="Legal"><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a></nav>
-      <p class="provenance">Original generated archive illustration · v1.0.1 · © 2026 Sociobot</p>
+      <p class="provenance">Original generated archive illustration · v1.0.2 · © 2026 Sociobot</p>
     </footer>
     <div class="toast" role="status" aria-live="polite" aria-atomic="true" hidden></div>
     ${licenseDialog()}
@@ -78,8 +79,8 @@ function welcomeView(): string {
     <section class="hero">
       <div class="hero-copy">
         <p class="eyebrow">A local, reversible photo cull</p>
-        <h1>Decide what leaves.<br><em>Before anything moves.</em></h1>
-        <p class="lede">Find byte-for-byte duplicates and likely bursts, compare them on a calm review desk, then export a move plan. Your originals are never changed.</p>
+        <h1>Clean up duplicate photos.<br><em>Before anything moves.</em></h1>
+        <p class="lede">For households with large or crowded photo archives, compare exact copies and likely bursts before exporting a move plan.</p>
         <div class="hero-actions">
           <a class="button primary" href="/?demo=1">Try it with sample data</a>
           <button class="button secondary" data-action="choose-folder">Choose your photo folder</button>
@@ -337,11 +338,25 @@ async function handleImport(event: Event): Promise<void> {
   const input = event.currentTarget as HTMLInputElement;
   const file = input.files?.[0];
   if (!file) return;
+  let restored: AppData | undefined;
   try {
-    const parsed = JSON.parse(await file.text()) as { product?: string; data?: AppData };
-    if (parsed.product !== 'photo-cull-review' || parsed.data?.version !== 1 || !Array.isArray(parsed.data.assets) || !Array.isArray(parsed.data.groups)) throw new Error('This is not a Photo Cull Review workspace backup.');
-    data = parsed.data; await saveData(data); globalError = ''; render(); showToast('Workspace restored.');
-  } catch (error) { globalError = message(error); render(); }
+    restored = parseWorkspaceBackup(await file.text());
+  } catch { /* File read failures use the same actionable invalid-backup path. */ }
+  if (!restored) {
+    globalError = INVALID_BACKUP_MESSAGE;
+    render();
+    return;
+  }
+  try {
+    await saveData(restored);
+    data = restored;
+    globalError = '';
+    render();
+    showToast('Workspace restored.');
+  } catch {
+    globalError = 'The backup is valid, but it could not be saved. Check this browser’s site storage and try again.';
+    render();
+  }
 }
 
 async function handleLicenseRestore(event: SubmitEvent): Promise<void> {
@@ -399,6 +414,17 @@ function showToast(text: string): void {
 
 function assetById(id: string): MediaAsset | undefined { return data.assets.find((asset) => asset.id === id); }
 function message(error: unknown): string { return error instanceof Error ? error.message : 'Something went wrong. Try again.'; }
+function parseWorkspaceBackup(contents: string): AppData | undefined {
+  let parsed: unknown;
+  try { parsed = JSON.parse(contents); }
+  catch { return undefined; }
+  if (!parsed || typeof parsed !== 'object') return undefined;
+  const backup = parsed as { product?: unknown; data?: unknown };
+  if (backup.product !== 'photo-cull-review' || !backup.data || typeof backup.data !== 'object') return undefined;
+  const candidate = backup.data as Partial<AppData>;
+  if (candidate.version !== 1 || !Array.isArray(candidate.assets) || !Array.isArray(candidate.groups)) return undefined;
+  return candidate as AppData;
+}
 function formatBytes(bytes: number): string { if (!bytes) return '0 B'; const units = ['B','KB','MB','GB','TB']; const index = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1); return `${(bytes / 1024 ** index).toFixed(index ? 1 : 0)} ${units[index]}`; }
 function formatDate(value?: number, time = false): string { if (!value) return 'Unknown date'; return new Intl.DateTimeFormat(undefined, time ? { dateStyle: 'medium', timeStyle: 'short' } : { dateStyle: 'medium' }).format(value); }
 function dateStamp(): string { return new Date().toISOString().slice(0, 10); }

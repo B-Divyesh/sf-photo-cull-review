@@ -1,16 +1,15 @@
 # Landing-page copy audit
 
-Audited 2026-08-30. Counts treat hyphenated terms, file formats, and prices as one word. No line exceeds 22 words. No banned marketing word is present; “unlocks” describes the literal paid license boundary.
+Audited 2026-09-01. Counts treat hyphenated terms, file formats, and prices as one word. No line exceeds 22 words. No banned marketing word is present; “unlocks” describes the literal paid license boundary.
 
 | Copy | Words | Result |
 | --- | ---: | --- |
 | Photo Cull Review | 3 | Pass |
 | Archive pass | 2 | Pass |
 | A local, reversible photo cull | 5 | Pass |
-| Decide what leaves. | 3 | Pass |
+| Clean up duplicate photos. | 4 | Pass |
 | Before anything moves. | 3 | Pass |
-| Find byte-for-byte duplicates and likely bursts, compare them on a calm review desk, then export a move plan. | 17 | Pass |
-| Your originals are never changed. | 5 | Pass |
+| For households with large or crowded photo archives, compare exact copies and likely bursts before exporting a move plan. | 19 | Pass |
 | Try it with sample data | 5 | Pass |
 | Choose your photo folder | 4 | Pass |
 | JPEG, PNG, WebP, GIF, BMP, MP4, MOV, M4V, WebM | 9 | Pass |
@@ -60,6 +59,13 @@ Demo-only banner:
 | Changes stay only in this sample. | 6 | Pass |
 | Reset demo | 2 | Pass |
 | Start for real | 3 | Pass |
+
+Import error:
+
+| Copy | Words | Result |
+| --- | ---: | --- |
+| That file is not a Photo Cull Review backup. | 9 | Pass |
+| Choose a valid JSON backup exported from Photo Cull Review. | 10 | Pass |
 
 ## Terminology
 

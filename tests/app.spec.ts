@@ -17,6 +17,35 @@ test('welcome is accessible and explains the safety boundary', async ({ page }) 
   expect(errors).toEqual([]);
 });
 
+test('cold first screen names photo cleanup and households with crowded archives', async ({ page }) => {
+  await page.goto('/');
+
+  const headline = await page.getByRole('heading', { level: 1 }).innerText();
+  expect(headline.replace(/\s+/g, ' ').trim()).toBe(
+    'Clean up duplicate photos. Before anything moves.',
+  );
+  await expect(page.locator('.lede')).toHaveText(
+    'For households with large or crowded photo archives, compare exact copies and likely bursts before exporting a move plan.',
+  );
+  await expect(page.getByRole('link', { name: 'Try it with sample data' })).toBeVisible();
+});
+
+test('invalid workspace JSON explains the problem and the next step without parser text', async ({ page }) => {
+  await page.goto('/?demo=1');
+  await page.locator('#import-input').setInputFiles({
+    name: 'invalid.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from('{invalid'),
+  });
+
+  const alert = page.getByRole('alert');
+  await expect(alert).toHaveText(
+    'That file is not a Photo Cull Review backup. Choose a valid JSON backup exported from Photo Cull Review.',
+  );
+  await expect(alert).not.toContainText(/Expected|position|line|column/i);
+  await expect(page.getByRole('heading', { name: 'Your review desk' })).toBeVisible();
+});
+
 test('@claim:exact-duplicates @claim:csv-export @claim:workspace-persistence indexes exact copies, records decisions, and exports a plan', async ({ page }) => {
   const fixture = path.join(process.cwd(), 'tests/fixtures/frame-001.jpg');
   const before = createHash('sha256').update(await readFile(fixture)).digest('hex');
@@ -115,5 +144,5 @@ test('@claim:demo-sandbox sample decisions stay separate and reset without setup
   await expect(page.getByRole('button', { name: /^Keep$/ }).first()).toHaveAttribute('aria-pressed', 'false');
   await page.getByRole('link', { name: 'Start for real' }).click();
   await expect(page).toHaveURL(/\/$/);
-  await expect(page.getByRole('heading', { name: /Decide what leaves/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Clean up duplicate photos/ })).toBeVisible();
 });
