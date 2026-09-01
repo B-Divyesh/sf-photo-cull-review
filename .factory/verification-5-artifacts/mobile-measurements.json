@@ -1,0 +1,18 @@
+{
+  "viewport": "390x844",
+  "headerFontSize": "11.2px",
+  "targets": {
+    "home": { "width": 133.03, "height": 44 },
+    "demo": { "width": 36.22, "height": 44 },
+    "howItWorks": { "width": 63.89, "height": 44 },
+    "privacy": { "width": 46.33, "height": 44 },
+    "archivePass": { "width": 66.53, "height": 50.72 }
+  },
+  "adjacentGaps": [0, 4, 4, 4],
+  "contentWidthAt200PercentText": {
+    "home": 500,
+    "demo": 636,
+    "privacy": 496,
+    "terms": 496
+  }
+}

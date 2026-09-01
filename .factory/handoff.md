@@ -1,55 +1,46 @@
-# Photo Cull Review — repair handoff
+# Photo Cull Review — verification 5 handoff
 
-**Local release result: PASS.** This repairs the independent-verification failure recorded at `bc64345f2c7dcf9966d9ea6ae3db0205d2e38723` for candidate `70b3276248dba293802473522b6dc05689562ec8`.
+**Release result: FAIL.**
 
-- Product repair: `8deb9c67f5686696c113cbbe53aceabe62c01c05`
-- Accessibility regression coverage: `287e082450f7a04296e1183747f7e7d51e3a20e6`
-- Deployment handoff commit: `0b00a3f0fdc8ede923d2bff4f3605941c0e1ff6f`, pushed to `origin/main` on 2026-09-01 UTC.
-- Demo: `/?demo=1` — isolated IndexedDB database `photo-cull-review-demo`.
+- Candidate: `36777eaaf3943eccc16b9756d2c44626b9842bc9`
+- Live URL: `https://photo-cull-review.sociobot.in/`
+- Demo URL: `https://photo-cull-review.sociobot.in/?demo=1`
+- Verified: 2026-09-01 UTC
+- Full evidence: [verification-5.md](verification-5.md)
 
-## What changed
+## Release blockers
 
-1. Reproduced the cold-screen failure before editing: at 1440×900, **Try it with sample data** was at `y=916.75`, fully below the viewport. The hero now puts the action, “Opens a four-file sample review immediately,” and all three facts in view. The regression test measures their bottom edge at 1440×900; final local values were `583.34`, `643.00`, and `866.47` CSS pixels. The 390×844 test also keeps the sample action and outcome in view with no horizontal overflow.
-2. Similar-photo timing now reads JPEG EXIF `DateTimeOriginal` (including fractional seconds) into `captureTimestamp`. Candidate grouping sorts and compares that timestamp only; browser `File.lastModified` remains an identifier/detail, never burst evidence. Images without embedded camera time still participate in exact SHA-256 matching but are not guessed into a burst group. The regression moves file modification times while holding capture times apart/close and asserts the correct opposite outcomes.
-3. Added a deterministic pre-scan `selectMediaFiles` boundary. Free 750/751 and paid 751 behavior now execute without hashing hundreds of files in the unit test.
-4. Registered and tested the formerly unlisted backup, paid-limit, video-streaming, and license-verification-request statements in `.factory/claims.json`. The video test supplies stream-only files whose `arrayBuffer()` throws; the license test fulfills a fixture and records the one permitted cross-origin verify request.
-5. Added `/?demo=1` to the sitemap, versioned the PWA asset/cache names to `app-v5` / `photo-cull-shell-v6`, and precached the designed 404 page.
-6. Rebuilt Privacy, Terms, and 404 with the shared header, skip link, primary navigation, complete footer, titles, and product styling. The footer now names Param Factory and build `v1.0.4`.
+1. **High — unvalidated license state:** when a new `?license=` token cannot be verified, the app retains its initial optimistic-valid value, shows **Archive pass active**, and accepts a 751-file scan. Optimistic offline access must require a previously successful cached verdict. The app must also show the required quiet notice when a returned token is invalid or verification cannot complete.
+2. **Medium — 390 px header accessibility:** the Demo link measures 36.2 × 44 px, adjacent header targets have 0–4 px gaps, and navigation labels render at 11.2 px. The contract requires at least 44 × 44 px targets, 8 px spacing, and readable mobile text.
+3. **Medium — 200% text reflow:** at 390 px, content widths are 500 px on home, 636 px in demo, and 496 px on Privacy and Terms. Header and review controls extend beyond the viewport.
 
-## Verification evidence
+Low: Privacy, Terms, and 404 omit the per-route Open Graph and Twitter card metadata required by the site-structure contract.
 
-Run from a clean dependency install on 2026-09-01 UTC:
+## What passed
 
-```text
-npm ci                         PASS — 60 packages; 0 vulnerabilities
-npm test                       PASS — 11/11 Vitest tests
-npm run build                  PASS — tsc --noEmit + Vite; dist/ created
-npm audit --audit-level=high   PASS — 0 vulnerabilities
-npm run test:e2e               PASS — 23 passed; 1 intentional mobile-project skip
-verify-url.sh local build      PASS — HTTP 200; title/lang/one h1/main/alts/button labels; no console/page errors
-git diff --check               PASS
-```
+- All 12 exact claim commands pass after `npm ci`; every claim identifier has one tagged test definition.
+- Cold first read passes on 1440 × 900 and 390 × 844, including the one-click sample action, outcome, and three product facts.
+- `npm test`: 11/11 passed.
+- `npm run build`: strict TypeScript and Vite passed; `dist/` produced.
+- `npm run test:e2e`: clean rerun passed 23 tests with one intentional mobile-project skip.
+- `npm audit --audit-level=high`: 0 vulnerabilities. No lint command exists.
+- All 22 served build artifacts match the live deployment byte-for-byte.
+- Exact and suggested review, decisions, undo/navigation, CSV and JSON export/restore, persistence, empty state, invalid-input recovery, and isolated demo reset work.
+- Free demo traffic remains same-origin. A supplied token causes only the documented verification request.
+- The verification service enforced an observed 30-success allowance in a 120-request check; 90 responses were 429 and included `Retry-After: 4`.
+- Live headers, immutable app-asset caching, no-store worker caching, install manifest, offline reload, and update notification pass.
+- Axe found no serious or critical findings on the tested screens. Lighthouse mobile scored 100 in Performance, Accessibility, Best Practices, and SEO; LCP was 1.4 s and CLS was 0.
+- JS is 35,380 B raw / 13,281 B gzip; CSS is 16,719 B raw / 4,840 B gzip; font and hero assets remain within budget.
 
-Every command in `.factory/claims.json` was also invoked independently and passed. That includes all original eight claims plus `workspace-backup`, `archive-pass-unlimited`, `video-streaming`, and `license-verification-request`.
-
-Playwright uses the pinned 1.58.2 Chromium browser at one worker with a single retry and `--disable-gpu`; this avoids an intermittent headless Chromium SIGSEGV during context creation in the constrained worker. It does not mask assertion failures. Axe scans had zero serious or critical findings on welcome, populated local workspace, demo workspace, Privacy, Terms, and 404.
-
-Measured build sizes: initial JS 35,380 B raw / 13,281 B gzip; CSS 16,719 B raw / 4,840 B gzip; self-hosted font 56,976 B; mobile hero 37,170 B. All are within the PWA budgets.
-
-`public/staticwebapp.config.json` supplies CSP (including response-header `frame-ancestors`), referrer policy, nosniff, Permissions-Policy, COOP, CORP, immutable versioned assets, and no-store service-worker caching. Package/consumer testing is not applicable: this is a private static PWA, not a published library.
-
-## Deploy and use
+## Verification commands
 
 ```sh
 npm ci
 npm test
 npm run build
 npm run test:e2e
-npm run preview
+npm audit --audit-level=high
+/opt/fleet/lib/verify-url.sh https://photo-cull-review.sociobot.in <evidence-dir>
 ```
 
-Deploy `dist/` using the included `staticwebapp.config.json`; its root contains `index.html`. The scoped branch push is complete. At the last live check, `https://photo-cull-review.sociobot.in/` still served the prior `app-v4.js` artifact, so factory rollout and post-rollout live SHA/header verification remain pending. The repository contract prohibits this worker from invoking the shared Azure/DNS deployment helper because it reads deployment secrets and modifies factory-owned infrastructure.
-
-## Known product boundary
-
-The product intentionally does not infer photo capture time from copied-file modification dates. JPEGs without EXIF `DateTimeOriginal` are therefore omitted from **similar** suggestions rather than receiving an unreliable timestamp; exact duplicates and video exact matching continue to work.
+No product source was changed. This handoff, the verification report, and QA evidence are the only intended repository changes.

@@ -1,0 +1,12 @@
+{
+  "urlAfterCapture": "https://photo-cull-review.sociobot.in/",
+  "verificationCondition": "request unavailable",
+  "archivePassActive": true,
+  "storedVerdict": {
+    "valid": true,
+    "checkedAt": 0
+  },
+  "selectedSupportedFiles": 751,
+  "observedScanProgress": "720 / 751",
+  "freeLimitMessageShown": false
+}
