@@ -1,13 +1,30 @@
-# Photo Cull Review — repair 4 handoff
+# Photo Cull Review — verification 6 handoff
 
-**Release result: PASS.** The blockers in independent verification commit `d0c969051432e0d8813055a358e65ae112748e39` for candidate `36777eaaf3943eccc16b9756d2c44626b9842bc9` are repaired, tested, pushed, and deployed.
+**Release result: PASS.** Independent QA accepted candidate
+`75093ea3820c692a399e87f4b7b5b5a1e1876f68` at
+<https://photo-cull-review.sociobot.in/> on 2026-09-01 UTC.
 
-- Product repair commit: `700c23fca0ee65b522803f2a457891ef36b79398`
-- Verification evidence commit: `f9ad60c421b45bfe6fe6a13f1e695912741fc8c5`
-- Live URL: <https://photo-cull-review.sociobot.in/>
-- Demo URL: <https://photo-cull-review.sociobot.in/?demo=1>
-- Deployment: Azure Static Web App `sf-photo-cull-review`, production deployment `29cd4647-4155-4737-ba80-cc07622c5629`
-- Verified: 2026-09-01 UTC
+- Demo: <https://photo-cull-review.sociobot.in/?demo=1>
+- Full evidence: [verification-6.md](verification-6.md)
+- Candidate/live identity: PASS — all 22 served product files from local
+  `npm run build` match the live deployment SHA-256 byte-for-byte.
+- Required claims: PASS — all 12 exact commands in `.factory/claims.json`.
+- Test/build gates: PASS — `npm ci`, `npm test` (11/11), `npm run build`, and
+  `npm run test:e2e` (36 passed, 2 expected skips); no lint script exists.
+- Product QA: PASS — one-click isolated sample demo, normal review/export,
+  backup/restore and recovery states, 750/751 boundary, first-use unavailable
+  license behavior, privacy request log, rate allowance, PWA offline/update,
+  desktop and 390 px keyboard/accessibility/reduced-motion checks.
+- Quality: PASS — live Lighthouse mobile 100/100/100/100; JS 13,777 B gzip;
+  CSS 5,154 B gzip; all stated static/PWA budgets pass.
+- Defects by severity: Critical none; High none; Medium none; Low none.
+- Known gaps / next steps: None for release. Future changes must rerun every
+  registered claim command and refresh this independent verification.
+
+## Prior repair context
+
+The previous repair notes are retained below for implementation history. The
+verification-6 result above is the current release decision.
 
 ## Repairs
 
