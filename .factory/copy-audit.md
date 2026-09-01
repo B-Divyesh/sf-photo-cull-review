@@ -1,11 +1,13 @@
 # Landing-page copy audit
 
-Audited 2026-09-01. Counts treat hyphenated terms, file formats, and prices as one word. No line exceeds 22 words. No banned marketing word is present; “unlocks” describes the literal paid license boundary.
+Audited 2026-09-01 after repair 4. Counts treat hyphenated terms, file formats, and prices as one word. No line exceeds 22 words. No banned marketing word is present; “unlocks” describes the literal paid license boundary.
 
 | Copy | Words | Result |
 | --- | ---: | --- |
 | Photo Cull Review | 3 | Pass |
 | Archive pass | 2 | Pass |
+| How | 1 | Pass — compact mobile label for “How it works” |
+| Archive | 1 | Pass — compact mobile label for “Archive pass” |
 | A local, reversible photo cull | 5 | Pass |
 | Clean up duplicate photos. | 4 | Pass |
 | Before anything moves. | 3 | Pass |
@@ -40,7 +42,7 @@ Audited 2026-09-01. Counts treat hyphenated terms, file formats, and prices as o
 | Local photo review before anything moves. | 6 | Pass |
 | Privacy | 1 | Pass |
 | Terms | 1 | Pass |
-| Original generated archive illustration · Built by Param Factory · v1.0.4 | 9 | Pass |
+| Original generated archive illustration · Built by Param Factory · v1.0.5 | 9 | Pass |
 | Close license dialog | 3 | Pass |
 | One-time unlock | 2 | Pass — literal license action |
 | Scan folders of any size for US$19 once. | 8 | Pass |
@@ -50,6 +52,22 @@ Audited 2026-09-01. Counts treat hyphenated terms, file formats, and prices as o
 | Verify and restore | 3 | Pass |
 | Sociobot/Dodo is the merchant of record. | 6 | Pass |
 | Refunds are handled there and revoke the license. | 8 | Pass |
+
+License status notices:
+
+| Copy | Words | Result |
+| --- | ---: | --- |
+| We could not recheck this Archive pass. | 7 | Pass |
+| Its last successful check remains active. | 6 | Pass |
+| We could not verify this license. | 6 | Pass |
+| Free limits remain active. | 4 | Pass |
+| Check your connection and try again. | 6 | Pass |
+| This license is no longer active. | 6 | Pass |
+| Free limits are in use. | 5 | Pass |
+| Buy Archive pass | 3 | Pass |
+| Restore a license | 3 | Pass |
+| That license is no longer active for this product. | 9 | Pass |
+| Check the token and try again. | 6 | Pass |
 
 Demo-only banner:
 
@@ -78,4 +96,5 @@ Import error:
 | The downloaded CSV | move manifest |
 | The saved JSON | workspace backup |
 | The paid license | Archive pass |
+| A stored successful API result | successful check |
 | The isolated sample state | demo |

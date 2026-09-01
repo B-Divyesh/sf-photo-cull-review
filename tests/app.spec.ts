@@ -143,24 +143,35 @@ test('sequential review shortcuts continue after focus moves to a decision butto
   await expect(page.getByRole('heading', { name: 'Your plan is ready' })).toBeVisible();
 });
 
-test('visible navigation links meet the 44px touch-target minimum at 390px', async ({ page }, testInfo) => {
+test('@regression:mobile-header every visible header control is readable, separated, and at least 44px at 390px', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'mobile', 'Mobile target measurement');
   await page.goto('/');
 
-  for (const locator of [
-    page.getByRole('link', { name: 'Photo Cull Review home' }),
-    page.getByRole('contentinfo').getByRole('link', { name: 'Privacy' }),
-    page.getByRole('contentinfo').getByRole('link', { name: 'Terms' }),
-  ]) {
+  const targets = page.locator('header.site-header .brand, header.site-header nav > *');
+  const boxes = [];
+  for (let index = 0; index < await targets.count(); index += 1) {
+    const locator = targets.nth(index);
     const box = await locator.boundingBox();
     expect(box, 'target must have a rendered box').not.toBeNull();
     expect(box!.width).toBeGreaterThanOrEqual(44);
     expect(box!.height).toBeGreaterThanOrEqual(44);
+    expect(Number.parseFloat(await locator.evaluate((element) => getComputedStyle(element).fontSize))).toBeGreaterThanOrEqual(16);
+    boxes.push(box!);
+  }
+  for (let first = 0; first < boxes.length; first += 1) {
+    for (let second = first + 1; second < boxes.length; second += 1) {
+      const a = boxes[first]!;
+      const b = boxes[second]!;
+      const horizontalGap = Math.max(a.x - (b.x + b.width), b.x - (a.x + a.width), 0);
+      const verticalGap = Math.max(a.y - (b.y + b.height), b.y - (a.y + a.height), 0);
+      expect(Math.max(horizontalGap, verticalGap), 'adjacent header targets need 8px separation').toBeGreaterThanOrEqual(7.9);
+    }
   }
 
   for (const locator of [
     page.getByRole('link', { name: 'Try it with sample data' }),
     page.getByText('Opens a four-file sample review immediately.'),
+    page.locator('.trust-facts'),
   ]) {
     const box = await locator.boundingBox();
     expect(box, 'sample start needs a rendered box').not.toBeNull();
@@ -220,6 +231,77 @@ test('@claim:license-verification-request verifies a supplied license with the o
   expect(crossOrigin).toEqual(['https://api.sociobot.in/api/v1/products/photo-cull-review/verify?license=claim-license']);
 });
 
+test('@regression:unverified-license an unavailable first verification stays free and rejects 751 files', async ({ page }) => {
+  await page.route('https://api.sociobot.in/api/v1/products/photo-cull-review/verify?license=qa-unavailable-license', (route) => route.abort('failed'));
+  await page.goto('/?license=qa-unavailable-license');
+
+  await expect(page).toHaveURL('/');
+  await expect(page.getByRole('status').filter({ hasText: 'We could not verify this license.' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Archive pass' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Archive pass active' })).toHaveCount(0);
+  expect(await page.evaluate(() => localStorage.getItem('sb_license:photo-cull-review:verdict'))).toBeNull();
+
+  await page.locator('#folder-input').evaluate((element) => {
+    const input = element as HTMLInputElement;
+    const transfer = new DataTransfer();
+    for (let index = 0; index < 751; index += 1) {
+      const file = new File(['x'], `clip-${index}.mp4`, { type: 'video/mp4' });
+      Object.defineProperty(file, 'webkitRelativePath', { value: `Archive/clip-${index}.mp4` });
+      transfer.items.add(file);
+    }
+    Object.defineProperty(input, 'files', { configurable: true, value: transfer.files });
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+
+  await expect(page.getByRole('alert')).toContainText('free archive desk scans up to 750');
+  await expect(page.locator('.scan-count')).toHaveCount(0);
+});
+
+test('a previously successful verdict remains active when its daily recheck is unavailable', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('sb_license:photo-cull-review', 'previously-verified-license');
+    localStorage.setItem('sb_license:photo-cull-review:verdict', JSON.stringify({
+      valid: true,
+      reason: 'ok',
+      checkedAt: Date.now() - 86_400_001,
+    }));
+  });
+  await page.route('https://api.sociobot.in/api/v1/products/photo-cull-review/verify?license=previously-verified-license', (route) => route.abort('failed'));
+  await page.goto('/');
+
+  await expect(page.getByRole('button', { name: 'Archive pass active' })).toBeVisible();
+  await expect(page.getByRole('status').filter({ hasText: 'last successful check remains active' })).toBeVisible();
+});
+
+test('an invalid checkout return shows the quiet inactive-license notice and buy link', async ({ page }) => {
+  await page.route('https://api.sociobot.in/api/v1/products/photo-cull-review/verify?license=invalid-return-license', (route) => route.fulfill({
+    contentType: 'application/json',
+    body: JSON.stringify({ valid: false, reason: 'revoked', expires_at: null }),
+  }));
+  await page.goto('/?license=invalid-return-license');
+
+  const notice = page.getByRole('status').filter({ hasText: 'This license is no longer active.' });
+  await expect(notice).toBeVisible();
+  await expect(notice.getByRole('link', { name: 'Buy Archive pass' })).toHaveAttribute('href', 'https://api.sociobot.in/api/v1/products/photo-cull-review/checkout');
+  await expect(page.getByRole('button', { name: 'Archive pass active' })).toHaveCount(0);
+  const accessibility = await new AxeBuilder({ page }).analyze();
+  expect(accessibility.violations.filter((violation) => ['serious', 'critical'].includes(violation.impact ?? ''))).toEqual([]);
+});
+
+test('license dialog receives focus, closes with Escape, and returns focus', async ({ page }) => {
+  await page.goto('/');
+  const trigger = page.getByRole('button', { name: 'Archive pass' });
+  await trigger.focus();
+  await trigger.press('Enter');
+  await expect(page.getByRole('dialog', { name: 'Archive pass' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Close license dialog' })).toBeFocused();
+  const accessibility = await new AxeBuilder({ page }).analyze();
+  expect(accessibility.violations.filter((violation) => ['serious', 'critical'].includes(violation.impact ?? ''))).toEqual([]);
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog', { name: 'Archive pass' })).not.toBeVisible();
+  await expect(trigger).toBeFocused();
+});
+
 test('@claim:demo-sandbox sample decisions stay separate and reset without setup', async ({ page }) => {
   await page.goto('/?demo=1');
   await expect(page.getByRole('heading', { name: 'Your review desk' })).toBeVisible();
@@ -249,4 +331,39 @@ test('privacy, terms, and 404 use the complete shared shell without serious acce
   const sitemap = await page.request.get('/sitemap.xml');
   expect(sitemap.ok()).toBe(true);
   expect(await sitemap.text()).toContain('https://photo-cull-review.sociobot.in/?demo=1');
+});
+
+test('@regression:route-social-metadata every public route provides its own complete social card', async ({ page }) => {
+  const routes = [
+    { path: '/', title: 'Photo Cull Review — plan duplicate photo moves', canonical: 'https://photo-cull-review.sociobot.in/' },
+    { path: '/?demo=1', title: 'Demo — Photo Cull Review', canonical: 'https://photo-cull-review.sociobot.in/?demo=1' },
+    { path: '/privacy/', title: 'Privacy — Photo Cull Review', canonical: 'https://photo-cull-review.sociobot.in/privacy/' },
+    { path: '/terms/', title: 'Terms — Photo Cull Review', canonical: 'https://photo-cull-review.sociobot.in/terms/' },
+    { path: '/404.html', title: 'Page not found — Photo Cull Review', canonical: 'https://photo-cull-review.sociobot.in/404.html' },
+  ];
+  for (const route of routes) {
+    await page.goto(route.path);
+    await expect(page).toHaveTitle(route.title);
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', route.canonical);
+    await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content', route.title);
+    await expect(page.locator('meta[property="og:description"]')).toHaveAttribute('content', /\S+/);
+    await expect(page.locator('meta[property="og:url"]')).toHaveAttribute('content', route.canonical);
+    await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', 'https://photo-cull-review.sociobot.in/assets/social-preview.jpg');
+    await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute('content', 'summary_large_image');
+    await expect(page.locator('meta[name="twitter:title"]')).toHaveAttribute('content', route.title);
+    await expect(page.locator('meta[name="twitter:description"]')).toHaveAttribute('content', /\S+/);
+    await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute('content', 'https://photo-cull-review.sociobot.in/assets/social-preview.jpg');
+  }
+});
+
+test('@regression:text-reflow home, demo, legal, and not-found routes reflow at 200% on 390px', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'mobile', '390px text reflow measurement');
+  for (const route of ['/', '/?demo=1', '/privacy/', '/terms/', '/404.html']) {
+    await page.goto(route);
+    await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
+    await expect.poll(() => page.evaluate(() => ({
+      clientWidth: document.documentElement.clientWidth,
+      scrollWidth: document.documentElement.scrollWidth,
+    }))).toEqual({ clientWidth: 390, scrollWidth: 390 });
+  }
 });

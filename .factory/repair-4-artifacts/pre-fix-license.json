@@ -1,0 +1,16 @@
+{
+  "candidate": "36777eaaf3943eccc16b9756d2c44626b9842bc9",
+  "verificationCondition": "request unavailable",
+  "urlAfterCapture": "http://127.0.0.1:4173/",
+  "storedToken": "qa-unavailable-verification-5",
+  "storedVerdict": {
+    "valid": true,
+    "checkedAt": 0
+  },
+  "paidLabel": "Archive pass active",
+  "selection": {
+    "supportedFiles": 751,
+    "observedScanCountBeforeStop": "244 / 751",
+    "freeLimitErrorShown": false
+  }
+}

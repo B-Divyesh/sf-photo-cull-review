@@ -1,8 +1,8 @@
 import { chromium } from 'playwright';
 import AxeBuilder from '@axe-core/playwright';
 
-const base = 'https://photo-cull-review.sociobot.in';
-const browser = await chromium.launch({ headless: true });
+const base = process.env.QA_BASE_URL || 'https://photo-cull-review.sociobot.in';
+const browser = await chromium.launch({ headless: true, args: ['--disable-gpu'] });
 const result = {};
 
 async function inspectRoute(path, viewport = { width: 1440, height: 900 }) {
@@ -26,6 +26,17 @@ async function inspectRoute(path, viewport = { width: 1440, height: 900 }) {
     h1: [...document.querySelectorAll('h1')].map((node) => node.textContent?.replace(/\s+/g, ' ').trim()),
     mainCount: document.querySelectorAll('main').length,
     horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    social: {
+      canonical: document.querySelector('link[rel="canonical"]')?.getAttribute('href'),
+      ogTitle: document.querySelector('meta[property="og:title"]')?.getAttribute('content'),
+      ogDescription: document.querySelector('meta[property="og:description"]')?.getAttribute('content'),
+      ogUrl: document.querySelector('meta[property="og:url"]')?.getAttribute('content'),
+      ogImage: document.querySelector('meta[property="og:image"]')?.getAttribute('content'),
+      twitterCard: document.querySelector('meta[name="twitter:card"]')?.getAttribute('content'),
+      twitterTitle: document.querySelector('meta[name="twitter:title"]')?.getAttribute('content'),
+      twitterDescription: document.querySelector('meta[name="twitter:description"]')?.getAttribute('content'),
+      twitterImage: document.querySelector('meta[name="twitter:image"]')?.getAttribute('content'),
+    },
   }));
   await context.close();
   return {
@@ -65,20 +76,64 @@ for (const path of ['/', '/?demo=1', '/privacy/', '/terms/', '/missing-verificat
   page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto(base, { waitUntil: 'networkidle' });
-  await page.screenshot({ path: '.factory/verification-artifacts/live-cold-mobile.png', fullPage: false });
+  const { mkdir } = await import('node:fs/promises');
+  await mkdir('.factory/repair-4-artifacts', { recursive: true });
+  await page.screenshot({ path: '.factory/repair-4-artifacts/live-cold-mobile.png', fullPage: false });
   const action = page.getByRole('link', { name: 'Try it with sample data' });
   const actionBox = await action.boundingBox();
-  const targetNames = ['Photo Cull Review home'];
-  const targets = {};
-  for (const name of targetNames) targets[name] = await page.getByRole('link', { name }).boundingBox();
+  const targets = await page.locator('header.site-header .brand, header.site-header nav > *').evaluateAll((elements) => elements.map((element) => {
+    const box = element.getBoundingClientRect();
+    return {
+      name: element.getAttribute('aria-label') || element.textContent?.trim(),
+      x: box.x,
+      y: box.y,
+      width: box.width,
+      height: box.height,
+      fontSize: getComputedStyle(element).fontSize,
+    };
+  }));
+  const factsBox = await page.locator('.trust-facts').boundingBox();
   result.mobile = {
     viewport: await page.evaluate(() => ({ width: innerWidth, height: innerHeight })),
     horizontalOverflow: await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth),
     actionBox,
     actionFullyInFirstScreen: Boolean(actionBox && actionBox.y >= 0 && actionBox.y + actionBox.height <= 844),
+    factsFullyInFirstScreen: Boolean(factsBox && factsBox.y >= 0 && factsBox.y + factsBox.height <= 844),
     targets,
     errors,
   };
+  await context.close();
+}
+
+result.textReflow = {};
+{
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const page = await context.newPage();
+  for (const path of ['/', '/?demo=1', '/privacy/', '/terms/', '/404.html']) {
+    await page.goto(`${base}${path}`, { waitUntil: 'networkidle' });
+    await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
+    result.textReflow[path] = await page.evaluate(() => ({
+      clientWidth: document.documentElement.clientWidth,
+      scrollWidth: document.documentElement.scrollWidth,
+      reflows: document.documentElement.scrollWidth === document.documentElement.clientWidth,
+    }));
+  }
+  await context.close();
+}
+
+{
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  const verifyUrl = 'https://api.sociobot.in/api/v1/products/photo-cull-review/verify?license=qa-repair-4-unavailable';
+  await page.route(verifyUrl, (route) => route.abort('failed'));
+  await page.goto(`${base}/?license=qa-repair-4-unavailable`);
+  await page.locator('.license-notice').waitFor();
+  result.unavailableLicense = await page.evaluate(() => ({
+    url: location.href,
+    verdict: localStorage.getItem('sb_license:photo-cull-review:verdict'),
+    active: [...document.querySelectorAll('button')].some((button) => button.getAttribute('aria-label') === 'Archive pass active'),
+    notice: document.querySelector('.license-notice')?.textContent?.replace(/\s+/g, ' ').trim(),
+  }));
   await context.close();
 }
 
@@ -86,10 +141,11 @@ for (const path of ['/', '/?demo=1', '/privacy/', '/terms/', '/missing-verificat
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' });
   const page = await context.newPage();
   await page.goto(base);
+  await page.getByRole('heading', { level: 1 }).waitFor();
   const focused = [];
   for (let index = 0; index < 5; index += 1) {
     await page.keyboard.press('Tab');
-    await page.waitForTimeout(20);
+    await page.waitForTimeout(100);
     focused.push(await page.evaluate(() => {
       const node = document.activeElement;
       const style = node ? getComputedStyle(node) : null;
@@ -194,7 +250,7 @@ for (const path of ['/', '/?demo=1', '/privacy/', '/terms/', '/missing-verificat
 }
 
 {
-  const paths = ['/', '/assets/app-v5.js', '/assets/app-v5.css', '/sw.js', '/manifest.webmanifest', '/missing-verification-route'];
+  const paths = ['/', '/assets/app-v6.js', '/assets/app-v6.css', '/sw.js', '/manifest.webmanifest', '/missing-verification-route'];
   result.responses = {};
   for (const path of paths) {
     const response = await fetch(`${base}${path}`, { redirect: 'manual' });

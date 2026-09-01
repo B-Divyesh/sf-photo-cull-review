@@ -1,6 +1,6 @@
 import './styles.css';
 import { clearData, loadData, saveData, useStorageNamespace } from './db';
-import { captureLicenseFromUrl, checkoutUrl, hasOptimisticUnlock, storeLicense, verifyLicense } from './license';
+import { captureLicenseFromUrl, checkoutUrl, hasOptimisticUnlock, hasStoredLicense, storeLicense, verifyLicense } from './license';
 import { FREE_FILE_LIMIT, scanFiles } from './scanner';
 import type { AppData, Decision, MediaAsset, ReviewGroup } from './types';
 import { EMPTY_DATA } from './types';
@@ -15,6 +15,7 @@ let data: AppData = structuredClone(EMPTY_DATA);
 let paid = false;
 let busy = true;
 let globalError = '';
+let licenseNotice = '';
 let toastTimer = 0;
 const INVALID_BACKUP_MESSAGE = 'That file is not a Photo Cull Review backup. Choose a valid JSON backup exported from Photo Cull Review.';
 
@@ -25,7 +26,7 @@ async function init(): Promise<void> {
     captureLicenseFromUrl();
     paid = hasOptimisticUnlock();
   }
-  if (demoMode) document.title = 'Demo — Photo Cull Review';
+  if (demoMode) setDemoMetadata();
   try {
     data = await loadData();
     if (demoMode && !data.scan) {
@@ -37,9 +38,17 @@ async function init(): Promise<void> {
   busy = false;
   render();
   bindGlobalEvents();
-  if (paid) {
-    const verified = await verifyLicense();
-    if (verified !== paid) { paid = verified; render(); }
+  if (!demoMode && hasStoredLicense()) {
+    const verification = await verifyLicense();
+    paid = verification.valid;
+    if (verification.status === 'unavailable') {
+      licenseNotice = paid
+        ? 'We could not recheck this Archive pass. Its last successful check remains active.'
+        : 'We could not verify this license. Free limits remain active. Check your connection and try again.';
+    } else if (!verification.valid) {
+      licenseNotice = 'This license is no longer active. Free limits are in use.';
+    }
+    render();
   }
   registerServiceWorker();
 }
@@ -55,16 +64,17 @@ function render(): void {
       </a>
       <nav aria-label="Primary">
         <a href="/?demo=1">Demo</a>
-        <a href="/#how-it-works">How it works</a>
+        <a href="/#how-it-works" aria-label="How it works"><span class="wide-label">How it works</span><span class="compact-label">How</span></a>
         <a href="/privacy/">Privacy</a>
-        <button class="text-button" data-action="open-license">${paid ? 'Archive pass active' : 'Archive pass'}</button>
+        <button class="text-button" data-action="open-license" aria-label="${paid ? 'Archive pass active' : 'Archive pass'}"><span class="wide-label">${paid ? 'Archive pass active' : 'Archive pass'}</span><span class="compact-label">${paid ? 'Pass active' : 'Archive'}</span></button>
       </nav>
     </header>
+    ${licenseNotice ? licenseNoticeView() : ''}
     ${busy ? loadingView() : data.scan ? workspaceView() : welcomeView()}
     <footer class="site-footer">
       <p>Local photo review before anything moves.</p>
       <nav aria-label="Legal"><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a></nav>
-      <p class="provenance">Original generated archive illustration · Built by Param Factory · v1.0.4</p>
+      <p class="provenance">Original generated archive illustration · Built by Param Factory · v1.0.5</p>
     </footer>
     <div class="toast" role="status" aria-live="polite" aria-atomic="true" hidden></div>
     ${licenseDialog()}
@@ -188,6 +198,10 @@ function assetView(asset: MediaAsset, index: number): string {
 
 function licenseDialog(): string {
   return `<dialog id="license-dialog" aria-labelledby="license-title"><form method="dialog" class="dialog-close"><button aria-label="Close license dialog">×</button></form><p class="eyebrow">One-time unlock</p><h2 id="license-title">Archive pass</h2>${paid ? '<p class="license-good">✓ This device has an active archive pass.</p>' : `<p>Scan folders of any size for US$19 once. The free desk handles up to ${FREE_FILE_LIMIT} files, and exporting your plan is always free.</p><a class="button primary wide" href="${checkoutUrl()}">Buy archive pass</a><hr><form id="restore-form"><label for="license-token">Have a license? Paste it here</label><input id="license-token" name="license" autocomplete="off" required><button class="button secondary wide" type="submit">Verify and restore</button><p class="form-status" role="status" aria-live="polite"></p></form>`}<p class="legal-small">Sociobot/Dodo is the merchant of record. Refunds are handled there and revoke the license. <a href="/terms/">Terms</a> · <a href="/privacy/">Privacy</a></p></dialog>`;
+}
+
+function licenseNoticeView(): string {
+  return `<aside class="license-notice" role="status"><span>${escapeHtml(licenseNotice)}</span>${paid ? '' : `<a href="${checkoutUrl()}">Buy Archive pass</a><button class="text-button" data-action="open-license">Restore a license</button>`}</aside>`;
 }
 
 function bindViewEvents(): void {
@@ -370,9 +384,12 @@ async function handleLicenseRestore(event: SubmitEvent): Promise<void> {
   const status = form.querySelector<HTMLElement>('.form-status');
   if (!token) return;
   storeLicense(token); if (status) status.textContent = 'Checking license…';
-  paid = await verifyLicense(true);
-  if (paid) { render(); showToast('Archive pass restored on this device.'); }
-  else if (status) status.textContent = 'That license is not active for this product. Check the token and try again.';
+  const verification = await verifyLicense(true);
+  paid = verification.valid;
+  if (paid) { licenseNotice = ''; render(); showToast('Archive pass restored on this device.'); }
+  else if (status) status.textContent = verification.status === 'unavailable'
+    ? 'We could not verify this license. Check your connection and try again. Free limits remain active.'
+    : 'That license is no longer active for this product. Check the token and try again.';
 }
 
 function handleShortcut(event: KeyboardEvent): void {
@@ -414,6 +431,24 @@ function showToast(text: string): void {
   if (!toast) return;
   toast.textContent = text; toast.hidden = false;
   toastTimer = window.setTimeout(() => { toast.hidden = true; }, 4200);
+}
+
+function setDemoMetadata(): void {
+  const title = 'Demo — Photo Cull Review';
+  const description = 'Try a four-file duplicate photo review with separate sample data.';
+  const canonical = 'https://photo-cull-review.sociobot.in/?demo=1';
+  document.title = title;
+  setMeta('meta[name="description"]', 'content', description);
+  setMeta('link[rel="canonical"]', 'href', canonical);
+  setMeta('meta[property="og:title"]', 'content', title);
+  setMeta('meta[property="og:description"]', 'content', description);
+  setMeta('meta[property="og:url"]', 'content', canonical);
+  setMeta('meta[name="twitter:title"]', 'content', title);
+  setMeta('meta[name="twitter:description"]', 'content', description);
+}
+
+function setMeta(selector: string, attribute: string, value: string): void {
+  document.querySelector(selector)?.setAttribute(attribute, value);
 }
 
 function assetById(id: string): MediaAsset | undefined { return data.assets.find((asset) => asset.id === id); }
