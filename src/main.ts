@@ -418,12 +418,53 @@ function parseWorkspaceBackup(contents: string): AppData | undefined {
   let parsed: unknown;
   try { parsed = JSON.parse(contents); }
   catch { return undefined; }
-  if (!parsed || typeof parsed !== 'object') return undefined;
+  if (!isRecord(parsed)) return undefined;
   const backup = parsed as { product?: unknown; data?: unknown };
-  if (backup.product !== 'photo-cull-review' || !backup.data || typeof backup.data !== 'object') return undefined;
+  if (backup.product !== 'photo-cull-review' || !isRecord(backup.data)) return undefined;
   const candidate = backup.data as Partial<AppData>;
-  if (candidate.version !== 1 || !Array.isArray(candidate.assets) || !Array.isArray(candidate.groups)) return undefined;
+  if (
+    candidate.version !== 1
+    || !Array.isArray(candidate.assets) || !candidate.assets.every(isMediaAsset)
+    || !Array.isArray(candidate.groups) || !candidate.groups.every(isReviewGroup)
+    || !Number.isInteger(candidate.activeGroup) || candidate.activeGroup! < 0 || candidate.activeGroup! > candidate.groups.length
+    || !Array.isArray(candidate.history) || !candidate.history.every(isHistoryEntry)
+    || (candidate.scan !== undefined && !isScanSummary(candidate.scan))
+  ) return undefined;
+  const assetIds = new Set(candidate.assets.map((asset) => asset.id));
+  if (candidate.groups.some((group) => group.assetIds.some((id) => !assetIds.has(id)))) return undefined;
   return candidate as AppData;
+}
+function isRecord(value: unknown): value is Record<string, unknown> { return Boolean(value) && typeof value === 'object' && !Array.isArray(value); }
+function isMediaAsset(value: unknown): value is MediaAsset {
+  if (!isRecord(value)) return false;
+  return ['id', 'name', 'path', 'mime', 'sha256'].every((key) => typeof value[key] === 'string')
+    && (value.mediaType === 'image' || value.mediaType === 'video')
+    && (value.decision === 'undecided' || value.decision === 'keep' || value.decision === 'review')
+    && typeof value.size === 'number' && Number.isFinite(value.size) && value.size >= 0
+    && typeof value.lastModified === 'number' && Number.isFinite(value.lastModified)
+    && (value.perceptualHash === undefined || typeof value.perceptualHash === 'string')
+    && (value.thumbnail === undefined || typeof value.thumbnail === 'string');
+}
+function isReviewGroup(value: unknown): value is ReviewGroup {
+  return isRecord(value)
+    && typeof value.id === 'string'
+    && (value.kind === 'exact' || value.kind === 'similar')
+    && Array.isArray(value.assetIds) && value.assetIds.every((id) => typeof id === 'string')
+    && typeof value.explanation === 'string';
+}
+function isHistoryEntry(value: unknown): value is AppData['history'][number] {
+  return isRecord(value)
+    && typeof value.at === 'number' && Number.isFinite(value.at)
+    && typeof value.assetId === 'string'
+    && (value.from === 'undecided' || value.from === 'keep' || value.from === 'review')
+    && (value.to === 'undecided' || value.to === 'keep' || value.to === 'review');
+}
+function isScanSummary(value: unknown): value is NonNullable<AppData['scan']> {
+  return isRecord(value)
+    && typeof value.scanned === 'number' && Number.isFinite(value.scanned) && value.scanned >= 0
+    && typeof value.skipped === 'number' && Number.isFinite(value.skipped) && value.skipped >= 0
+    && typeof value.scannedAt === 'number' && Number.isFinite(value.scannedAt)
+    && typeof value.rootName === 'string';
 }
 function formatBytes(bytes: number): string { if (!bytes) return '0 B'; const units = ['B','KB','MB','GB','TB']; const index = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1); return `${(bytes / 1024 ** index).toFixed(index ? 1 : 0)} ${units[index]}`; }
 function formatDate(value?: number, time = false): string { if (!value) return 'Unknown date'; return new Intl.DateTimeFormat(undefined, time ? { dateStyle: 'medium', timeStyle: 'short' } : { dateStyle: 'medium' }).format(value); }

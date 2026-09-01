@@ -44,6 +44,15 @@ test('invalid workspace JSON explains the problem and the next step without pars
   );
   await expect(alert).not.toContainText(/Expected|position|line|column/i);
   await expect(page.getByRole('heading', { name: 'Your review desk' })).toBeVisible();
+
+  await page.locator('#import-input').setInputFiles({
+    name: 'wrong-shape.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from('{"product":"photo-cull-review","data":{"version":1,"assets":[],"groups":[]}}'),
+  });
+  await expect(page.getByRole('alert')).toHaveText(
+    'That file is not a Photo Cull Review backup. Choose a valid JSON backup exported from Photo Cull Review.',
+  );
 });
 
 test('@claim:exact-duplicates @claim:csv-export @claim:workspace-persistence indexes exact copies, records decisions, and exports a plan', async ({ page }) => {
