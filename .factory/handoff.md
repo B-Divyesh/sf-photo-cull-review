@@ -6,6 +6,7 @@
 - Repaired candidate: `4188b4c65407c06fc07e233521b230be04855393`
 - Verifier report commit: `ab9f0d35875d2010a4a3c799f087400cd93532c5`
 - Code repair commits: `2c91694`, `c863b2c`
+- Release preparation commit: `bcb0f02`
 - Live URL: `https://photo-cull-review.sociobot.in/`
 - Demo URL: `https://photo-cull-review.sociobot.in/?demo=1`
 - Artifact/deployment class: unchanged `pwa-offline` static build
@@ -40,7 +41,7 @@ Every exact command in `.factory/claims.json` passed independently. Evidence cov
 Browser, keyboard, accessibility, and copy:
 
 - Chromium desktop and 390×844 mobile: PASS; no horizontal overflow.
-- Factory `verify-url.sh`: PASS live — HTTPS 200, 847 ms load, title, `lang=en`, one H1, main landmark, alt text, named buttons, and no console/page errors.
+- Factory `verify-url.sh`: PASS live — HTTPS 200, 711 ms load, title, `lang=en`, one H1, main landmark, alt text, named buttons, and no console/page errors.
 - Axe 4.13.0: zero serious/critical findings and zero console/page errors on live landing, populated demo, Privacy, Terms, and 404 pages.
 - The existing browser suite passes skip-link/focus behavior, a visible 3 px `#A93228` focus ring, 44 px targets, sequential K/R decisions, ArrowRight completion, and the dialog path.
 - Reduced motion reports `scroll-behavior: auto`. The exact first-read test passes in both configured browser projects.
