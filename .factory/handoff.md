@@ -1,54 +1,72 @@
-# Photo Cull Review — polish 1 handoff
+# Photo Cull Review — verification 7 handoff
 
 ## Result
 
-**PASS.** Repair commit `c6589c1f64a454ae61f43f93c7b3184e1a5de4ab` is deployed to <https://photo-cull-review.sociobot.in>.
+**FAIL — do not release candidate
+`c6589c1f64a454ae61f43f93c7b3184e1a5de4ab`.**
 
-The review’s 31 findings are closed in [polish-1.md](polish-1.md). The product remains a local-first offline PWA with its warm darkroom/contact-sheet visual system.
+The complete independent report is in
+[verification-7.md](verification-7.md). The deployed product matches the
+candidate and passes its main workflow, first-read, demo, local test, PWA,
+privacy, accessibility, performance, and rate-limit checks. Release is blocked
+because the product advertises a one-time **US$19** Archive pass while the
+linked live checkout charges **$12.00**.
 
-## What changed
+## What was verified
 
-- Strengthened all incomplete claims: full SHA-256 export checks, 30/31-second burst boundary, parsed CSV/JSON downloads, populated offline demo reload, real-data demo isolation, and UI-driven validated Archive pass behavior.
-- Added nine missing claim groups and their isolated tests. `.factory/claims.json` now has 21 entries, each with exactly one `@claim:<id>` test.
-- Rewrote the flagged first-screen, price, README, legal, and export wording in plain language. “Move plan” is now the one visitor-facing name for the CSV.
-- Moved focus to the new page heading after demo navigation and Back navigation.
-- Bumped the cache-safe PWA release to `1.0.6`: `app-v7` assets and `photo-cull-shell-v8` prevent the previous immutable app files from masking this repair.
+- Ran all 21 commands in `.factory/claims.json` separately from a clean
+  candidate checkout; every declared command exited zero.
+- Ran `npm ci`, `npm test`, `npm run test:e2e`, `npm run build`,
+  `npm audit --audit-level=high`, and `git diff --check`.
+- Exercised cold desktop and 390 px first screens, the one-click demo, a real
+  duplicate-folder scan, keyboard decisions, CSV export, reset, invalid input,
+  malformed backup recovery, 750/751 limits, license fail-soft behavior,
+  offline reload, update behavior, response headers, links, and request logs.
+- Confirmed all 22 served build artifacts match the fresh candidate build by
+  SHA-256.
+- Confirmed the verification allowance: 30 successful requests, then HTTP 429
+  with `Retry-After` (3 seconds observed).
+- Ran axe on all public views and Lighthouse 13.4.1 mobile. Axe had no
+  serious/critical findings. Lighthouse scored 100 in Performance,
+  Accessibility, Best Practices, and SEO; LCP was 1.5 s and CLS was 0.
 
-## Verification
+Local results: 12 unit tests passed; 52 browser tests passed and 2 intentional
+project checks skipped; TypeScript and the production build passed. There is no
+lint script in the repository. The build produced 13,988 B gzip JavaScript and
+5,154 B gzip CSS.
 
-Fresh clone: `/tmp/photo-cull-review-clean-5JJJkK` at pushed commit `c6589c1`.
+## Release blocker
+
+The site, license dialog, README, terms, and `archive-pass-unlimited` claim say
+**US$19**. A fresh visit through
+`https://api.sociobot.in/api/v1/products/photo-cull-review/checkout` shows a
+Photo Cull Review order with a **$12.00** item price, subtotal, and total. The
+claim test checks local copy and a mocked license response but never checks the
+real checkout amount.
+
+Fix the product-scoped billing configuration or all advertised price copy so
+they agree. Then add a real checkout contract assertion before repeating the
+verification. Do not alter unrelated Sociobot resources.
+
+## Other findings
+
+- Low: the privacy page and CSV filename still use “manifest,” despite “move
+  plan” being the documented single user-facing term.
+- Low: existing QA documentation says 54 browser tests passed plus 2 skipped;
+  the reproducible result is 52 passed and 2 skipped.
+
+## Evidence and rerun
+
+Screenshots, Lighthouse output, and URL-verifier output are in
+[`verification-7-artifacts`](verification-7-artifacts/). To repeat local gates:
 
 ```sh
 npm ci
 npm test
+npm run test:e2e
 npm run build
-npm run test:e2e -- --reporter=line
-# then every command recorded in .factory/claims.json, one by one
 ```
 
-Results:
-
-- Unit tests: 12 passed.
-- Build: passed; `dist/index.html` exists; app JS 14.07 KB gzip and CSS 5.15 KB gzip.
-- Browser/accessibility suite: 54 passed across Chromium and 390 px mobile; 2 project-specific skips.
-- Claims: 21/21 declared commands passed from the clean clone.
-- Live verifier: `/opt/fleet/lib/verify-url.sh https://photo-cull-review.sociobot.in /tmp/photo-cull-review-live-verify` passed. It found a title, `lang=en`, one h1, one main, complete image alt coverage, labelled buttons, and no errors on the landing route.
-- Live axe integration: no serious or critical issues on home, demo, Privacy, Terms, or 404.
-- Live cold check: desktop and 390 px first screens show the action and its outcome; no horizontal overflow; 44 px header targets; 200% text reflows on all public routes.
-- Live PWA check: `photo-cull-shell-v8` controls the demo; a saved demo reloads offline with the banner and review desk present.
-- Live focus check: demo forward navigation and browser Back both focus the destination h1.
-- Lighthouse mobile: Performance 100, Accessibility 100, Best Practices 100, SEO 100; LCP 1.5 s and CLS 0.
-
-Live evidence: [cold mobile screenshot](repair-4-artifacts/live-cold-mobile.png), `/tmp/photo-cull-review-live-qa.json`, and `/tmp/photo-cull-review-lighthouse.json` from this repair run. The live QA captures only an expected browser console 404 for the intentionally missing-route check; valid routes had no console errors.
-
-## Deployment
-
-```sh
-/opt/fleet/lib/deploy-static.sh photo-cull-review dist
-```
-
-The deployment reused only `sf-photo-cull-review` in resource group `sociobot` and its `photo-cull-review.sociobot.in` custom domain.
-
-## Known gaps
-
-None.
+Then run every `test` command in `.factory/claims.json` separately, check the
+live checkout total through the product's buy link, and repeat the live
+privacy/PWA/accessibility checks described in `verification-7.md`.
