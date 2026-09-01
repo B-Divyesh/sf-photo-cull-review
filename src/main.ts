@@ -62,7 +62,7 @@ function render(): void {
     <footer class="site-footer">
       <p>Private by design. No photos leave this browser.</p>
       <nav aria-label="Legal"><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a></nav>
-      <p class="provenance">Original generated archive illustration · v1.0.2 · © 2026 Sociobot</p>
+      <p class="provenance">Original generated archive illustration · v1.0.3 · © 2026 Sociobot</p>
     </footer>
     <div class="toast" role="status" aria-live="polite" aria-atomic="true" hidden></div>
     ${licenseDialog()}

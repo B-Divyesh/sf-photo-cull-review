@@ -8,9 +8,9 @@ export default defineConfig({
     sourcemap: false,
     rollupOptions: {
       output: {
-        entryFileNames: 'assets/app-v3.js',
+        entryFileNames: 'assets/app-v4.js',
         chunkFileNames: 'assets/[name]-[hash].js',
-        assetFileNames: (asset) => asset.name?.endsWith('.css') ? 'assets/app-v3.css' : 'assets/[name]-[hash][extname]',
+        assetFileNames: (asset) => asset.name?.endsWith('.css') ? 'assets/app-v4.css' : 'assets/[name]-[hash][extname]',
       },
     },
   },
