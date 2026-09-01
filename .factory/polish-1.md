@@ -39,6 +39,7 @@ Repair version: `1.0.6`
 
 ## Evidence summary
 
+- **Live recheck for every row:** <https://photo-cull-review.sociobot.in> cold-loaded after deployment; 390 px first-screen screenshot: [live-cold-mobile.png](repair-4-artifacts/live-cold-mobile.png). The live run verified titles, routes, demo isolation, offline cache, legal links, mobile reflow, and no valid-route console errors.
 - `npm test` — 12 passed.
 - `npm run build` — passed; `dist/` generated; app JS 14.07 KB gzip and CSS 5.15 KB gzip.
 - `npm run test:e2e -- --reporter=line` — 54 passed, 2 project-specific skips.
