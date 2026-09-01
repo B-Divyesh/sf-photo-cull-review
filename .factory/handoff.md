@@ -2,9 +2,9 @@
 
 ## Result
 
-**Local repair verified; production deployment evidence will be added after the
-static release.** This repair closes verification 7’s price-contract blocker
-without changing the researched local-first workflow.
+**PASS — deployed to production.** Commit
+`5aa0abe5afadec0b29ace13d5e894f2bae5c46f1` closes verification 7’s
+price-contract blocker without changing the researched local-first workflow.
 
 ## Reproduction and root cause
 
@@ -53,15 +53,42 @@ purchase contract could drift unnoticed.
   Playwright AxeBuilder scans ran instead and passed for home, review, legal,
   and 404 routes.
 
-## Deployment
+## Production deployment and verification
 
-Deploy `dist/` using `/opt/fleet/lib/deploy-static.sh photo-cull-review dist`.
-After deployment, rerun `.factory/live-qa.mjs`, the checkout contract, response
-headers, and production URL verifier; record the exact result below before
-release handoff.
+- `/opt/fleet/lib/deploy-static.sh photo-cull-review dist` — passed. It reused
+  only the assigned `sf-photo-cull-review` Static Web App in `centralus` and
+  served HTTPS 200 at `https://photo-cull-review.sociobot.in`.
+- SHA-256 checks match all **22** served product artifacts to the fresh `dist/`
+  build, including v8 JS/CSS, legal pages, worker, manifest, icons, local font,
+  sample art, and social preview.
+- `node .factory/live-qa.mjs` — passed. Home, demo, Privacy, Terms, and 404
+  have the expected route status, title, one H1, main landmark, social metadata,
+  no horizontal overflow, and no serious/critical Axe violations. The designed
+  404 naturally logs its requested missing resource; valid routes have no
+  console or page errors. Evidence: `repair-14-artifacts/live-qa.json`.
+- Cold first screen: at 1440 × 900, the sample action is fully visible at
+  y=532.55. At 390 × 844, it is fully visible at y=575.75; all visible header
+  targets are at least 44 px high and routes reflow at 200% text.
+- Live demo completed two groups, reset safely, and downloaded
+  `photo-cull-move-plan-2026-09-01.csv`. Free/demo requests stayed same-origin.
+- Live PWA: controlled `photo-cull-shell-v9` contains 20 entries; after the
+  first visit the demo reloads offline with its banner, review, and decision.
+  No update was waiting when v9 was current.
+- Live checkout contract: the product checkout redirected to a Photo Cull
+  Review Dodo order in USD with `$12.00` item subtotal and total.
+- Live URL verifier passed at
+  `repair-14-artifacts/verify-url-live/verify.json`: HTTPS 200, 638 ms,
+  title/lang/one H1/main, image alternatives, named buttons, and no console
+  errors.
+- Response policy is live: CSP with header-level `frame-ancestors 'none'`,
+  HSTS, `nosniff`, strict referrer policy, Permissions-Policy, COOP, CORP, and
+  `X-Frame-Options`. `app-v8.js` is one-year immutable and `sw.js` is no-store.
+- Lighthouse 13.4.1 mobile: **100 Performance, 100 Accessibility, 100 Best
+  Practices, 100 SEO**; FCP 1.1 s, LCP 1.5 s, TBT 0 ms, CLS 0. Evidence:
+  `repair-14-artifacts/lighthouse-live.json`.
 
 ## Known gaps
 
-None in the repaired product behavior. The Chrome-discovery limitation affects
-only the standalone Axe CLI in this worker; equivalent Axe coverage passes
-through the checked-in Playwright integration.
+None in the repaired product behavior. The standalone Axe CLI could not locate
+a system Chrome binary in this worker, but the checked-in Playwright AxeBuilder
+coverage passed locally and on the live product.
