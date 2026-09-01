@@ -2,7 +2,8 @@
 
 **Release result: PASS.** The blockers in independent verification commit `d0c969051432e0d8813055a358e65ae112748e39` for candidate `36777eaaf3943eccc16b9756d2c44626b9842bc9` are repaired, tested, pushed, and deployed.
 
-- Product repair commit: `700c23fb8e7cac4ce5edc47614b5a3948e10f85d`
+- Product repair commit: `700c23fca0ee65b522803f2a457891ef36b79398`
+- Verification evidence commit: `f9ad60c421b45bfe6fe6a13f1e695912741fc8c5`
 - Live URL: <https://photo-cull-review.sociobot.in/>
 - Demo URL: <https://photo-cull-review.sociobot.in/?demo=1>
 - Deployment: Azure Static Web App `sf-photo-cull-review`, production deployment `29cd4647-4155-4737-ba80-cc07622c5629`
