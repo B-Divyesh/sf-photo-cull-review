@@ -11,6 +11,7 @@ Audited 2026-09-01. Counts treat hyphenated terms, file formats, and prices as o
 | Before anything moves. | 3 | Pass |
 | For households with large or crowded photo archives, compare exact copies and likely bursts before exporting a move plan. | 19 | Pass |
 | Try it with sample data | 5 | Pass |
+| Opens a four-file sample review immediately. | 6 | Pass |
 | Choose your photo folder | 4 | Pass |
 | JPEG, PNG, WebP, GIF, BMP, MP4, MOV, M4V, WebM | 9 | Pass |
 | Photos stay on this device | 5 | Pass |
@@ -36,11 +37,10 @@ Audited 2026-09-01. Counts treat hyphenated terms, file formats, and prices as o
 | US$19 one time | 3 | Pass |
 | Buy archive pass | 3 | Pass |
 | Restore a license | 3 | Pass |
-| Private by design. | 3 | Pass |
-| No photos leave this browser. | 5 | Pass |
+| Local photo review before anything moves. | 6 | Pass |
 | Privacy | 1 | Pass |
 | Terms | 1 | Pass |
-| Original generated archive illustration | 4 | Pass |
+| Original generated archive illustration · Built by Param Factory · v1.0.4 | 9 | Pass |
 | Close license dialog | 3 | Pass |
 | One-time unlock | 2 | Pass — literal license action |
 | Scan folders of any size for US$19 once. | 8 | Pass |

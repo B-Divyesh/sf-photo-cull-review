@@ -1,4 +1,5 @@
 import { hammingDistance, hashFile } from './hash';
+import { readCaptureTimestamp } from './capture-time';
 import type { MediaAsset, ReviewGroup } from './types';
 
 const SUPPORTED_IMAGES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/bmp']);
@@ -13,17 +14,23 @@ export interface ScanResult {
   rootName: string;
 }
 
-export async function scanFiles(
-  incoming: File[],
-  paid: boolean,
-  onProgress: (complete: number, total: number, name: string) => void,
-): Promise<ScanResult> {
+/** Select supported input and enforce the free boundary before any file read. */
+export function selectMediaFiles(incoming: File[], paid: boolean): { media: File[]; skipped: number } {
   const media = incoming.filter((file) => SUPPORTED_IMAGES.has(file.type) || SUPPORTED_VIDEOS.has(file.type));
   const skipped = incoming.length - media.length;
   if (!media.length) throw new Error('No supported photos or videos were found. Choose a folder containing JPEG, PNG, WebP, GIF, BMP, MP4, MOV, M4V, or WebM files.');
   if (!paid && media.length > FREE_FILE_LIMIT) {
     throw new Error(`This folder contains ${media.length.toLocaleString()} supported files. The free archive desk scans up to ${FREE_FILE_LIMIT}; choose a smaller folder or unlock unlimited scans.`);
   }
+  return { media, skipped };
+}
+
+export async function scanFiles(
+  incoming: File[],
+  paid: boolean,
+  onProgress: (complete: number, total: number, name: string) => void,
+): Promise<ScanResult> {
+  const { media, skipped } = selectMediaFiles(incoming, paid);
 
   const assets: MediaAsset[] = [];
   const failures: string[] = [];
@@ -35,6 +42,7 @@ export async function scanFiles(
       const path = file.webkitRelativePath || file.name;
       const isImage = SUPPORTED_IMAGES.has(file.type);
       const sha256 = await hashFile(file);
+      const captureTimestamp = isImage ? await readCaptureTimestamp(file) : undefined;
       let visual: Pick<MediaAsset, 'thumbnail' | 'perceptualHash'> = {};
       if (isImage) {
         try { visual = await readVisual(file); }
@@ -48,6 +56,7 @@ export async function scanFiles(
         mime: file.type,
         size: file.size,
         lastModified: file.lastModified,
+        ...(captureTimestamp === undefined ? {} : { captureTimestamp }),
         sha256,
         ...visual,
         decision: 'undecided',
@@ -89,8 +98,8 @@ export function buildGroups(assets: MediaAsset[]): ReviewGroup[] {
   }
 
   const candidates = assets
-    .filter((asset) => asset.mediaType === 'image' && asset.perceptualHash && !exactIds.has(asset.id))
-    .sort((a, b) => a.lastModified - b.lastModified);
+    .filter((asset) => asset.mediaType === 'image' && asset.perceptualHash && asset.captureTimestamp !== undefined && !exactIds.has(asset.id))
+    .sort((a, b) => (a.captureTimestamp ?? 0) - (b.captureTimestamp ?? 0));
   const parent = candidates.map((_, index) => index);
   const find = (value: number): number => parent[value] === value ? value : (parent[value] = find(parent[value] ?? value));
   const union = (a: number, b: number): void => { const ra = find(a); const rb = find(b); if (ra !== rb) parent[rb] = ra; };
@@ -100,7 +109,7 @@ export function buildGroups(assets: MediaAsset[]): ReviewGroup[] {
     for (let j = i + 1; j < Math.min(candidates.length, i + 12); j += 1) {
       const second = candidates[j];
       if (!second?.perceptualHash) continue;
-      const elapsed = Math.abs(first.lastModified - second.lastModified);
+      const elapsed = Math.abs((first.captureTimestamp ?? 0) - (second.captureTimestamp ?? 0));
       if (elapsed > 30_000) break;
       if (hammingDistance(first.perceptualHash, second.perceptualHash) <= 10) union(i, j);
     }
@@ -117,7 +126,7 @@ export function buildGroups(assets: MediaAsset[]): ReviewGroup[] {
       id: `similar-${matches[0]?.id ?? groups.length}`,
       kind: 'similar',
       assetIds: matches.map((asset) => asset.id),
-      explanation: 'Made within 30 seconds and visually close by a 64-bit difference hash. This suggests a burst—it does not prove the photos are duplicates.',
+      explanation: 'Captured within 30 seconds according to embedded camera metadata and visually close by a 64-bit difference hash. This suggests a burst—it does not prove the photos are duplicates.',
     });
   }
   return groups.sort((a, b) => a.kind.localeCompare(b.kind));

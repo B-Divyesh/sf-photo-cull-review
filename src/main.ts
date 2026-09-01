@@ -54,15 +54,17 @@ function render(): void {
         <img src="/icons/icon.svg" alt="" width="34" height="34"><span>Photo Cull Review</span>
       </a>
       <nav aria-label="Primary">
+        <a href="/?demo=1">Demo</a>
+        <a href="/#how-it-works">How it works</a>
+        <a href="/privacy/">Privacy</a>
         <button class="text-button" data-action="open-license">${paid ? 'Archive pass active' : 'Archive pass'}</button>
-        ${data.scan ? '<button class="text-button" data-action="reset">New scan</button>' : ''}
       </nav>
     </header>
     ${busy ? loadingView() : data.scan ? workspaceView() : welcomeView()}
     <footer class="site-footer">
-      <p>Private by design. No photos leave this browser.</p>
+      <p>Local photo review before anything moves.</p>
       <nav aria-label="Legal"><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a></nav>
-      <p class="provenance">Original generated archive illustration · v1.0.3 · © 2026 Sociobot</p>
+      <p class="provenance">Original generated archive illustration · Built by Param Factory · v1.0.4</p>
     </footer>
     <div class="toast" role="status" aria-live="polite" aria-atomic="true" hidden></div>
     ${licenseDialog()}
@@ -83,8 +85,9 @@ function welcomeView(): string {
         <p class="lede">For households with large or crowded photo archives, compare exact copies and likely bursts before exporting a move plan.</p>
         <div class="hero-actions">
           <a class="button primary" href="/?demo=1">Try it with sample data</a>
+          <span class="button-note">Opens a four-file sample review immediately.</span>
           <button class="button secondary" data-action="choose-folder">Choose your photo folder</button>
-          <span class="button-note">JPEG, PNG, WebP, GIF, BMP, MP4, MOV, M4V, WebM</span>
+          <span class="format-note">JPEG, PNG, WebP, GIF, BMP, MP4, MOV, M4V, WebM</span>
         </div>
         <input class="visually-hidden" id="folder-input" type="file" aria-label="Choose a photo folder" multiple webkitdirectory accept="image/jpeg,image/png,image/webp,image/gif,image/bmp,video/mp4,video/quicktime,video/webm,video/x-m4v">
         <ul class="trust-facts" aria-label="Product facts"><li>Photos stay on this device</li><li>Works offline after the first visit</li><li>Free for up to ${FREE_FILE_LIMIT} files</li></ul>
@@ -95,7 +98,7 @@ function welcomeView(): string {
         <figcaption>Every frame stays where it is. The red thread is only a review plan.</figcaption>
       </figure>
     </section>
-    <section class="method" aria-labelledby="method-title">
+    <section id="how-it-works" class="method" aria-labelledby="method-title">
       <p class="eyebrow">The cautious path</p><h2 id="method-title">Evidence, then judgment, then a plan.</h2>
       <ol class="method-list">
         <li><span>01</span><h3>Index locally</h3><p>Complete SHA-256 hashes find exact files. A small visual hash suggests nearby burst frames.</p></li>
@@ -103,7 +106,7 @@ function welcomeView(): string {
         <li><span>03</span><h3>Export, don’t delete</h3><p>Download a CSV move manifest for a separate review folder. Your source archive remains untouched.</p></li>
       </ol>
     </section>
-    <section class="pricing" aria-labelledby="price-title">
+    <section id="archive-pass" class="pricing" aria-labelledby="price-title">
       <div><p class="eyebrow">For the big archive</p><h2 id="price-title">Archive pass</h2><p>Free for folders up to ${FREE_FILE_LIMIT} supported files. A one-time US$19 pass unlocks unlimited scans and stays useful every cleanup season.</p></div>
       <div class="price-action"><strong>US$19 <small>one time</small></strong><a class="button secondary" href="${checkoutUrl()}">Buy archive pass</a><button class="text-button" data-action="open-license">Restore a license</button></div>
     </section>
@@ -120,6 +123,7 @@ function workspaceView(): string {
     <section class="workspace-head">
       <div><p class="eyebrow">${escapeHtml(data.scan?.rootName ?? 'Local folder')} · ${formatDate(data.scan?.scannedAt)}</p><h1 tabindex="-1">Your review desk</h1><p>${data.scan?.scanned.toLocaleString()} files indexed locally. ${data.groups.length ? `${data.groups.length} candidate groups need a human decision.` : 'No duplicate or burst groups were found.'}</p></div>
       <div class="head-actions">
+        <button class="text-button" data-action="reset">New scan</button>
         <button class="button secondary" data-action="export-csv">Export move manifest</button>
         <button class="text-button" data-action="export-json">Back up workspace</button>
         <button class="text-button import-label" data-action="choose-import">Restore workspace</button><input class="visually-hidden" id="import-input" type="file" aria-label="Choose a workspace backup" accept="application/json">
@@ -137,7 +141,7 @@ function workspaceView(): string {
 }
 
 function noCandidatesView(): string {
-  return `<section class="empty-state"><div class="empty-mark" aria-hidden="true">✓</div><p class="eyebrow">Scan complete</p><h2>No candidates to review</h2><p>No exact duplicates or close-together similar images were found. Nothing has been moved or changed.</p><button class="button primary" data-action="reset">Scan another folder</button></section>`;
+  return `<section class="empty-state"><div class="empty-mark" aria-hidden="true">✓</div><p class="eyebrow">Scan complete</p><h2>No candidates to review</h2><p>No exact copies or visually close photos with embedded camera capture time were found. Nothing has been moved or changed.</p><button class="button primary" data-action="reset">Scan another folder</button></section>`;
 }
 
 function completedView(reviewCount: number): string {
@@ -174,7 +178,7 @@ function groupView(group: ReviewGroup, reviewCount: number): string {
 function assetView(asset: MediaAsset, index: number): string {
   return `<article class="asset ${asset.decision}" data-asset="${asset.id}">
     <div class="asset-image">${asset.thumbnail ? `<img src="${asset.thumbnail}" alt="Preview of ${escapeHtml(asset.name)}" width="320" height="220">` : `<div class="video-placeholder" role="img" aria-label="No preview available for ${escapeHtml(asset.name)}"><span>${asset.mediaType === 'video' ? '▶' : '◇'}</span><small>${asset.mediaType === 'video' ? 'Video' : 'Preview unavailable'}</small></div>`}<span class="asset-number">${index + 1}</span></div>
-    <div class="asset-meta"><h3 title="${escapeHtml(asset.path)}">${escapeHtml(asset.name)}</h3><p>${formatBytes(asset.size)} · ${formatDate(asset.lastModified, true)}</p><p class="path">${escapeHtml(asset.path)}</p></div>
+    <div class="asset-meta"><h3 title="${escapeHtml(asset.path)}">${escapeHtml(asset.name)}</h3><p>${formatBytes(asset.size)} · ${asset.captureTimestamp !== undefined ? `Captured ${formatDate(asset.captureTimestamp, true)}` : 'No embedded capture time'}</p><p class="path">${escapeHtml(asset.path)}</p></div>
     <fieldset><legend>Decision for ${escapeHtml(asset.name)}</legend>
       <button class="decision keep ${asset.decision === 'keep' ? 'selected' : ''}" data-decision="keep" data-id="${asset.id}" aria-pressed="${asset.decision === 'keep'}"><span aria-hidden="true">✓</span> Keep</button>
       <button class="decision review ${asset.decision === 'review' ? 'selected' : ''}" data-decision="review" data-id="${asset.id}" aria-pressed="${asset.decision === 'review'}"><span aria-hidden="true">↗</span> Move to review</button>
@@ -442,6 +446,7 @@ function isMediaAsset(value: unknown): value is MediaAsset {
     && (value.decision === 'undecided' || value.decision === 'keep' || value.decision === 'review')
     && typeof value.size === 'number' && Number.isFinite(value.size) && value.size >= 0
     && typeof value.lastModified === 'number' && Number.isFinite(value.lastModified)
+    && (value.captureTimestamp === undefined || typeof value.captureTimestamp === 'number' && Number.isFinite(value.captureTimestamp))
     && (value.perceptualHash === undefined || typeof value.perceptualHash === 'string')
     && (value.thumbnail === undefined || typeof value.thumbnail === 'string');
 }
@@ -476,17 +481,17 @@ function download(name: string, contents: string, type: string): void { const ur
 function createDemoData(): AppData {
   const captured = Date.UTC(2025, 6, 19, 15, 42);
   const assets: MediaAsset[] = [
-    { id: 'demo-picnic-1', name: 'IMG_2041.jpg', path: 'Family Picnic/IMG_2041.jpg', mediaType: 'image', mime: 'image/jpeg', size: 4_281_004, lastModified: captured, sha256: '8ca4d5901f13e8cbdd47efc129e6599ea2ca8f1c4fae4d4bea85fb99d03fc459', thumbnail: '/samples/picnic-wide.svg', decision: 'undecided' },
-    { id: 'demo-picnic-copy', name: 'IMG_2041 copy.jpg', path: 'Family Picnic/Phone imports/IMG_2041 copy.jpg', mediaType: 'image', mime: 'image/jpeg', size: 4_281_004, lastModified: captured + 2_000, sha256: '8ca4d5901f13e8cbdd47efc129e6599ea2ca8f1c4fae4d4bea85fb99d03fc459', thumbnail: '/samples/picnic-wide.svg', decision: 'undecided' },
-    { id: 'demo-sparklers-1', name: 'DSC_7718.jpg', path: 'Summer Evening/DSC_7718.jpg', mediaType: 'image', mime: 'image/jpeg', size: 6_104_322, lastModified: captured + 8_000, sha256: 'bc11c3832ddf35a026c7b46f62c1b3a4284746d41eb3012151c9a0bed70bf491', perceptualHash: '003e7c7c7e3c1800', thumbnail: '/samples/sparklers-close.svg', decision: 'undecided' },
-    { id: 'demo-sparklers-2', name: 'DSC_7719.jpg', path: 'Summer Evening/DSC_7719.jpg', mediaType: 'image', mime: 'image/jpeg', size: 6_220_815, lastModified: captured + 11_000, sha256: 'ff11b36933275c4eb041120d6c41722c225b99b5c2805d6281e5183aecdd5d2f', perceptualHash: '003e7c7e7e3c1800', thumbnail: '/samples/sparklers-wide.svg', decision: 'undecided' },
+    { id: 'demo-picnic-1', name: 'IMG_2041.jpg', path: 'Family Picnic/IMG_2041.jpg', mediaType: 'image', mime: 'image/jpeg', size: 4_281_004, lastModified: captured, captureTimestamp: captured, sha256: '8ca4d5901f13e8cbdd47efc129e6599ea2ca8f1c4fae4d4bea85fb99d03fc459', thumbnail: '/samples/picnic-wide.svg', decision: 'undecided' },
+    { id: 'demo-picnic-copy', name: 'IMG_2041 copy.jpg', path: 'Family Picnic/Phone imports/IMG_2041 copy.jpg', mediaType: 'image', mime: 'image/jpeg', size: 4_281_004, lastModified: captured + 2_000, captureTimestamp: captured, sha256: '8ca4d5901f13e8cbdd47efc129e6599ea2ca8f1c4fae4d4bea85fb99d03fc459', thumbnail: '/samples/picnic-wide.svg', decision: 'undecided' },
+    { id: 'demo-sparklers-1', name: 'DSC_7718.jpg', path: 'Summer Evening/DSC_7718.jpg', mediaType: 'image', mime: 'image/jpeg', size: 6_104_322, lastModified: captured + 8_000, captureTimestamp: captured + 8_000, sha256: 'bc11c3832ddf35a026c7b46f62c1b3a4284746d41eb3012151c9a0bed70bf491', perceptualHash: '003e7c7c7e3c1800', thumbnail: '/samples/sparklers-close.svg', decision: 'undecided' },
+    { id: 'demo-sparklers-2', name: 'DSC_7719.jpg', path: 'Summer Evening/DSC_7719.jpg', mediaType: 'image', mime: 'image/jpeg', size: 6_220_815, lastModified: captured + 11_000, captureTimestamp: captured + 11_000, sha256: 'ff11b36933275c4eb041120d6c41722c225b99b5c2805d6281e5183aecdd5d2f', perceptualHash: '003e7c7e7e3c1800', thumbnail: '/samples/sparklers-wide.svg', decision: 'undecided' },
   ];
   return {
     version: 1,
     assets,
     groups: [
       { id: 'demo-exact', kind: 'exact', assetIds: ['demo-picnic-1', 'demo-picnic-copy'], explanation: 'Same file size and complete SHA-256 hash (8ca4d5901f…). These files are byte-for-byte identical.' },
-      { id: 'demo-similar', kind: 'similar', assetIds: ['demo-sparklers-1', 'demo-sparklers-2'], explanation: 'Made within 3 seconds and visually close by a 64-bit difference hash. This suggests a burst—it does not prove the photos are duplicates.' },
+      { id: 'demo-similar', kind: 'similar', assetIds: ['demo-sparklers-1', 'demo-sparklers-2'], explanation: 'Captured within 3 seconds according to embedded camera metadata and visually close by a 64-bit difference hash. This suggests a burst—it does not prove the photos are duplicates.' },
     ],
     scan: { scanned: 4, skipped: 0, scannedAt: captured, rootName: 'Sample family archive' },
     activeGroup: 0,

@@ -9,10 +9,10 @@ Try the isolated sample at <https://photo-cull-review.sociobot.in/?demo=1>. It o
 ## What it does
 
 - Streams complete files through local SHA-256 hashing to find exact copies without loading a large video whole into memory.
-- Uses a small visual difference hash plus capture-time proximity to suggest burst candidates. Suggestions are clearly distinguished from proof.
+- Uses a small visual difference hash plus embedded JPEG camera capture time to suggest burst candidates. It never guesses capture time from file modification dates.
 - Stores thumbnails, hashes, candidate groups, and decisions in IndexedDB so the review survives refreshes and works offline.
 - Exports a CSV move plan and a restorable JSON workspace backup. Exporting is never paywalled.
-- Offers a useful free tier for folders up to 750 supported files; a one-time Archive pass unlocks unlimited scans through the Sociobot billing API.
+- Offers a useful free tier for folders up to 750 supported files; a one-time US$19 Archive pass lets a licensed user scan larger folders.
 
 Supported inputs are JPEG, PNG, WebP, GIF, BMP, MP4, MOV, M4V, and WebM. Images get local previews; videos participate in exact matching without preview decoding.
 
@@ -41,7 +41,7 @@ The billing URL defaults to the production Sociobot API. Factory staging may set
 
 ## Privacy and safety model
 
-All photo data stays in browser storage. The only network request made by the app is license verification when a user supplies a license. A manifest is an instruction sheet, not an executable deletion script. Users should review it and keep an independent backup before moving media.
+All photo data stays in browser storage. Free review sends no cross-origin requests. With a supplied license token, verification is the app’s only cross-origin runtime request. A manifest is an instruction sheet, not an executable deletion script. Users should review it and keep an independent backup before moving media.
 
 See [the product brief](.factory/brief.json), [visual system](.factory/design.md), [privacy policy](public/privacy/index.html), and [terms](public/terms/index.html).
 

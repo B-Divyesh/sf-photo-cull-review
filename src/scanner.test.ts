@@ -1,9 +1,32 @@
 import { describe, expect, it } from 'vitest';
-import { buildGroups, scanFiles } from './scanner';
+import { buildGroups, scanFiles, selectMediaFiles } from './scanner';
 import type { MediaAsset } from './types';
 
-function asset(id: string, sha256: string, perceptualHash?: string, lastModified = 0): MediaAsset {
-  return { id, name: `${id}.jpg`, path: `roll/${id}.jpg`, mediaType: 'image', mime: 'image/jpeg', size: 100, lastModified, sha256, perceptualHash, decision: 'undecided' };
+function asset(id: string, sha256: string, perceptualHash?: string, lastModified = 0, captureTimestamp?: number): MediaAsset {
+  return { id, name: `${id}.jpg`, path: `roll/${id}.jpg`, mediaType: 'image', mime: 'image/jpeg', size: 100, lastModified, captureTimestamp, sha256, perceptualHash, decision: 'undecided' };
+}
+
+function streamedVideo(name: string, chunks: string[]): File {
+  const encoder = new TextEncoder();
+  const encoded = chunks.map((chunk) => encoder.encode(chunk));
+  return {
+    name,
+    type: 'video/mp4',
+    size: encoded.reduce((total, chunk) => total + chunk.byteLength, 0),
+    lastModified: 1,
+    webkitRelativePath: `Videos/${name}`,
+    arrayBuffer: async () => { throw new Error('A video should not be loaded as one buffer.'); },
+    stream: () => {
+      let index = 0;
+      return new ReadableStream<Uint8Array>({
+        pull(controller) {
+          const chunk = encoded[index++];
+          if (chunk) controller.enqueue(chunk);
+          else controller.close();
+        },
+      });
+    },
+  } as unknown as File;
 }
 
 describe('candidate grouping', () => {
@@ -16,19 +39,50 @@ describe('candidate grouping', () => {
 
   it('@claim:similar-suggestions only suggests similar photos taken close together', () => {
     const groups = buildGroups([
-      asset('a', 'one', '0000000000000000', 1_000),
-      asset('b', 'two', '000000000000000f', 2_000),
-      asset('c', 'three', '000000000000000f', 90_000),
+      asset('a', 'one', '0000000000000000', 1_000, 1_000),
+      asset('b', 'two', '000000000000000f', 2_000, 2_000),
+      asset('c', 'three', '000000000000000f', 90_000, 90_000),
     ]);
     expect(groups).toHaveLength(1);
     expect(groups[0]?.kind).toBe('similar');
     expect(groups[0]?.assetIds).toEqual(['a', 'b']);
   });
 
-  it('@claim:free-limit accepts 750 supported files and rejects 751 before scanning', async () => {
+  it('@regression:capture-time ignores file modification time for burst timing', () => {
+    const visuallyCloseButCapturedFiveMinutesApart = buildGroups([
+      asset('a', 'one', '0000000000000000', 1_000, 1_000),
+      asset('b', 'two', '000000000000000f', 2_000, 301_000),
+    ]);
+    expect(visuallyCloseButCapturedFiveMinutesApart).toEqual([]);
+
+    const capturedSecondsApartAfterFilesWereCopiedLater = buildGroups([
+      asset('c', 'three', '0000000000000000', 1_000, 1_000),
+      asset('d', 'four', '000000000000000f', 301_000, 2_000),
+    ]);
+    expect(capturedSecondsApartAfterFilesWereCopiedLater).toHaveLength(1);
+    expect(capturedSecondsApartAfterFilesWereCopiedLater[0]?.explanation).toContain('embedded camera metadata');
+  });
+
+  it('@claim:free-limit accepts 750 supported files and rejects 751 before scanning', () => {
     const files = Array.from({ length: 751 }, (_, index) => new File([String(index)], `clip-${index}.mp4`, { type: 'video/mp4' }));
-    const accepted = await scanFiles(files.slice(0, 750), false, () => undefined);
-    expect(accepted.assets).toHaveLength(750);
-    await expect(scanFiles(files, false, () => undefined)).rejects.toThrow('free archive desk scans up to 750');
+    expect(selectMediaFiles(files.slice(0, 750), false).media).toHaveLength(750);
+    expect(() => selectMediaFiles(files, false)).toThrow('free archive desk scans up to 750');
+  });
+
+  it('@claim:archive-pass-unlimited accepts folders above the free limit before any file read', () => {
+    const files = Array.from({ length: 751 }, (_, index) => new File([String(index)], `clip-${index}.mp4`, { type: 'video/mp4' }));
+    expect(selectMediaFiles(files, true).media).toHaveLength(751);
+  });
+
+  it('@claim:video-streaming hashes videos as streams for exact matching without preview decoding', async () => {
+    const result = await scanFiles([
+      streamedVideo('clip-a.mp4', ['frame-', 'bytes']),
+      streamedVideo('clip-b.mp4', ['frame-', 'bytes']),
+    ], true, () => undefined);
+
+    expect(result.groups).toHaveLength(1);
+    expect(result.groups[0]).toMatchObject({ kind: 'exact' });
+    expect(result.groups[0]?.assetIds).toHaveLength(2);
+    expect(result.assets.every((item) => item.thumbnail === undefined && item.perceptualHash === undefined)).toBe(true);
   });
 });

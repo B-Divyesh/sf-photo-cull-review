@@ -8,6 +8,12 @@ export interface MediaAsset {
   mime: string;
   size: number;
   lastModified: number;
+  /**
+   * Camera capture time read from embedded image metadata. It is deliberately
+   * separate from the browser's file-system modification time: copied files
+   * commonly receive a new modification time.
+   */
+  captureTimestamp?: number;
   sha256: string;
   perceptualHash?: string;
   thumbnail?: string;

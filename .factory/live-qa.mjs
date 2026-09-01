@@ -194,7 +194,7 @@ for (const path of ['/', '/?demo=1', '/privacy/', '/terms/', '/missing-verificat
 }
 
 {
-  const paths = ['/', '/assets/app-v4.js', '/assets/app-v4.css', '/sw.js', '/manifest.webmanifest', '/missing-verification-route'];
+  const paths = ['/', '/assets/app-v5.js', '/assets/app-v5.css', '/sw.js', '/manifest.webmanifest', '/missing-verification-route'];
   result.responses = {};
   for (const path of paths) {
     const response = await fetch(`${base}${path}`, { redirect: 'manual' });

@@ -54,5 +54,33 @@
     "where": "pricing, license dialog, README, terms",
     "test": "npm test -- --testNamePattern @claim:free-limit",
     "sandbox": "750 and 751 in-memory supported video files; assert boundary behavior without network or real media"
+  },
+  {
+    "id": "workspace-backup",
+    "claim": "Exports and restores a JSON workspace backup in the browser.",
+    "where": "review workspace, README, privacy",
+    "test": "npm run test:e2e -- --grep @claim:workspace-backup",
+    "sandbox": "fresh browser context; decide on shipped duplicate fixtures; download a backup; start a new scan; restore the downloaded backup; assert the decision returns"
+  },
+  {
+    "id": "archive-pass-unlimited",
+    "claim": "A one-time US$19 Archive pass lets a licensed user scan folders above the 750-file free limit.",
+    "where": "landing pricing, license dialog, README, terms",
+    "test": "npm test -- --testNamePattern @claim:archive-pass-unlimited",
+    "sandbox": "751 in-memory supported video files; assert the validated-paid path accepts all files before any file read"
+  },
+  {
+    "id": "video-streaming",
+    "claim": "Hashes videos as streams for exact-copy matching without generating video previews.",
+    "where": "README",
+    "test": "npm test -- --testNamePattern @claim:video-streaming",
+    "sandbox": "two stream-only video file doubles whose arrayBuffer throws; assert an exact group and no thumbnail or visual hash"
+  },
+  {
+    "id": "license-verification-request",
+    "claim": "With a supplied license token, verification is the app's only cross-origin runtime request.",
+    "where": "README, privacy",
+    "test": "npm run test:e2e -- --grep @claim:license-verification-request",
+    "sandbox": "fresh browser context; route the billing verification fixture; record requests; assert the sole cross-origin URL is the verify endpoint"
   }
 ]
