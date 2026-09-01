@@ -206,6 +206,29 @@ test('@claim:offline-reload the installed shell reopens offline', async ({ brows
   }
 });
 
+test('a newly installed worker announces the available update', async ({ page }) => {
+  await page.addInitScript(() => {
+    const worker = new EventTarget() as EventTarget & { state: string };
+    worker.state = 'installing';
+    const registration = new EventTarget() as EventTarget & { installing: typeof worker };
+    registration.installing = worker;
+    Object.defineProperty(navigator, 'serviceWorker', {
+      configurable: true,
+      value: { controller: {}, register: async () => registration },
+    });
+    (window as typeof window & { triggerWorkerUpdate?: () => void }).triggerWorkerUpdate = () => {
+      registration.dispatchEvent(new Event('updatefound'));
+      worker.state = 'installed';
+      worker.dispatchEvent(new Event('statechange'));
+    };
+  });
+  await page.goto('/');
+  await page.getByRole('heading', { level: 1 }).waitFor();
+  await expect.poll(() => page.evaluate(() => typeof (window as typeof window & { triggerWorkerUpdate?: () => void }).triggerWorkerUpdate)).toBe('function');
+  await page.evaluate(() => (window as typeof window & { triggerWorkerUpdate: () => void }).triggerWorkerUpdate());
+  await expect(page.getByRole('status')).toContainText('An update is ready. Reload to use it.');
+});
+
 test('@claim:local-only free demo review sends no cross-origin requests', async ({ page }) => {
   const origins = new Set<string>();
   page.on('request', (request) => origins.add(new URL(request.url()).origin));

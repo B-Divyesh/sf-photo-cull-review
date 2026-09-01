@@ -128,9 +128,43 @@ result.textReflow = {};
   await page.route(verifyUrl, (route) => route.abort('failed'));
   await page.goto(`${base}/?license=qa-repair-4-unavailable`);
   await page.locator('.license-notice').waitFor();
+  await page.locator('#folder-input').evaluate((element) => {
+    const transfer = new DataTransfer();
+    for (let index = 0; index < 751; index += 1) {
+      const file = new File(['x'], `clip-${index}.mp4`, { type: 'video/mp4' });
+      Object.defineProperty(file, 'webkitRelativePath', { value: `Archive/clip-${index}.mp4` });
+      transfer.items.add(file);
+    }
+    Object.defineProperty(element, 'files', { configurable: true, value: transfer.files });
+    element.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+  await page.getByRole('alert').waitFor();
   result.unavailableLicense = await page.evaluate(() => ({
     url: location.href,
     verdict: localStorage.getItem('sb_license:photo-cull-review:verdict'),
+    active: [...document.querySelectorAll('button')].some((button) => button.getAttribute('aria-label') === 'Archive pass active'),
+    notice: document.querySelector('.license-notice')?.textContent?.replace(/\s+/g, ' ').trim(),
+    limitMessage: document.querySelector('[role="alert"]')?.textContent?.replace(/\s+/g, ' ').trim(),
+    scanStarted: Boolean(document.querySelector('.scan-count')),
+  }));
+  await context.close();
+}
+
+{
+  const context = await browser.newContext();
+  await context.addInitScript(() => {
+    localStorage.setItem('sb_license:photo-cull-review', 'qa-repair-4-cached');
+    localStorage.setItem('sb_license:photo-cull-review:verdict', JSON.stringify({
+      valid: true,
+      reason: 'ok',
+      checkedAt: Date.now() - 86_400_001,
+    }));
+  });
+  const page = await context.newPage();
+  await page.route('https://api.sociobot.in/api/v1/products/photo-cull-review/verify?license=qa-repair-4-cached', (route) => route.abort('failed'));
+  await page.goto(base);
+  await page.locator('.license-notice').waitFor();
+  result.cachedLicenseFallback = await page.evaluate(() => ({
     active: [...document.querySelectorAll('button')].some((button) => button.getAttribute('aria-label') === 'Archive pass active'),
     notice: document.querySelector('.license-notice')?.textContent?.replace(/\s+/g, ' ').trim(),
   }));

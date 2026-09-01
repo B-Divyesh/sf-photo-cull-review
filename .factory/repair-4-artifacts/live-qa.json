@@ -1,0 +1,393 @@
+{
+  "routes": {
+    "/": {
+      "status": 200,
+      "title": "Photo Cull Review — plan duplicate photo moves",
+      "lang": "en",
+      "h1": [
+        "Clean up duplicate photos.Before anything moves."
+      ],
+      "mainCount": 1,
+      "horizontalOverflow": false,
+      "social": {
+        "canonical": "https://photo-cull-review.sociobot.in/",
+        "ogTitle": "Photo Cull Review — plan duplicate photo moves",
+        "ogDescription": "Review duplicate and burst photos locally, then export a reversible move plan.",
+        "ogUrl": "https://photo-cull-review.sociobot.in/",
+        "ogImage": "https://photo-cull-review.sociobot.in/assets/social-preview.jpg",
+        "twitterCard": "summary_large_image",
+        "twitterTitle": "Photo Cull Review — plan duplicate photo moves",
+        "twitterDescription": "Review duplicate and burst photos locally, then export a reversible move plan.",
+        "twitterImage": "https://photo-cull-review.sociobot.in/assets/social-preview.jpg"
+      },
+      "seriousCritical": [],
+      "errors": [],
+      "origins": [
+        "https://photo-cull-review.sociobot.in"
+      ]
+    },
+    "/?demo=1": {
+      "status": 200,
+      "title": "Demo — Photo Cull Review",
+      "lang": "en",
+      "h1": [
+        "Your review desk"
+      ],
+      "mainCount": 1,
+      "horizontalOverflow": false,
+      "social": {
+        "canonical": "https://photo-cull-review.sociobot.in/?demo=1",
+        "ogTitle": "Demo — Photo Cull Review",
+        "ogDescription": "Try a four-file duplicate photo review with separate sample data.",
+        "ogUrl": "https://photo-cull-review.sociobot.in/?demo=1",
+        "ogImage": "https://photo-cull-review.sociobot.in/assets/social-preview.jpg",
+        "twitterCard": "summary_large_image",
+        "twitterTitle": "Demo — Photo Cull Review",
+        "twitterDescription": "Try a four-file duplicate photo review with separate sample data.",
+        "twitterImage": "https://photo-cull-review.sociobot.in/assets/social-preview.jpg"
+      },
+      "seriousCritical": [],
+      "errors": [],
+      "origins": [
+        "https://photo-cull-review.sociobot.in"
+      ]
+    },
+    "/privacy/": {
+      "status": 200,
+      "title": "Privacy — Photo Cull Review",
+      "lang": "en",
+      "h1": [
+        "Privacy, in plain language."
+      ],
+      "mainCount": 1,
+      "horizontalOverflow": false,
+      "social": {
+        "canonical": "https://photo-cull-review.sociobot.in/privacy/",
+        "ogTitle": "Privacy — Photo Cull Review",
+        "ogDescription": "How Photo Cull Review stores local media data and handles license checks.",
+        "ogUrl": "https://photo-cull-review.sociobot.in/privacy/",
+        "ogImage": "https://photo-cull-review.sociobot.in/assets/social-preview.jpg",
+        "twitterCard": "summary_large_image",
+        "twitterTitle": "Privacy — Photo Cull Review",
+        "twitterDescription": "How Photo Cull Review stores local media data and handles license checks.",
+        "twitterImage": "https://photo-cull-review.sociobot.in/assets/social-preview.jpg"
+      },
+      "seriousCritical": [],
+      "errors": [],
+      "origins": [
+        "https://photo-cull-review.sociobot.in"
+      ]
+    },
+    "/terms/": {
+      "status": 200,
+      "title": "Terms — Photo Cull Review",
+      "lang": "en",
+      "h1": [
+        "Terms of use."
+      ],
+      "mainCount": 1,
+      "horizontalOverflow": false,
+      "social": {
+        "canonical": "https://photo-cull-review.sociobot.in/terms/",
+        "ogTitle": "Terms — Photo Cull Review",
+        "ogDescription": "Terms for safe local review, exports, and the Photo Cull Review Archive pass.",
+        "ogUrl": "https://photo-cull-review.sociobot.in/terms/",
+        "ogImage": "https://photo-cull-review.sociobot.in/assets/social-preview.jpg",
+        "twitterCard": "summary_large_image",
+        "twitterTitle": "Terms — Photo Cull Review",
+        "twitterDescription": "Terms for safe local review, exports, and the Photo Cull Review Archive pass.",
+        "twitterImage": "https://photo-cull-review.sociobot.in/assets/social-preview.jpg"
+      },
+      "seriousCritical": [],
+      "errors": [],
+      "origins": [
+        "https://photo-cull-review.sociobot.in"
+      ]
+    },
+    "/missing-verification-route": {
+      "status": 404,
+      "title": "Page not found — Photo Cull Review",
+      "lang": "en",
+      "h1": [
+        "Page not found"
+      ],
+      "mainCount": 1,
+      "horizontalOverflow": false,
+      "social": {
+        "canonical": "https://photo-cull-review.sociobot.in/404.html",
+        "ogTitle": "Page not found — Photo Cull Review",
+        "ogDescription": "The requested Photo Cull Review page was not found.",
+        "ogUrl": "https://photo-cull-review.sociobot.in/404.html",
+        "ogImage": "https://photo-cull-review.sociobot.in/assets/social-preview.jpg",
+        "twitterCard": "summary_large_image",
+        "twitterTitle": "Page not found — Photo Cull Review",
+        "twitterDescription": "The requested Photo Cull Review page was not found.",
+        "twitterImage": "https://photo-cull-review.sociobot.in/assets/social-preview.jpg"
+      },
+      "seriousCritical": [],
+      "errors": [
+        "console: Failed to load resource: the server responded with a status of 404 ()"
+      ],
+      "origins": [
+        "https://photo-cull-review.sociobot.in"
+      ]
+    }
+  },
+  "firstReadDesktop": {
+    "heading": "Clean up duplicate photos. Before anything moves.",
+    "audience": "For households with large or crowded photo archives, compare exact copies and likely bursts before exporting a move plan.",
+    "actionText": "Try it with sample data",
+    "actionBox": {
+      "x": 72,
+      "y": 532.546875,
+      "width": 249.671875,
+      "height": 50.796875
+    },
+    "actionFullyInFirstScreen": true
+  },
+  "mobile": {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "horizontalOverflow": false,
+    "actionBox": {
+      "x": 20,
+      "y": 557.15625,
+      "width": 262.65625,
+      "height": 52.34375
+    },
+    "actionFullyInFirstScreen": true,
+    "factsFullyInFirstScreen": true,
+    "targets": [
+      {
+        "name": "Photo Cull Review home",
+        "x": 16,
+        "y": 10,
+        "width": 201.828125,
+        "height": 44,
+        "fontSize": "17px"
+      },
+      {
+        "name": "Demo",
+        "x": 16,
+        "y": 62,
+        "width": 59.796875,
+        "height": 44,
+        "fontSize": "16px"
+      },
+      {
+        "name": "How it works",
+        "x": 83.796875,
+        "y": 62,
+        "width": 47.171875,
+        "height": 44,
+        "fontSize": "16px"
+      },
+      {
+        "name": "Privacy",
+        "x": 138.96875,
+        "y": 62,
+        "width": 74.25,
+        "height": 44,
+        "fontSize": "16px"
+      },
+      {
+        "name": "Archive pass",
+        "x": 221.21875,
+        "y": 62,
+        "width": 75.921875,
+        "height": 44,
+        "fontSize": "16px"
+      }
+    ],
+    "errors": []
+  },
+  "textReflow": {
+    "/": {
+      "clientWidth": 390,
+      "scrollWidth": 390,
+      "reflows": true
+    },
+    "/?demo=1": {
+      "clientWidth": 390,
+      "scrollWidth": 390,
+      "reflows": true
+    },
+    "/privacy/": {
+      "clientWidth": 390,
+      "scrollWidth": 390,
+      "reflows": true
+    },
+    "/terms/": {
+      "clientWidth": 390,
+      "scrollWidth": 390,
+      "reflows": true
+    },
+    "/404.html": {
+      "clientWidth": 390,
+      "scrollWidth": 390,
+      "reflows": true
+    }
+  },
+  "unavailableLicense": {
+    "url": "https://photo-cull-review.sociobot.in/",
+    "verdict": null,
+    "active": false,
+    "notice": "We could not verify this license. Free limits remain active. Check your connection and try again.Buy Archive passRestore a license",
+    "limitMessage": "This folder contains 751 supported files. The free archive desk scans up to 750; choose a smaller folder or unlock unlimited scans.",
+    "scanStarted": false
+  },
+  "cachedLicenseFallback": {
+    "active": true,
+    "notice": "We could not recheck this Archive pass. Its last successful check remains active."
+  },
+  "keyboardAndMotion": {
+    "focused": [
+      {
+        "tag": "A",
+        "text": "Skip to main content",
+        "ariaLabel": null,
+        "outline": "3px solid rgb(169, 50, 40)"
+      },
+      {
+        "tag": "A",
+        "text": "Photo Cull Review",
+        "ariaLabel": "Photo Cull Review home",
+        "outline": "3px solid rgb(169, 50, 40)"
+      },
+      {
+        "tag": "A",
+        "text": "Demo",
+        "ariaLabel": null,
+        "outline": "3px solid rgb(169, 50, 40)"
+      },
+      {
+        "tag": "A",
+        "text": "How it worksHow",
+        "ariaLabel": "How it works",
+        "outline": "3px solid rgb(169, 50, 40)"
+      },
+      {
+        "tag": "A",
+        "text": "Privacy",
+        "ariaLabel": null,
+        "outline": "3px solid rgb(169, 50, 40)"
+      }
+    ],
+    "scrollBehavior": "auto",
+    "heroAnimationName": "none"
+  },
+  "demoFlow": {
+    "bannerBefore": "Demo — sample data, separate from your workspace",
+    "ready": true,
+    "downloadName": "photo-cull-move-manifest-2026-09-01.csv",
+    "csvFirstLines": [
+      "# PLAN ONLY — Photo Cull Review never moved or deleted these files.",
+      "\"source_path\",\"review_path\",\"size_bytes\",\"sha256\",\"group_type\",\"reason\"",
+      "\"Family Picnic/Phone imports/IMG_2041 copy.jpg\",\"_photo-review/Family Picnic/Phone imports/IMG_2041 copy.jpg\",\"4281004\",\"8ca4d5901f13e8cbdd47efc129e6599ea2ca8f1c4fae4d4bea85fb99d03fc459\",\"exact\",\"Same file size and complete SHA-256 hash (8ca4d5901f…). These files are byte-for-byte identical.\"",
+      "\"Summer Evening/DSC_7719.jpg\",\"_photo-review/Summer Evening/DSC_7719.jpg\",\"6220815\",\"ff11b36933275c4eb041120d6c41722c225b99b5c2805d6281e5183aecdd5d2f\",\"similar\",\"Captured within 3 seconds according to embedded camera metadata and visually close by a 64-bit difference hash. This suggests a burst—it does not prove the photos are duplicates.\""
+    ],
+    "origins": [
+      "https://photo-cull-review.sociobot.in"
+    ],
+    "errors": [],
+    "resetKeepPressed": "false"
+  },
+  "invalidRecovery": {
+    "unsupported": "No supported photos or videos were found. Choose a folder containing JPEG, PNG, WebP, GIF, BMP, MP4, MOV, M4V, or WebM files.",
+    "invalidBackup": "That file is not a Photo Cull Review backup. Choose a valid JSON backup exported from Photo Cull Review.",
+    "deskStillVisible": true
+  },
+  "pwa": {
+    "controlled": true,
+    "active": "activated",
+    "waiting": null,
+    "cacheCounts": {
+      "photo-cull-shell-v7": 20
+    },
+    "offlineStatus": "Offline — your saved review is still available on this device.",
+    "demoBannerOffline": true,
+    "headingOffline": true
+  },
+  "responses": {
+    "/": {
+      "status": 200,
+      "contentType": "text/html",
+      "cacheControl": "public, must-revalidate, max-age=30",
+      "csp": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://api.sociobot.in https://pilot-api.sociobot.in; manifest-src 'self'; worker-src 'self'; form-action 'self'",
+      "hsts": "max-age=10886400; includeSubDomains; preload",
+      "xContentTypeOptions": "nosniff",
+      "referrerPolicy": "strict-origin-when-cross-origin",
+      "permissionsPolicy": "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
+      "coop": "same-origin",
+      "corp": "same-origin",
+      "xFrameOptions": "DENY"
+    },
+    "/assets/app-v6.js": {
+      "status": 200,
+      "contentType": "text/javascript",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "csp": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://api.sociobot.in https://pilot-api.sociobot.in; manifest-src 'self'; worker-src 'self'; form-action 'self'",
+      "hsts": "max-age=10886400; includeSubDomains; preload",
+      "xContentTypeOptions": "nosniff",
+      "referrerPolicy": "strict-origin-when-cross-origin",
+      "permissionsPolicy": "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
+      "coop": "same-origin",
+      "corp": "same-origin",
+      "xFrameOptions": "DENY"
+    },
+    "/assets/app-v6.css": {
+      "status": 200,
+      "contentType": "text/css",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "csp": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://api.sociobot.in https://pilot-api.sociobot.in; manifest-src 'self'; worker-src 'self'; form-action 'self'",
+      "hsts": "max-age=10886400; includeSubDomains; preload",
+      "xContentTypeOptions": "nosniff",
+      "referrerPolicy": "strict-origin-when-cross-origin",
+      "permissionsPolicy": "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
+      "coop": "same-origin",
+      "corp": "same-origin",
+      "xFrameOptions": "DENY"
+    },
+    "/sw.js": {
+      "status": 200,
+      "contentType": "text/javascript",
+      "cacheControl": "no-cache, no-store, must-revalidate",
+      "csp": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://api.sociobot.in https://pilot-api.sociobot.in; manifest-src 'self'; worker-src 'self'; form-action 'self'",
+      "hsts": "max-age=10886400; includeSubDomains; preload",
+      "xContentTypeOptions": "nosniff",
+      "referrerPolicy": "strict-origin-when-cross-origin",
+      "permissionsPolicy": "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
+      "coop": "same-origin",
+      "corp": "same-origin",
+      "xFrameOptions": "DENY"
+    },
+    "/manifest.webmanifest": {
+      "status": 200,
+      "contentType": "application/manifest+json",
+      "cacheControl": "public, must-revalidate, max-age=30",
+      "csp": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://api.sociobot.in https://pilot-api.sociobot.in; manifest-src 'self'; worker-src 'self'; form-action 'self'",
+      "hsts": "max-age=10886400; includeSubDomains; preload",
+      "xContentTypeOptions": "nosniff",
+      "referrerPolicy": "strict-origin-when-cross-origin",
+      "permissionsPolicy": "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
+      "coop": "same-origin",
+      "corp": "same-origin",
+      "xFrameOptions": "DENY"
+    },
+    "/missing-verification-route": {
+      "status": 404,
+      "contentType": "text/html",
+      "cacheControl": "public, must-revalidate, max-age=30",
+      "csp": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://api.sociobot.in https://pilot-api.sociobot.in; manifest-src 'self'; worker-src 'self'; form-action 'self'",
+      "hsts": "max-age=10886400; includeSubDomains; preload",
+      "xContentTypeOptions": "nosniff",
+      "referrerPolicy": "strict-origin-when-cross-origin",
+      "permissionsPolicy": "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
+      "coop": "same-origin",
+      "corp": "same-origin",
+      "xFrameOptions": "DENY"
+    }
+  }
+}

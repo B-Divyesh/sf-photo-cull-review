@@ -1,0 +1,184 @@
+{
+  "checkedAt": "2026-09-01T21:25:28.755Z",
+  "matched": 22,
+  "total": 22,
+  "allMatch": true,
+  "files": [
+    {
+      "file": "404.html",
+      "route": "/404.html",
+      "status": 200,
+      "bytes": 2780,
+      "match": true,
+      "sha256": "f4f95aa5b8537c2a05417e9ccca94675bb82d0accb8ede56dfe48465db1f195e"
+    },
+    {
+      "file": "assets/app-v6.css",
+      "route": "/assets/app-v6.css",
+      "status": 200,
+      "bytes": 18633,
+      "match": true,
+      "sha256": "aa9b28c79dc72cb9834e7129680f3706b03754f17e94e184e7285201c3207f9b"
+    },
+    {
+      "file": "assets/app-v6.js",
+      "route": "/assets/app-v6.js",
+      "status": 200,
+      "bytes": 37231,
+      "match": true,
+      "sha256": "503a5816e115ff2b3bd203a2f5c69cfba24dfbe8d44bd814503a72456a7d3c86"
+    },
+    {
+      "file": "assets/archive-room-mobile.webp",
+      "route": "/assets/archive-room-mobile.webp",
+      "status": 200,
+      "bytes": 37170,
+      "match": true,
+      "sha256": "d8506b103f6519a4135cb13ae3c838bfeb99dd91f4c66f0288d1aa7d1fd1c2d4"
+    },
+    {
+      "file": "assets/archive-room.webp",
+      "route": "/assets/archive-room.webp",
+      "status": 200,
+      "bytes": 62082,
+      "match": true,
+      "sha256": "cd722af2a5773095708433417d366d43973455777cb6c761d30c2e1c739bac04"
+    },
+    {
+      "file": "assets/newsreader-latin.woff2",
+      "route": "/assets/newsreader-latin.woff2",
+      "status": 200,
+      "bytes": 56976,
+      "match": true,
+      "sha256": "9509290630ca06f66e66cfdd3a2018a967582f5f962709a281dd961245054fc4"
+    },
+    {
+      "file": "assets/social-preview.jpg",
+      "route": "/assets/social-preview.jpg",
+      "status": 200,
+      "bytes": 113073,
+      "match": true,
+      "sha256": "8bb6fefc7b20a8f95bd58a7569a4760c8ec5dbc017cde23913d09aab0e2ccaa2"
+    },
+    {
+      "file": "icons/icon-192.png",
+      "route": "/icons/icon-192.png",
+      "status": 200,
+      "bytes": 14266,
+      "match": true,
+      "sha256": "8bb4748abcb57c485d1434139dcbd6178205f04cdfaf514776403eda99786fa2"
+    },
+    {
+      "file": "icons/icon-512.png",
+      "route": "/icons/icon-512.png",
+      "status": 200,
+      "bytes": 17395,
+      "match": true,
+      "sha256": "21c221dd9e03afbe464b6f82f38816feff573e3940f837542fbc16900bff1085"
+    },
+    {
+      "file": "icons/icon-maskable-512.png",
+      "route": "/icons/icon-maskable-512.png",
+      "status": 200,
+      "bytes": 17395,
+      "match": true,
+      "sha256": "21c221dd9e03afbe464b6f82f38816feff573e3940f837542fbc16900bff1085"
+    },
+    {
+      "file": "icons/icon.svg",
+      "route": "/icons/icon.svg",
+      "status": 200,
+      "bytes": 463,
+      "match": true,
+      "sha256": "11fbff486f97e38b7496e1ed766aeed3c418b64c040c94ab795fdacf9edcc192"
+    },
+    {
+      "file": "index.html",
+      "route": "/",
+      "status": 200,
+      "bytes": 1866,
+      "match": true,
+      "sha256": "2b9ecdbf8eb5c3c29e17f3f6a3ed29dbdb6387cbf4bc67e4afe0713c958a4e7b"
+    },
+    {
+      "file": "manifest.webmanifest",
+      "route": "/manifest.webmanifest",
+      "status": 200,
+      "bytes": 624,
+      "match": true,
+      "sha256": "cd93bf5b126fc75c379e4d6091d735f6a3a98d7dcf265579ce2462a9b3a735c8"
+    },
+    {
+      "file": "offline.html",
+      "route": "/offline.html",
+      "status": 200,
+      "bytes": 726,
+      "match": true,
+      "sha256": "47a932f0898da71766b5c36f05744eb3b4e9ab039382644a4cfda107f27b18a6"
+    },
+    {
+      "file": "privacy/index.html",
+      "route": "/privacy/",
+      "status": 200,
+      "bytes": 3835,
+      "match": true,
+      "sha256": "3fcdf2c5a8a1577df7008489857e3a757e13bd283e817b14be4b3fdc431cfcfc"
+    },
+    {
+      "file": "robots.txt",
+      "route": "/robots.txt",
+      "status": 200,
+      "bytes": 82,
+      "match": true,
+      "sha256": "1b7ec0b83183951ae872b154dd926eb3b0f110a94d86e90a7647bd9479e55d6a"
+    },
+    {
+      "file": "samples/picnic-wide.svg",
+      "route": "/samples/picnic-wide.svg",
+      "status": 200,
+      "bytes": 852,
+      "match": true,
+      "sha256": "ca98249482d8befae9c84ed54112d6600363f8da6a7455b8a0b89c39526464e3"
+    },
+    {
+      "file": "samples/sparklers-close.svg",
+      "route": "/samples/sparklers-close.svg",
+      "status": 200,
+      "bytes": 821,
+      "match": true,
+      "sha256": "c812c09eb9b80619d971b20396d3dd306267986938707b7817233efdd5ba7bcd"
+    },
+    {
+      "file": "samples/sparklers-wide.svg",
+      "route": "/samples/sparklers-wide.svg",
+      "status": 200,
+      "bytes": 817,
+      "match": true,
+      "sha256": "304323a10ec02405912669f70d5e7741a9a4f1dc4c64a3c30769a69832aa5479"
+    },
+    {
+      "file": "sitemap.xml",
+      "route": "/sitemap.xml",
+      "status": 200,
+      "bytes": 383,
+      "match": true,
+      "sha256": "76f31bbb4ad04f9ab8b6ab5c5230da5d724956b779f93ff7b92892f35ff05a04"
+    },
+    {
+      "file": "sw.js",
+      "route": "/sw.js",
+      "status": 200,
+      "bytes": 1981,
+      "match": true,
+      "sha256": "5d1d475e78a0fc41a45d4d497de982a03d987cbf0965fe87b7ff0197ad01a5d3"
+    },
+    {
+      "file": "terms/index.html",
+      "route": "/terms/",
+      "status": 200,
+      "bytes": 3954,
+      "match": true,
+      "sha256": "019960dcc21aad48dedcd2260647b9f63772ee7827a96f99190b041214d52c79"
+    }
+  ]
+}

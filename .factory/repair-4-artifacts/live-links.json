@@ -1,0 +1,26 @@
+{
+  "checkedAt": "2026-09-01T21:27:36.777Z",
+  "links": [
+    {
+      "url": "https://photo-cull-review.sociobot.in/",
+      "status": 200
+    },
+    {
+      "url": "https://photo-cull-review.sociobot.in/404.html",
+      "status": 200
+    },
+    {
+      "url": "https://photo-cull-review.sociobot.in/?demo=1",
+      "status": 200
+    },
+    {
+      "url": "https://photo-cull-review.sociobot.in/privacy/",
+      "status": 200
+    },
+    {
+      "url": "https://photo-cull-review.sociobot.in/terms/",
+      "status": 200
+    }
+  ],
+  "allSuccessful": true
+}

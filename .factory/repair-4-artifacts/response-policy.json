@@ -1,0 +1,23 @@
+{
+  "checkedAt": "2026-09-01T21:25:48.550Z",
+  "requests": 120,
+  "concurrency": 20,
+  "statuses": {
+    "200": 30,
+    "429": 90
+  },
+  "sampleSuccess": {
+    "status": 200,
+    "retryAfter": null,
+    "cacheControl": "no-store",
+    "allowOrigin": "https://photo-cull-review.sociobot.in",
+    "vary": "origin, access-control-request-method, access-control-request-headers"
+  },
+  "sampleLimited": {
+    "status": 429,
+    "retryAfter": "4",
+    "cacheControl": null,
+    "allowOrigin": "https://photo-cull-review.sociobot.in",
+    "vary": "origin, access-control-request-method, access-control-request-headers"
+  }
+}
