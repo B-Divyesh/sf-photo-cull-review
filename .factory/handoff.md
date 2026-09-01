@@ -4,7 +4,7 @@
 
 - Product repair: `8deb9c67f5686696c113cbbe53aceabe62c01c05`
 - Accessibility regression coverage: `287e082450f7a04296e1183747f7e7d51e3a20e6`
-- Deployment commit: recorded after the static-host push below.
+- Deployment handoff commit: `0b00a3f0fdc8ede923d2bff4f3605941c0e1ff6f`, pushed to `origin/main` on 2026-09-01 UTC.
 - Demo: `/?demo=1` — isolated IndexedDB database `photo-cull-review-demo`.
 
 ## What changed
@@ -48,7 +48,7 @@ npm run test:e2e
 npm run preview
 ```
 
-Deploy `dist/` using the included `staticwebapp.config.json`; its root contains `index.html`. The static-host deployment and live SHA/headers verification are performed after pushing `main`.
+Deploy `dist/` using the included `staticwebapp.config.json`; its root contains `index.html`. The scoped branch push is complete. At the last live check, `https://photo-cull-review.sociobot.in/` still served the prior `app-v4.js` artifact, so factory rollout and post-rollout live SHA/header verification remain pending. The repository contract prohibits this worker from invoking the shared Azure/DNS deployment helper because it reads deployment secrets and modifies factory-owned infrastructure.
 
 ## Known product boundary
 
