@@ -18,6 +18,7 @@ let globalError = '';
 let licenseNotice = '';
 let toastTimer = 0;
 const INVALID_BACKUP_MESSAGE = 'That file is not a Photo Cull Review backup. Choose a valid JSON backup exported from Photo Cull Review.';
+const ROUTE_FOCUS_KEY = 'photo-cull-review:route-focus';
 
 void init();
 
@@ -38,6 +39,7 @@ async function init(): Promise<void> {
   busy = false;
   render();
   bindGlobalEvents();
+  focusRouteHeadingIfNeeded();
   if (!demoMode && hasStoredLicense()) {
     const verification = await verifyLicense();
     paid = verification.valid;
@@ -66,7 +68,7 @@ function render(): void {
         <a href="/?demo=1">Demo</a>
         <a href="/#how-it-works" aria-label="How it works"><span class="wide-label">How it works</span><span class="compact-label">How</span></a>
         <a href="/privacy/">Privacy</a>
-        <button class="text-button" data-action="open-license" aria-label="${paid ? 'Archive pass active' : 'Archive pass'}"><span class="wide-label">${paid ? 'Archive pass active' : 'Archive pass'}</span><span class="compact-label">${paid ? 'Pass active' : 'Archive'}</span></button>
+        <button class="text-button" data-action="open-license" aria-label="${paid ? 'Archive pass active' : 'View Archive pass'}"><span class="wide-label">${paid ? 'Archive pass active' : 'View Archive pass'}</span><span class="compact-label">${paid ? 'Pass active' : 'Pass'}</span></button>
       </nav>
     </header>
     ${licenseNotice ? licenseNoticeView() : ''}
@@ -74,7 +76,7 @@ function render(): void {
     <footer class="site-footer">
       <p>Local photo review before anything moves.</p>
       <nav aria-label="Legal"><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a></nav>
-      <p class="provenance">Original generated archive illustration · Built by Param Factory · v1.0.5</p>
+      <p class="provenance">Original generated archive illustration · Built by Param Factory · v1.0.6</p>
     </footer>
     <div class="toast" role="status" aria-live="polite" aria-atomic="true" hidden></div>
     ${licenseDialog()}
@@ -90,8 +92,8 @@ function welcomeView(): string {
   return `<main id="main">
     <section class="hero">
       <div class="hero-copy">
-        <p class="eyebrow">A local, reversible photo cull</p>
-        <h1>Clean up duplicate photos.<br><em>Before anything moves.</em></h1>
+        <p class="eyebrow">Review duplicate photos on this device</p>
+        <h1 tabindex="-1">Clean up duplicate photos.<br><em>Before anything moves.</em></h1>
         <p class="lede">For households with large or crowded photo archives, compare exact copies and likely bursts before exporting a move plan.</p>
         <div class="hero-actions">
           <a class="button primary" href="/?demo=1">Try it with sample data</a>
@@ -105,19 +107,19 @@ function welcomeView(): string {
       </div>
       <figure class="hero-art">
         <picture><source media="(max-width: 640px)" srcset="/assets/archive-room-mobile.webp"><img src="/assets/archive-room.webp" width="1280" height="853" alt="An imagined moonlit archive where a red thread connects photographic slides across paper dunes" fetchpriority="high" decoding="async"></picture>
-        <figcaption>Every frame stays where it is. The red thread is only a review plan.</figcaption>
+        <figcaption>The app creates a move plan and does not move photos.</figcaption>
       </figure>
     </section>
     <section id="how-it-works" class="method" aria-labelledby="method-title">
-      <p class="eyebrow">The cautious path</p><h2 id="method-title">Evidence, then judgment, then a plan.</h2>
+      <p class="eyebrow">How it works</p><h2 id="method-title">Review duplicate and burst photos in three steps.</h2>
       <ol class="method-list">
         <li><span>01</span><h3>Index locally</h3><p>Complete SHA-256 hashes find exact files. A small visual hash suggests nearby burst frames.</p></li>
         <li><span>02</span><h3>Review every group</h3><p>See why files were grouped. Mark each one keep or move to review; suggestions never become facts.</p></li>
-        <li><span>03</span><h3>Export, don’t delete</h3><p>Download a CSV move manifest for a separate review folder. Your source archive remains untouched.</p></li>
+        <li><span>03</span><h3>Export, don’t delete</h3><p>Download a CSV move plan for a separate review folder. Your source archive remains untouched.</p></li>
       </ol>
     </section>
     <section id="archive-pass" class="pricing" aria-labelledby="price-title">
-      <div><p class="eyebrow">For the big archive</p><h2 id="price-title">Archive pass</h2><p>Free for folders up to ${FREE_FILE_LIMIT} supported files. A one-time US$19 pass unlocks unlimited scans and stays useful every cleanup season.</p></div>
+      <div><p class="eyebrow">For folders over ${FREE_FILE_LIMIT} files</p><h2 id="price-title">Archive pass</h2><p>Free for folders up to ${FREE_FILE_LIMIT} supported files. A one-time US$19 pass removes the ${FREE_FILE_LIMIT}-file scan limit.</p></div>
       <div class="price-action"><strong>US$19 <small>one time</small></strong><a class="button secondary" href="${checkoutUrl()}">Buy archive pass</a><button class="text-button" data-action="open-license">Restore a license</button></div>
     </section>
   </main>`;
@@ -131,10 +133,10 @@ function workspaceView(): string {
   const completeGroups = data.groups.filter((item) => item.assetIds.every((id) => assetById(id)?.decision !== 'undecided')).length;
   return `<main id="main" class="workspace">
     <section class="workspace-head">
-      <div><p class="eyebrow">${escapeHtml(data.scan?.rootName ?? 'Local folder')} · ${formatDate(data.scan?.scannedAt)}</p><h1 tabindex="-1">Your review desk</h1><p>${data.scan?.scanned.toLocaleString()} files indexed locally. ${data.groups.length ? `${data.groups.length} candidate groups need a human decision.` : 'No duplicate or burst groups were found.'}</p></div>
+      <div><p class="eyebrow">${escapeHtml(data.scan?.rootName ?? 'Local folder')} · ${formatDate(data.scan?.scannedAt)}</p><h1 tabindex="-1">Your review desk</h1><p>${data.scan?.scanned.toLocaleString()} files indexed on this device. ${data.groups.length ? `${data.groups.length} candidate groups need a human decision.` : 'No duplicate or burst groups were found.'}</p></div>
       <div class="head-actions">
         <button class="text-button" data-action="reset">New scan</button>
-        <button class="button secondary" data-action="export-csv">Export move manifest</button>
+        <button class="button secondary" data-action="export-csv">Export move plan</button>
         <button class="text-button" data-action="export-json">Back up workspace</button>
         <button class="text-button import-label" data-action="choose-import">Restore workspace</button><input class="visually-hidden" id="import-input" type="file" aria-label="Choose a workspace backup" accept="application/json">
       </div>
@@ -155,7 +157,7 @@ function noCandidatesView(): string {
 }
 
 function completedView(reviewCount: number): string {
-  return `<section class="empty-state"><div class="empty-mark" aria-hidden="true">✓</div><p class="eyebrow">Review complete</p><h2>Your plan is ready</h2><p>${reviewCount} ${reviewCount === 1 ? 'file is' : 'files are'} marked to move into a separate review folder. Export the manifest, inspect it, and use your file manager to make the moves.</p><button class="button primary" data-action="export-csv">Export move manifest</button></section>`;
+  return `<section class="empty-state"><div class="empty-mark" aria-hidden="true">✓</div><p class="eyebrow">Review complete</p><h2>Your plan is ready</h2><p>${reviewCount} ${reviewCount === 1 ? 'file is' : 'files are'} marked to move into a separate review folder. Export the move plan, inspect it, and use your file manager to make the moves.</p><button class="button primary" data-action="export-csv">Export move plan</button></section>`;
 }
 
 function groupView(group: ReviewGroup, reviewCount: number): string {
@@ -197,7 +199,7 @@ function assetView(asset: MediaAsset, index: number): string {
 }
 
 function licenseDialog(): string {
-  return `<dialog id="license-dialog" aria-labelledby="license-title"><form method="dialog" class="dialog-close"><button aria-label="Close license dialog">×</button></form><p class="eyebrow">One-time unlock</p><h2 id="license-title">Archive pass</h2>${paid ? '<p class="license-good">✓ This device has an active archive pass.</p>' : `<p>Scan folders of any size for US$19 once. The free desk handles up to ${FREE_FILE_LIMIT} files, and exporting your plan is always free.</p><a class="button primary wide" href="${checkoutUrl()}">Buy archive pass</a><hr><form id="restore-form"><label for="license-token">Have a license? Paste it here</label><input id="license-token" name="license" autocomplete="off" required><button class="button secondary wide" type="submit">Verify and restore</button><p class="form-status" role="status" aria-live="polite"></p></form>`}<p class="legal-small">Sociobot/Dodo is the merchant of record. Refunds are handled there and revoke the license. <a href="/terms/">Terms</a> · <a href="/privacy/">Privacy</a></p></dialog>`;
+  return `<dialog id="license-dialog" aria-labelledby="license-title"><form method="dialog" class="dialog-close"><button aria-label="Close license dialog">×</button></form><p class="eyebrow">One-time pass</p><h2 id="license-title">Archive pass</h2>${paid ? '<p class="license-good">✓ This device has an active archive pass.</p>' : `<p>Scan folders of any size for US$19 once. The free desk handles up to ${FREE_FILE_LIMIT} files. Exporting your move plan is always free.</p><a class="button primary wide" href="${checkoutUrl()}">Buy Archive pass</a><hr><form id="restore-form"><label for="license-token">Have a license? Paste it here</label><input id="license-token" name="license" autocomplete="off" required><button class="button secondary wide" type="submit">Verify and restore</button><p class="form-status" role="status" aria-live="polite"></p></form>`}<p class="legal-small">Sociobot/Dodo is the merchant of record. Refunds are handled there and revoke the license. <a href="/terms/">Terms</a> · <a href="/privacy/">Privacy</a></p></dialog>`;
 }
 
 function licenseNoticeView(): string {
@@ -222,6 +224,8 @@ function bindGlobalEvents(): void {
   window.addEventListener('online', render);
   window.addEventListener('offline', render);
   window.addEventListener('keydown', handleShortcut);
+  document.addEventListener('click', markRouteNavigation);
+  window.addEventListener('pageshow', (event) => { if (event.persisted) focusRouteHeading(); });
 }
 
 async function handleFolder(event: Event): Promise<void> {
@@ -295,7 +299,7 @@ async function resetDemo(): Promise<void> {
 async function resetWorkspace(): Promise<void> {
   if (data.scan && !confirm('Start a new scan? This clears the saved workspace and decisions on this device. Export a workspace backup first if you need it.')) return;
   await clearData();
-  data = structuredClone(EMPTY_DATA); globalError = ''; render();
+  data = structuredClone(EMPTY_DATA); globalError = ''; render(); focusRouteHeading();
 }
 
 function setDecision(id: string, decision: Decision): void {
@@ -445,6 +449,31 @@ function setDemoMetadata(): void {
   setMeta('meta[property="og:url"]', 'content', canonical);
   setMeta('meta[name="twitter:title"]', 'content', title);
   setMeta('meta[name="twitter:description"]', 'content', description);
+}
+
+function markRouteNavigation(event: MouseEvent): void {
+  const link = (event.target as Element | null)?.closest<HTMLAnchorElement>('a[href]');
+  if (!link || link.target || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  const destination = new URL(link.href, location.href);
+  if (destination.origin === location.origin && (destination.pathname === '/' || destination.searchParams.get('demo') === '1')) {
+    sessionStorage.setItem(ROUTE_FOCUS_KEY, '1');
+  }
+}
+
+function focusRouteHeadingIfNeeded(): void {
+  const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+  if (sessionStorage.getItem(ROUTE_FOCUS_KEY) === '1' || navigation?.type === 'back_forward') {
+    sessionStorage.removeItem(ROUTE_FOCUS_KEY);
+    focusRouteHeading();
+  }
+}
+
+function focusRouteHeading(): void {
+  const heading = document.querySelector<HTMLElement>('main h1');
+  if (!heading) return;
+  heading.setAttribute('tabindex', '-1');
+  heading.focus();
+  showToast(`${heading.textContent?.replace(/\s+/g, ' ').trim() ?? 'Page'} opened.`);
 }
 
 function setMeta(selector: string, attribute: string, value: string): void {

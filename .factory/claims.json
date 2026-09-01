@@ -1,86 +1,23 @@
 [
-  {
-    "id": "exact-duplicates",
-    "claim": "Finds byte-for-byte duplicate media with complete SHA-256 hashes.",
-    "where": "landing page, review workspace, README",
-    "test": "npm run test:e2e -- --grep @claim:exact-duplicates",
-    "sandbox": "fresh browser context; upload shipped duplicate JPEG fixtures; assert exact-copy group"
-  },
-  {
-    "id": "similar-suggestions",
-    "claim": "Suggests visually close photos captured within 30 seconds without calling them duplicates.",
-    "where": "landing page, review workspace, README",
-    "test": "npm test -- --testNamePattern @claim:similar-suggestions",
-    "sandbox": "three synthetic image records; assert only the visually close, time-adjacent pair is suggested"
-  },
-  {
-    "id": "csv-export",
-    "claim": "Exports a CSV move-to-review-folder plan without changing originals.",
-    "where": "landing page, workspace, README, terms",
-    "test": "npm run test:e2e -- --grep @claim:csv-export",
-    "sandbox": "shipped duplicate fixtures; make decisions; inspect downloaded CSV and compare source SHA-256 before and after"
-  },
-  {
-    "id": "workspace-persistence",
-    "claim": "Saves the review workspace on this device across reloads.",
-    "where": "workspace, README, privacy",
-    "test": "npm run test:e2e -- --grep @claim:workspace-persistence",
-    "sandbox": "fresh browser context; make two decisions; reload and assert the saved review count"
-  },
-  {
-    "id": "offline-reload",
-    "claim": "The installed app reopens offline after the first visit.",
-    "where": "README, offline status",
-    "test": "npm run test:e2e -- --grep @claim:offline-reload",
-    "sandbox": "dedicated fresh browser context; wait for service-worker control; go offline; reload and assert shell and status"
-  },
-  {
-    "id": "local-only",
-    "claim": "Free review data stays in the browser and sends no cross-origin requests.",
-    "where": "landing page, footer, README, privacy",
-    "test": "npm run test:e2e -- --grep @claim:local-only",
-    "sandbox": "fresh demo context; record every request while making decisions; assert the sole origin is the local product origin"
-  },
-  {
-    "id": "demo-sandbox",
-    "claim": "Sample decisions use a separate demo workspace that can be reset or discarded.",
-    "where": "first-screen action, demo banner, README",
-    "test": "npm run test:e2e -- --grep @claim:demo-sandbox",
-    "sandbox": "open ?demo=1 from a fresh context; decide, reset, leave demo, and assert the real workspace is empty"
-  },
-  {
-    "id": "free-limit",
-    "claim": "The free product accepts up to 750 supported files and rejects 751 before scanning.",
-    "where": "pricing, license dialog, README, terms",
-    "test": "npm test -- --testNamePattern @claim:free-limit",
-    "sandbox": "750 and 751 in-memory supported video files; assert boundary behavior without network or real media"
-  },
-  {
-    "id": "workspace-backup",
-    "claim": "Exports and restores a JSON workspace backup in the browser.",
-    "where": "review workspace, README, privacy",
-    "test": "npm run test:e2e -- --grep @claim:workspace-backup",
-    "sandbox": "fresh browser context; decide on shipped duplicate fixtures; download a backup; start a new scan; restore the downloaded backup; assert the decision returns"
-  },
-  {
-    "id": "archive-pass-unlimited",
-    "claim": "A one-time US$19 Archive pass lets a licensed user scan folders above the 750-file free limit.",
-    "where": "landing pricing, license dialog, README, terms",
-    "test": "npm test -- --testNamePattern @claim:archive-pass-unlimited",
-    "sandbox": "751 in-memory supported video files; assert the validated-paid path accepts all files before any file read"
-  },
-  {
-    "id": "video-streaming",
-    "claim": "Hashes videos as streams for exact-copy matching without generating video previews.",
-    "where": "README",
-    "test": "npm test -- --testNamePattern @claim:video-streaming",
-    "sandbox": "two stream-only video file doubles whose arrayBuffer throws; assert an exact group and no thumbnail or visual hash"
-  },
-  {
-    "id": "license-verification-request",
-    "claim": "With a supplied license token, verification is the app's only cross-origin runtime request.",
-    "where": "README, privacy",
-    "test": "npm run test:e2e -- --grep @claim:license-verification-request",
-    "sandbox": "fresh browser context; route the billing verification fixture; record requests; assert the sole cross-origin URL is the verify endpoint"
-  }
+  {"id":"exact-duplicates","claim":"Finds byte-for-byte duplicate media with complete SHA-256 hashes.","where":"landing page, review workspace, README","test":"npm run test:e2e -- --grep @claim:exact-duplicates","sandbox":"fresh browser context; upload shipped duplicate JPEG fixtures; compare exported hashes with Node complete SHA-256 digests"},
+  {"id":"similar-suggestions","claim":"Suggests visually close photos captured within 30 seconds without calling them duplicates.","where":"landing page, review workspace, README","test":"npm test -- --testNamePattern @claim:similar-suggestions","sandbox":"synthetic images; assert inclusion at exactly 30 seconds, exclusion at 31 seconds, and cautious classification"},
+  {"id":"csv-export","claim":"Exports a CSV move plan without changing originals.","where":"landing page, workspace, README, terms","test":"npm run test:e2e -- --grep @claim:csv-export","sandbox":"shipped duplicate fixtures; parse download headers, quoted rows, group type, reason, and full hash; compare source digest before and after"},
+  {"id":"workspace-persistence","claim":"Saves the review workspace on this device across reloads.","where":"workspace, README, privacy","test":"npm run test:e2e -- --grep @claim:workspace-persistence","sandbox":"fresh browser context; make decisions; reload and assert the saved review count"},
+  {"id":"offline-reload","claim":"The installed app reopens offline after the first visit.","where":"README, offline status","test":"npm run test:e2e -- --grep @claim:offline-reload","sandbox":"dedicated fresh context; open demo, make a decision, wait for worker control, go offline, reload, and assert sample data, previews, banner, and decision"},
+  {"id":"local-only","claim":"Free review data stays in the browser and contacts no other website or service.","where":"landing page, footer, README, privacy","test":"npm run test:e2e -- --grep @claim:local-only","sandbox":"fresh demo context; record every request during review decisions; assert only the product origin"},
+  {"id":"demo-sandbox","claim":"The four-file sample uses a separate demo workspace that can be reset or discarded without changing real work.","where":"first-screen action, demo banner, README","test":"npm run test:e2e -- --grep @claim:demo-sandbox","sandbox":"seed a real decision; enter demo; assert four sample files and two groups; reset, leave, and assert the real decision remains"},
+  {"id":"free-limit","claim":"The free product accepts up to 750 supported files and rejects 751 before scanning.","where":"pricing, license dialog, README, terms","test":"npm test -- --testNamePattern @claim:free-limit","sandbox":"750 and 751 in-memory supported video files; assert boundary behavior without file reads"},
+  {"id":"workspace-backup","claim":"Exports and restores a JSON workspace backup in the browser.","where":"review workspace, README, privacy","test":"npm run test:e2e -- --grep @claim:workspace-backup","sandbox":"fresh browser context; decide, download backup, start a new scan, restore backup, and assert decision returns"},
+  {"id":"archive-pass-unlimited","claim":"A validated one-time US$19 Archive pass lets a licensed user scan folders above the 750-file free limit.","where":"landing pricing, license dialog, README, terms","test":"npm run test:e2e -- --grep @claim:archive-pass-unlimited","sandbox":"recorded valid license response; assert visible US$19 one-time offer and scan 751 files through the browser"},
+  {"id":"video-streaming","claim":"Hashes videos as streams for exact-copy matching without generating video previews.","where":"README","test":"npm test -- --testNamePattern @claim:video-streaming","sandbox":"stream-only video doubles whose arrayBuffer throws; assert exact group with no thumbnail or visual hash"},
+  {"id":"license-verification-request","claim":"With a supplied license token, verification is the app's only cross-origin runtime request.","where":"README, privacy","test":"npm run test:e2e -- --grep @claim:license-verification-request","sandbox":"fresh browser context; route the verification fixture; record requests and assert the sole cross-origin URL is the verify endpoint"},
+  {"id":"group-explanations","claim":"Explains exact-copy and likely-burst groups before you decide.","where":"landing page, workspace, README","test":"npm run test:e2e -- --grep @claim:group-explanations","sandbox":"demo sample; open both groups and assert complete-hash evidence and cautious camera-time/visual evidence"},
+  {"id":"capture-time","claim":"Uses embedded JPEG camera capture time for burst suggestions, never file modification time.","where":"README, terms","test":"npm test -- --testNamePattern @claim:capture-time","sandbox":"synthetic records with copied-file modification times; assert grouping uses only embedded capture times"},
+  {"id":"supported-formats","claim":"Accepts JPEG, PNG, WebP, GIF, BMP, MP4, MOV, M4V, and WebM files.","where":"landing page, README","test":"npm test -- --testNamePattern @claim:supported-formats","sandbox":"in-memory files for every documented MIME type plus unsupported text; assert all documented types are selected and text is skipped"},
+  {"id":"image-previews","claim":"Images show local previews.","where":"README","test":"npm run test:e2e -- --grep @claim:image-previews","sandbox":"demo sample; assert each displayed image candidate has a local preview image"},
+  {"id":"free-export","claim":"CSV move plans and JSON workspace backups are available without an Archive pass.","where":"license dialog, README, terms","test":"npm run test:e2e -- --grep @claim:free-export","sandbox":"fresh unlicensed context; export CSV and JSON, then parse path and complete hash fields"},
+  {"id":"no-setup","claim":"No server, account, or API key is required for free review.","where":"README","test":"npm run test:e2e -- --grep @claim:no-setup","sandbox":"fresh context with empty cookies and storage; upload shipped fixtures and assert a review starts with no account/key request"},
+  {"id":"storage-controls","claim":"A provided license token stays in browser storage, and New scan clears the saved review workspace.","where":"privacy","test":"npm run test:e2e -- --grep @claim:storage-controls","sandbox":"recorded valid license response; inspect local token, make a real workspace, choose New scan, reload, and assert empty workspace"},
+  {"id":"runtime-privacy","claim":"The app includes no ads, analytics, tracking pixels, third-party fonts, or runtime scripts.","where":"privacy","test":"npm run test:e2e -- --grep @claim:runtime-privacy","sandbox":"record requests and inspect storage across home, demo, and legal routes; assert only same-origin resources and no tracking storage"},
+  {"id":"merchant-refund","claim":"Sociobot/Dodo is the merchant of record, and a refunded license is inactive.","where":"license dialog, privacy, terms","test":"npm run test:e2e -- --grep @claim:merchant-refund","sandbox":"recorded revoked verification response; assert inactive state, documented merchant/refund copy, and hosted checkout URL"}
 ]

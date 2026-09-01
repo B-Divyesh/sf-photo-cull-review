@@ -1,6 +1,6 @@
 # Photo Cull Review
 
-Photo Cull Review is a cautious, local-first review desk for households with crowded photo archives. It indexes a folder in the browser, finds byte-identical media and likely burst photos, explains each group, saves human keep/review decisions, and exports a move-to-review-folder manifest. It never uploads, moves, or deletes originals.
+Photo Cull Review helps households compare duplicate and burst photos before moving any files. It finds exact copies and likely bursts in a folder. You review each group and export a move plan. It never uploads, moves, or deletes originals.
 
 Live product: <https://photo-cull-review.sociobot.in>
 
@@ -9,12 +9,12 @@ Try the isolated sample at <https://photo-cull-review.sociobot.in/?demo=1>. It o
 ## What it does
 
 - Streams complete files through local SHA-256 hashing to find exact copies without loading a large video whole into memory.
-- Uses a small visual difference hash plus embedded JPEG camera capture time to suggest burst candidates. It never guesses capture time from file modification dates.
-- Stores thumbnails, hashes, candidate groups, and decisions in IndexedDB so the review survives refreshes and works offline.
+- Compares compact visual fingerprints and JPEG capture times to suggest photos taken in one burst. It never uses file modification dates for this suggestion.
+- Saves thumbnails, file details, groups, and decisions in your browser. Your review survives refreshes and remains available offline.
 - Exports a CSV move plan and a restorable JSON workspace backup. Exporting is never paywalled.
-- Offers a useful free tier for folders up to 750 supported files; a one-time US$19 Archive pass lets a licensed user scan larger folders.
+- Folders with up to 750 supported files are free. A validated one-time US$19 Archive pass scans larger folders.
 
-Supported inputs are JPEG, PNG, WebP, GIF, BMP, MP4, MOV, M4V, and WebM. Images get local previews; videos participate in exact matching without preview decoding.
+Supported inputs are JPEG, PNG, WebP, GIF, BMP, MP4, MOV, M4V, and WebM. Images show previews. Videos are checked only for exact copies and do not show previews.
 
 ## Run locally
 
@@ -41,7 +41,7 @@ The billing URL defaults to the production Sociobot API. Factory staging may set
 
 ## Privacy and safety model
 
-All photo data stays in browser storage. Free review sends no cross-origin requests. With a supplied license token, verification is the app’s only cross-origin runtime request. A manifest is an instruction sheet, not an executable deletion script. Users should review it and keep an independent backup before moving media.
+All photo data stays in browser storage. Free review contacts no other website or service. With a supplied license token, verification is the app’s only outside request. A move plan is an instruction sheet, not an executable deletion script. Review it and keep an independent backup before moving media.
 
 See [the product brief](.factory/brief.json), [visual system](.factory/design.md), [privacy policy](public/privacy/index.html), and [terms](public/terms/index.html).
 

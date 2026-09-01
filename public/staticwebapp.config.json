@@ -1,11 +1,11 @@
 {
   "routes": [
     {
-      "route": "/assets/app-v6.js",
+      "route": "/assets/app-v7.js",
       "headers": { "Cache-Control": "public, max-age=31536000, immutable" }
     },
     {
-      "route": "/assets/app-v6.css",
+      "route": "/assets/app-v7.css",
       "headers": { "Cache-Control": "public, max-age=31536000, immutable" }
     },
     {

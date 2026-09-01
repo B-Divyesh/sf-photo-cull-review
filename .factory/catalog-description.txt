@@ -1,0 +1,1 @@
+Review duplicate photos and likely bursts before exporting a local move plan.

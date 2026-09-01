@@ -1,6 +1,6 @@
-const CACHE = 'photo-cull-shell-v7';
+const CACHE = 'photo-cull-shell-v8';
 const SHELL = [
-  '/', '/index.html', '/offline.html', '/404.html', '/manifest.webmanifest', '/assets/app-v6.js', '/assets/app-v6.css',
+  '/', '/index.html', '/offline.html', '/404.html', '/manifest.webmanifest', '/assets/app-v7.js', '/assets/app-v7.css',
   '/icons/icon.svg', '/icons/icon-192.png', '/icons/icon-512.png', '/icons/icon-maskable-512.png',
   '/assets/newsreader-latin.woff2', '/assets/archive-room.webp', '/assets/archive-room-mobile.webp',
   '/samples/picnic-wide.svg', '/samples/sparklers-close.svg', '/samples/sparklers-wide.svg',

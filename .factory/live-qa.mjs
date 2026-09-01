@@ -218,7 +218,7 @@ result.textReflow = {};
   await page.keyboard.press('ArrowRight');
   const ready = await page.getByRole('heading', { name: 'Your plan is ready' }).isVisible();
   const downloadPromise = page.waitForEvent('download');
-  await page.getByRole('button', { name: 'Export move manifest' }).first().click();
+  await page.getByRole('button', { name: 'Export move plan' }).first().click();
   const download = await downloadPromise;
   const downloadPath = await download.path();
   const csv = await (await import('node:fs/promises')).readFile(downloadPath, 'utf8');
