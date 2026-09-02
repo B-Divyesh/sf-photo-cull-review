@@ -497,6 +497,7 @@ test('privacy, terms, and 404 use the complete shared shell without serious acce
     await expect(page.getByRole('link', { name: 'Skip to main content' })).toBeVisible();
     await expect(page.locator('header.site-header').getByRole('link', { name: 'Photo Cull Review home' })).toBeVisible();
     await expect(page.locator('header.site-header').getByRole('navigation', { name: 'Primary' }).getByRole('link', { name: 'Demo' })).toBeVisible();
+    await expect(page.locator('header.site-header .compact-label').last()).toHaveText('View pass');
     await expect(page.locator('footer.site-footer')).toContainText('Built by Param Factory');
     const results = await new AxeBuilder({ page }).analyze();
     expect(results.violations.filter((violation) => ['serious', 'critical'].includes(violation.impact ?? ''))).toEqual([]);

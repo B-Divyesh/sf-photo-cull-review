@@ -77,8 +77,8 @@ for (const path of ['/', '/?demo=1', '/privacy/', '/terms/', '/missing-verificat
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto(base, { waitUntil: 'networkidle' });
   const { mkdir } = await import('node:fs/promises');
-  await mkdir('.factory/repair-4-artifacts', { recursive: true });
-  await page.screenshot({ path: '.factory/repair-4-artifacts/live-cold-mobile.png', fullPage: false });
+  await mkdir('.factory/polish-3-artifacts', { recursive: true });
+  await page.screenshot({ path: '.factory/polish-3-artifacts/cold-mobile-390x844.png', fullPage: false });
   const action = page.getByRole('link', { name: 'Try it with sample data' });
   const actionBox = await action.boundingBox();
   const targets = await page.locator('header.site-header .brand, header.site-header nav > *').evaluateAll((elements) => elements.map((element) => {
@@ -101,6 +101,29 @@ for (const path of ['/', '/?demo=1', '/privacy/', '/terms/', '/missing-verificat
     factsFullyInFirstScreen: Boolean(factsBox && factsBox.y >= 0 && factsBox.y + factsBox.height <= 844),
     targets,
     errors,
+  };
+  await context.close();
+}
+
+for (const viewport of [{ width: 390, height: 844 }, { width: 1440, height: 900 }]) {
+  const context = await browser.newContext({ viewport });
+  const page = await context.newPage();
+  await page.goto(`${base}/?demo=1`, { waitUntil: 'networkidle' });
+  const boxes = {};
+  for (const [name, locator] of [
+    ['group', page.getByRole('heading', { name: 'These files are exact copies' })],
+    ['filename', page.getByRole('heading', { name: 'IMG_2041.jpg' })],
+    ['decision', page.locator('[data-id="demo-picnic-1"][data-decision="keep"]')],
+  ]) {
+    const box = await locator.boundingBox();
+    boxes[name] = box ? { ...box, bottom: box.y + box.height } : null;
+  }
+  const suffix = viewport.width === 390 ? 'mobile-390x844' : 'desktop-1440x900';
+  await page.screenshot({ path: `.factory/polish-3-artifacts/demo-${suffix}.png`, fullPage: false });
+  result[`demoFirstViewport-${suffix}`] = {
+    viewport,
+    boxes,
+    allFit: Object.values(boxes).every((box) => box && box.bottom <= viewport.height),
   };
   await context.close();
 }
@@ -284,7 +307,7 @@ result.textReflow = {};
 }
 
 {
-  const paths = ['/', '/assets/app-v8.js', '/assets/app-v8.css', '/sw.js', '/manifest.webmanifest', '/missing-verification-route'];
+  const paths = ['/', '/assets/app-v9.js', '/assets/app-v9.css', '/icons/apple-touch-icon.png', '/sw.js', '/manifest.webmanifest', '/missing-verification-route'];
   result.responses = {};
   for (const path of paths) {
     const response = await fetch(`${base}${path}`, { redirect: 'manual' });
