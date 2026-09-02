@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import type { Locator } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
@@ -21,6 +22,22 @@ async function set751VideoFiles(page: import('@playwright/test').Page): Promise<
     Object.defineProperty(input, 'files', { configurable: true, value: transfer.files });
     input.dispatchEvent(new Event('change', { bubbles: true }));
   });
+}
+
+async function expectVisibleTouchTargets(root: Locator, scope: string): Promise<Array<{ name: string; x: number; y: number; width: number; height: number }>> {
+  const targets = root.locator('a[href]:not(.skip-link), button:not([disabled]), input:not([type="hidden"]), select, textarea, [role="button"]');
+  const measurements = [];
+  for (let index = 0; index < await targets.count(); index += 1) {
+    const target = targets.nth(index);
+    if (!(await target.isVisible())) continue;
+    const name = await target.evaluate((element) => element.getAttribute('aria-label') || element.textContent?.replace(/\s+/g, ' ').trim() || element.getAttribute('name') || element.tagName.toLowerCase());
+    const box = await target.boundingBox();
+    expect(box, `${scope} target "${name}" needs a rendered hit area`).not.toBeNull();
+    expect(box!.width, `${scope} target "${name}" width`).toBeGreaterThanOrEqual(44);
+    expect(box!.height, `${scope} target "${name}" height`).toBeGreaterThanOrEqual(44);
+    measurements.push({ name, ...box! });
+  }
+  return measurements;
 }
 
 test.describe('@suite:core', () => {
@@ -357,6 +374,29 @@ test('license dialog receives focus, closes with Escape, and returns focus', asy
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog', { name: 'Archive pass' })).not.toBeVisible();
   await expect(trigger).toBeFocused();
+});
+
+test('@regression:mobile-legal-targets every visible Privacy and Archive-pass target is at least 44px at 390px', async ({ page }, testInfo) => {
+  test.skip(!testInfo.project.name.startsWith('mobile-'), '390px touch-target measurement');
+
+  await page.goto('/privacy/');
+  const contact = page.getByRole('link', { name: 'sociobot.in (external site)' });
+  await expect(contact).toHaveAttribute('href', 'https://sociobot.in');
+  const privacyTargets = await expectVisibleTouchTargets(page.locator('body'), 'Privacy page');
+  expect(privacyTargets).toHaveLength(8);
+  expect(privacyTargets.map(({ name }) => name)).toContain('sociobot.in (external site)');
+
+  await page.goto('/');
+  await page.getByRole('button', { name: 'View Archive pass' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Archive pass' });
+  const dialogTargets = await expectVisibleTouchTargets(dialog, 'Archive-pass dialog');
+  expect(dialogTargets).toHaveLength(6);
+
+  const terms = dialogTargets.find(({ name }) => name === 'Terms');
+  const privacy = dialogTargets.find(({ name }) => name === 'Privacy');
+  expect(terms, 'Terms target measurement').toBeDefined();
+  expect(privacy, 'Privacy target measurement').toBeDefined();
+  expect(privacy!.x - (terms!.x + terms!.width), 'dialog legal links need 8px separation').toBeGreaterThanOrEqual(8);
 });
 });
 

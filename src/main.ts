@@ -76,7 +76,7 @@ function render(): void {
     <footer class="site-footer">
       <p>Local photo review before anything moves.</p>
       <nav aria-label="Legal"><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a></nav>
-      <p class="provenance">Original generated archive illustration · Built by Param Factory · v1.0.9</p>
+      <p class="provenance">Original generated archive illustration · Built by Param Factory · v1.0.10</p>
     </footer>
     <div class="toast" role="status" aria-live="polite" aria-atomic="true" hidden></div>
     ${licenseDialog()}
@@ -205,7 +205,7 @@ function assetView(asset: MediaAsset, index: number): string {
 }
 
 function licenseDialog(): string {
-  return `<dialog id="license-dialog" aria-labelledby="license-title"><form method="dialog" class="dialog-close"><button aria-label="Close license dialog">×</button></form><p class="eyebrow">One-time pass</p><h2 id="license-title">Archive pass</h2>${paid ? '<p class="license-good">✓ This device has an active archive pass.</p>' : `<p>Scan folders above the ${FREE_FILE_LIMIT}-file free limit for ${ARCHIVE_PASS_PRICE} once. The free product handles up to ${FREE_FILE_LIMIT} files. Exporting your move plan is always free.</p><a class="button primary wide" href="${checkoutUrl()}">Buy Archive pass at checkout<span class="visually-hidden"> (opens external checkout)</span></a><hr><form id="restore-form"><label for="license-token">Have a license? Paste it here</label><input id="license-token" name="license" autocomplete="off" required><button class="button secondary wide" type="submit">Verify and restore</button><p class="form-status" role="status" aria-live="polite"></p></form>`}<p class="legal-small">Sociobot/Dodo is the merchant of record. Refunds are handled there and revoke the license. <a href="/terms/">Terms</a> · <a href="/privacy/">Privacy</a></p></dialog>`;
+  return `<dialog id="license-dialog" aria-labelledby="license-title"><form method="dialog" class="dialog-close"><button aria-label="Close license dialog">×</button></form><p class="eyebrow">One-time pass</p><h2 id="license-title">Archive pass</h2>${paid ? '<p class="license-good">✓ This device has an active archive pass.</p>' : `<p>Scan folders above the ${FREE_FILE_LIMIT}-file free limit for ${ARCHIVE_PASS_PRICE} once. The free product handles up to ${FREE_FILE_LIMIT} files. Exporting your move plan is always free.</p><a class="button primary wide" href="${checkoutUrl()}">Buy Archive pass at checkout<span class="visually-hidden"> (opens external checkout)</span></a><hr><form id="restore-form"><label for="license-token">Have a license? Paste it here</label><input id="license-token" name="license" autocomplete="off" required><button class="button secondary wide" type="submit">Verify and restore</button><p class="form-status" role="status" aria-live="polite"></p></form>`}<p class="legal-small">Sociobot/Dodo is the merchant of record. Refunds are handled there and revoke the license. <a class="legal-touch-link" href="/terms/">Terms</a> · <a class="legal-touch-link" href="/privacy/">Privacy</a></p></dialog>`;
 }
 
 function licenseNoticeView(): string {

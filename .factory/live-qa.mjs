@@ -1,9 +1,27 @@
 import { chromium } from 'playwright';
 import AxeBuilder from '@axe-core/playwright';
+import { mkdir, writeFile } from 'node:fs/promises';
 
 const base = process.env.QA_BASE_URL || 'https://photo-cull-review.sociobot.in';
+const evidenceDir = process.env.QA_EVIDENCE_DIR || '.factory/repair-16-artifacts';
+await mkdir(evidenceDir, { recursive: true });
 const browser = await chromium.launch({ headless: true, args: ['--disable-gpu'] });
 const result = {};
+
+async function measureTouchTargets(root) {
+  const targets = root.locator('a[href]:not(.skip-link), button:not([disabled]), input:not([type="hidden"]), select, textarea, [role="button"]');
+  const measurements = [];
+  for (let index = 0; index < await targets.count(); index += 1) {
+    const target = targets.nth(index);
+    if (!(await target.isVisible())) continue;
+    const box = await target.boundingBox();
+    measurements.push({
+      name: await target.evaluate((element) => element.getAttribute('aria-label') || element.textContent?.replace(/\s+/g, ' ').trim() || element.getAttribute('name') || element.tagName.toLowerCase()),
+      ...box,
+    });
+  }
+  return measurements;
+}
 
 async function inspectRoute(path, viewport = { width: 1440, height: 900 }) {
   const context = await browser.newContext({ viewport });
@@ -81,9 +99,7 @@ for (const path of ['/', '/?demo=1', '/privacy/', '/terms/', '/missing-verificat
   page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto(base, { waitUntil: 'networkidle' });
-  const { mkdir } = await import('node:fs/promises');
-  await mkdir('.factory/polish-3-artifacts', { recursive: true });
-  await page.screenshot({ path: '.factory/polish-3-artifacts/cold-mobile-390x844.png', fullPage: false });
+  await page.screenshot({ path: `${evidenceDir}/cold-mobile-390x844.png`, fullPage: false });
   const action = page.getByRole('link', { name: 'Try it with sample data' });
   const actionBox = await action.boundingBox();
   const targets = await page.locator('header.site-header .brand, header.site-header nav > *').evaluateAll((elements) => elements.map((element) => {
@@ -111,6 +127,36 @@ for (const path of ['/', '/?demo=1', '/privacy/', '/terms/', '/missing-verificat
   await context.close();
 }
 
+{
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const page = await context.newPage();
+  await page.goto(`${base}/privacy/`, { waitUntil: 'networkidle' });
+  const privacyTargets = await measureTouchTargets(page.locator('body'));
+  const contact = page.getByRole('link', { name: 'sociobot.in (external site)' });
+  const externalContactLabel = await contact.innerText();
+  await contact.scrollIntoViewIfNeeded();
+  await page.screenshot({ path: `${evidenceDir}/mobile-privacy-390x844.png`, fullPage: false });
+  await page.goto(base, { waitUntil: 'networkidle' });
+  await page.getByRole('button', { name: 'View Archive pass' }).click();
+  const dialogTargets = await measureTouchTargets(page.getByRole('dialog', { name: 'Archive pass' }));
+  await page.screenshot({ path: `${evidenceDir}/mobile-archive-pass-390x844.png`, fullPage: false });
+  const terms = dialogTargets.find(({ name }) => name === 'Terms');
+  const privacy = dialogTargets.find(({ name }) => name === 'Privacy');
+  const legalGap = terms && privacy ? privacy.x - (terms.x + terms.width) : null;
+  result.mobileLegalTargets = {
+    viewport: { width: 390, height: 844 },
+    privacyTargets,
+    dialogTargets,
+    externalContactLabel,
+    legalGap,
+  };
+  const undersized = [...privacyTargets, ...dialogTargets].filter(({ width, height }) => width < 44 || height < 44);
+  if (privacyTargets.length !== 8 || dialogTargets.length !== 6 || undersized.length || legalGap === null || legalGap < 8) {
+    throw new Error(`Mobile legal targets failed: ${JSON.stringify(result.mobileLegalTargets)}`);
+  }
+  await context.close();
+}
+
 for (const viewport of [{ width: 390, height: 844 }, { width: 1440, height: 900 }]) {
   const context = await browser.newContext({ viewport });
   const page = await context.newPage();
@@ -125,7 +171,7 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 1440, height: 900 
     boxes[name] = box ? { ...box, bottom: box.y + box.height } : null;
   }
   const suffix = viewport.width === 390 ? 'mobile-390x844' : 'desktop-1440x900';
-  await page.screenshot({ path: `.factory/polish-3-artifacts/demo-${suffix}.png`, fullPage: false });
+  await page.screenshot({ path: `${evidenceDir}/demo-${suffix}.png`, fullPage: false });
   result[`demoFirstViewport-${suffix}`] = {
     viewport,
     boxes,
@@ -339,7 +385,7 @@ result.textReflow = {};
 }
 
 {
-  const paths = ['/', '/assets/app-v9.js', '/assets/app-v9.css', '/icons/apple-touch-icon.png', '/sw.js', '/manifest.webmanifest', '/missing-verification-route'];
+  const paths = ['/', '/assets/app-v10.js', '/assets/app-v10.css', '/icons/apple-touch-icon.png', '/sw.js', '/manifest.webmanifest', '/missing-verification-route'];
   result.responses = {};
   for (const path of paths) {
     const response = await fetch(`${base}${path}`, { redirect: 'manual' });
@@ -379,4 +425,6 @@ result.textReflow = {};
 }
 
 await browser.close();
-console.log(JSON.stringify(result, null, 2));
+const serialized = JSON.stringify(result, null, 2);
+await writeFile(`${evidenceDir}/qa.json`, serialized);
+console.log(serialized);

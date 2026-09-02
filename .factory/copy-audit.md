@@ -92,6 +92,8 @@ sentence exceeds 22 words. No banned marketing word remains in visitor copy.
 | Free review contacts no other website or service. | 8 | Pass — `local-only` |
 | With a supplied license token, verification is the app’s only outside request. | 12 | Pass — `license-verification-request` |
 | Start a new scan clears the saved review workspace. | 9 | Pass — `storage-controls` |
+| Questions may be sent through sociobot.in (external site). | 8 | Pass — external destination is explicit |
+| This policy changes only when the product’s data behavior changes. | 10 | Pass |
 
 ## Terminology
 
