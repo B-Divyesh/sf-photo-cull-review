@@ -45,6 +45,9 @@ polite route announcement as the app shell.
 Deployed with `/opt/fleet/lib/deploy-static.sh photo-cull-review dist`.
 Deployment ID: `d2e22b70-d26a-4491-a17a-8b9df6d6a078`. The product URL returned
 HTTP 200 over managed TLS: <https://photo-cull-review.sociobot.in/>.
+The deployed `app-v8.js` and `app-v8.css` match the final production build
+byte-for-byte: `01f24ada6d7ef2676e8a889eceb52ecb2b38490a63db258d50279c1a3005d29b`
+and `3121559bdf837b04c8bef5f970842dc385aa4dd255983992767147a77539be1b`.
 
 ## Run locally
 
