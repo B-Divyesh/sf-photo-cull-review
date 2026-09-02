@@ -1,5 +1,12 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const applicationSuites = [
+  { name: 'core', grep: /@suite:core/ },
+  { name: 'license', grep: /@suite:license/ },
+  { name: 'claims', grep: /@suite:claims/ },
+  { name: 'routes', grep: /@suite:routes/ },
+] as const;
+
 export default defineConfig({
   testDir: './tests',
   // Serial browser contexts keep the PWA/offline checks reliable in constrained
@@ -14,12 +21,31 @@ export default defineConfig({
     launchOptions: { args: ['--disable-gpu'] },
   },
   webServer: {
-    command: 'npm run build && npm run preview -- --port 4173',
+    command: 'npm run preview -- --port 4173 --strictPort',
     url: 'http://127.0.0.1:4173',
-    reuseExistingServer: true,
+    reuseExistingServer: false,
   },
   projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-    { name: 'mobile', use: { ...devices['Pixel 5'], viewport: { width: 390, height: 844 } } },
+    ...applicationSuites.flatMap(({ name, grep }) => [
+      {
+        name: `chromium-${name}`,
+        testIgnore: /pwa\.spec\.ts/,
+        grep,
+        use: { ...devices['Desktop Chrome'] },
+      },
+      {
+        name: `mobile-${name}`,
+        testIgnore: /pwa\.spec\.ts/,
+        grep,
+        use: { ...devices['Pixel 5'], viewport: { width: 390, height: 844 } },
+      },
+    ]),
+    {
+      // Service-worker and offline state live in their own worker/browser so
+      // they cannot destabilize the ordinary desktop and mobile suites.
+      name: 'pwa-offline',
+      testMatch: /pwa\.spec\.ts/,
+      use: { ...devices['Desktop Chrome'] },
+    },
   ],
 });

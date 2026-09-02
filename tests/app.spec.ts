@@ -23,6 +23,7 @@ async function set751VideoFiles(page: import('@playwright/test').Page): Promise<
   });
 }
 
+test.describe('@suite:core', () => {
 test('welcome is accessible and explains the safety boundary', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
@@ -188,7 +189,7 @@ test('sequential review shortcuts continue after focus moves to a decision butto
 });
 
 test('@regression:mobile-header every visible header control is readable, separated, and at least 44px at 390px', async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name !== 'mobile', 'Mobile target measurement');
+  test.skip(!testInfo.project.name.startsWith('mobile-'), 'Mobile target measurement');
   await page.goto('/');
 
   const targets = page.locator('header.site-header .brand, header.site-header nav > *');
@@ -222,41 +223,9 @@ test('@regression:mobile-header every visible header control is readable, separa
     expect(box!.y + box!.height).toBeLessThanOrEqual(844);
   }
 });
-
-test('@claim:offline-reload the installed demo reopens offline with sample data and decisions', async ({ browser }, testInfo) => {
-  const context = await browser.newContext({
-    baseURL: 'http://127.0.0.1:4173',
-    viewport: testInfo.project.name === 'mobile' ? { width: 390, height: 844 } : { width: 1280, height: 720 },
-  });
-  try {
-    const page = await context.newPage();
-    await page.goto('/?demo=1');
-    await expect(page.getByRole('heading', { name: 'Your review desk' })).toBeVisible();
-    await page.getByRole('heading', { name: 'Your review desk' }).focus();
-    await page.keyboard.press('r');
-    await expect(page.getByRole('button', { name: /Move to review/ }).first()).toHaveAttribute('aria-pressed', 'true');
-    await page.evaluate(async () => { await navigator.serviceWorker.ready; });
-    await page.reload();
-    await expect(page.getByRole('heading', { name: 'Your review desk' })).toBeVisible();
-    await expect(page.getByText('Demo — sample data, separate from your workspace')).toBeVisible();
-    await expect(page.locator('img[alt^="Preview of"]')).toHaveCount(2);
-    await expect(page.getByRole('button', { name: /Move to review/ }).first()).toHaveAttribute('aria-pressed', 'true');
-    const update = await page.evaluate(async () => {
-      const registration = await navigator.serviceWorker.ready;
-      await registration.update();
-      return { active: registration.active?.scriptURL ?? null, waiting: Boolean(registration.waiting) };
-    });
-    expect(update.active).toContain('/sw.js');
-    expect(update.waiting).toBe(false);
-    await context.setOffline(true);
-    await page.reload();
-    await expect(page.getByText(/Offline — your saved review/)).toBeVisible();
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-  } finally {
-    await context.close();
-  }
 });
 
+test.describe('@suite:license', () => {
 test('a newly installed worker announces the available update', async ({ page }) => {
   await page.addInitScript(() => {
     const worker = new EventTarget() as EventTarget & { state: string };
@@ -365,7 +334,9 @@ test('license dialog receives focus, closes with Escape, and returns focus', asy
   await expect(page.getByRole('dialog', { name: 'Archive pass' })).not.toBeVisible();
   await expect(trigger).toBeFocused();
 });
+});
 
+test.describe('@suite:claims', () => {
 test('@claim:demo-sandbox sample decisions stay separate and reset without setup', async ({ page }) => {
   await page.goto('/');
   await page.locator('#folder-input').setInputFiles(path.join(process.cwd(), 'tests/fixtures'));
@@ -476,7 +447,9 @@ test('@claim:merchant-refund uses the documented merchant checkout and locks a r
   await expect(page.getByText('Sociobot/Dodo is the merchant of record. Refunds are handled there and revoke the license.')).toBeVisible();
   await expect(page.locator('#license-dialog').getByRole('link', { name: 'Buy Archive pass' })).toHaveAttribute('href', 'https://api.sociobot.in/api/v1/products/photo-cull-review/checkout');
 });
+});
 
+test.describe('@suite:routes', () => {
 test('@regression:route-focus moves focus to the new page heading after demo navigation and Back', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('link', { name: 'Try it with sample data' }).click();
@@ -525,7 +498,7 @@ test('@regression:route-social-metadata every public route provides its own comp
 });
 
 test('@regression:text-reflow home, demo, legal, and not-found routes reflow at 200% on 390px', async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name !== 'mobile', '390px text reflow measurement');
+  test.skip(!testInfo.project.name.startsWith('mobile-'), '390px text reflow measurement');
   for (const route of ['/', '/?demo=1', '/privacy/', '/terms/', '/404.html']) {
     await page.goto(route);
     await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
@@ -534,4 +507,5 @@ test('@regression:text-reflow home, demo, legal, and not-found routes reflow at 
       scrollWidth: document.documentElement.scrollWidth,
     }))).toEqual({ clientWidth: 390, scrollWidth: 390 });
   }
+});
 });
