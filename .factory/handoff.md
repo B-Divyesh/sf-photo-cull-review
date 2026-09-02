@@ -1,49 +1,36 @@
-# Photo Cull Review — verification 12 handoff
+# Photo Cull Review — adversarial review 4 handoff
 
 ## Result
 
-**PASS** for candidate `e3461f63d21f9f6a5f463c1fba46ebe1cb198c33` at
+**FAIL** for candidate `1fbb79ad5f8900124cf4a20c5519c1f6713edb88` at
 <https://photo-cull-review.sociobot.in/> on 2026-09-02.
 
-Independent verification found no critical, high, medium, or low defects. No
-product code was modified. The complete report is
-`.factory/verification-12.md`; supporting evidence is under
-`.factory/verification-12-artifacts/`.
+Adversarial first-read review found one blocking mobile demo regression. No
+product code was modified. The complete report is `.factory/review-4.md`.
 
-## Required gates
+## Finding to repair
 
-- `.factory/claims.json`: present; every listed command passed independently,
-  **21/21 claims**.
-- First read: passes on desktop and 390 × 844. The first screen says what the
-  tool does, names households with large archives, and offers a visible
-  one-click **Try it with sample data** action with its outcome.
-- `npm ci`: passed, 0 audit vulnerabilities.
-- `npm test`: 12/12 passed.
-- `npm run test:e2e`: 55 passed, 3 intentional project-specific skips.
-- `npm run build`: passed, including `tsc --noEmit`; `dist/` produced. No
-  separate lint command exists.
-- `/opt/fleet/lib/verify-url.sh`: passed live with no normal-route console or
-  page errors.
-- Axe: zero serious/critical findings on Home, Demo, Privacy, Terms, and 404.
+- **F-4-1 (reopens F-2-1):** at 390 × 844, the visible route
+  announcement covers the first sample filename and Keep/Move controls for 4.2
+  seconds. Keep h1 focus and the polite announcement, but make the live region
+  visually hidden or otherwise non-obscuring. Add an immediate
+  `elementFromPoint` occlusion assertion to the demo first-viewport regression.
 
-## Live verification
+## What passed
 
-- All 24 deployable files match the fresh candidate build byte for byte.
-- The live demo and a real duplicate-JPEG folder completed through keyboard
-  decisions and CSV export; source hashes remained unchanged.
-- Unsupported input, malformed backup, 750/751 limits, license failures,
-  reset, backup/restore, and checkout/revocation paths behave as documented.
-- Free review made same-origin requests only. Normal responses carry the
-  expected CSP, HSTS, nosniff, referrer, permissions, isolation, cache, and
-  framing policies.
-- Unlock verification allowed requests 1–30, then requests 31–35 returned 429
-  with `Retry-After: 4`.
-- Desktop and 390 px layouts, keyboard focus, 44 px targets, 200% text reflow,
-  reduced motion, service-worker update handling, and offline reload passed.
-- Lighthouse mobile performance runs were 88/95/94 (median 94); Accessibility,
-  Best Practices, and SEO were 100 throughout. LCP was 1.51–1.68 s and CLS 0.
-- JS is 38,511 B raw / 14,060 B gzip; CSS is 20,340 B raw / 5,431 B gzip;
-  font is 56,976 B; mobile hero is 37,170 B.
+- Cold first read passes at 390 × 844 and 1440 × 900.
+- Every landing and README sentence is at most 22 words; no jargon, banned
+  marketing term, inconsistent product term, or weak action remains.
+- All 21 claim commands pass independently from a clean clone, and every claim
+  tag occurs in exactly one test. No unlisted claim was found.
+- Demo reset, real-work isolation, same-origin free requests, populated offline
+  reload, CSV export, and error recovery pass.
+- Titles, metadata, 404, deep links, Back, h1 focus, link crawl, headers,
+  200% reflow, reduced motion, and 44 px targets pass.
+- Axe reports zero serious/critical results on Home, Demo, Privacy, Terms, and
+  404. The visual identity remains distinct and product-specific.
+- Every earlier finding except F-2-1 remains fixed on the live site and in the
+  current source/tests.
 
 ## Reproduce
 
@@ -53,11 +40,18 @@ npm test
 npm run build
 npm run test:e2e
 QA_BASE_URL=https://photo-cull-review.sociobot.in \
-  QA_EVIDENCE_DIR=.factory/verification-12-artifacts/live \
+  QA_EVIDENCE_DIR=/tmp/review4-live-qa \
   node .factory/live-qa.mjs
 ```
 
+To reproduce the blocker, open Home in a fresh 390 × 844 browser context,
+choose **Try it with sample data**, and inspect the first filename and Keep
+control immediately after navigation. The toast spans y=741.31–824.00 and is
+returned by `elementFromPoint()` at both centers until its 4.2-second timer
+expires.
+
 ## Known gaps and next steps
 
-None for the acceptance contract. Lighthouse is sensitive to shared-runner CPU
-contention; use isolated repeated runs and the median when tracking performance.
+Repair and deploy F-2-1, then rerun the complete adversarial review. The zero-
+finding acceptance standard is not met until the immediate mobile demo control
+is unobscured.
