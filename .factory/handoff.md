@@ -2,9 +2,9 @@
 
 ## Result
 
-**Release blocker repaired and verified locally.** This repair closes F-8-1
-from `.factory/verification-8.md` without changing the researched product,
-photo-handling behavior, price, privacy boundary, or deployment class.
+**Release blocker repaired, pushed, deployed, and verified.** This repair
+closes F-8-1 from `.factory/verification-8.md` without changing the researched
+product, photo-handling behavior, price, privacy boundary, or deployment class.
 
 ## Reproduction and root cause
 
@@ -65,9 +65,31 @@ metadata.
 
 ## Deployment
 
-Pending the product-scoped static deployment of `dist/` to
-`sf-photo-cull-review`. After deployment, run the live URL verifier,
-`.factory/live-qa.mjs`, response-policy checks, and artifact identity check.
+- Repair commit `6c1d3d2bdc455ad09e8270e7dcd8604089ce31fb` was pushed to
+  `origin/main`.
+- `/opt/fleet/lib/deploy-static.sh photo-cull-review dist` deployed production
+  deployment `763a745e-8372-445f-9e0a-9319e586c254` to the existing
+  product-scoped `sf-photo-cull-review` Static Web App in Central US.
+- <https://photo-cull-review.sociobot.in/> returned 200 over managed TLS.
+- All **22** public files matched local `dist/` byte-for-byte. The deployment
+  configuration returned 404 as expected because it is not a public artifact.
+- The live URL verifier reported no console errors and the expected title,
+  language, H1, main landmark, and labels. Evidence is in
+  `repair-15-artifacts/verify-url-live/`.
+- `node .factory/live-qa.mjs` passed home, demo, Privacy, Terms, designed 404,
+  390 px layout, 200% text reflow, keyboard focus, reduced motion, demo export,
+  invalid-input recovery, first-license failure, cached-license fallback,
+  same-origin privacy, and Axe serious/critical checks.
+- Live offline reload passed under service-worker control with the four-file
+  demo, saved decision, banner, and `photo-cull-shell-v9` cache.
+- Live response policy passed for HTML, immutable JS/CSS, `sw.js`, manifest,
+  and 404: CSP with header-level `frame-ancestors`, HSTS, nosniff, strict
+  referrer policy, Permissions-Policy, COOP/CORP, and frame denial were present.
+- The hosted checkout identified Photo Cull Review in USD at a `$12.00`
+  subtotal and total.
+- Live Lighthouse 13.4.1 mobile — **100 performance, 100 accessibility, 100
+  best practices, 100 SEO**; LCP 1.2 s, CLS 0, total blocking time 0 ms.
+  Evidence: `repair-15-artifacts/lighthouse-live.json`.
 
 ## Known gaps
 

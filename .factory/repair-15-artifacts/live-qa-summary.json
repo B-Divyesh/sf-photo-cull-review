@@ -1,0 +1,32 @@
+{
+  "checked_at": "2026-09-02T01:13:12Z",
+  "base_url": "https://photo-cull-review.sociobot.in",
+  "command": "node .factory/live-qa.mjs",
+  "result": "pass",
+  "routes": {
+    "/": 200,
+    "/?demo=1": 200,
+    "/privacy/": 200,
+    "/terms/": 200,
+    "/missing-verification-route": 404
+  },
+  "valid_route_console_errors": 0,
+  "serious_or_critical_axe_violations": 0,
+  "mobile_horizontal_overflow": false,
+  "all_routes_reflow_at_200_percent": true,
+  "demo_requests_only_product_origin": true,
+  "demo_export_passed": true,
+  "offline_reload_passed": true,
+  "service_worker_cache": "photo-cull-shell-v9",
+  "security_headers_passed": true,
+  "checkout": {
+    "product": "Photo Cull Review",
+    "currency": "USD",
+    "subtotal": "$12.00",
+    "total": "$12.00"
+  },
+  "artifact_parity": {
+    "public_files_matched": 22,
+    "deployment_config_status": 404
+  }
+}
