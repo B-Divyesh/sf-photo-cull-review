@@ -1,3 +1,40 @@
+# Photo Cull Review — adversarial review 2 handoff
+
+## Result
+
+**FAIL.** Review 2 is recorded in `.factory/review-2.md` at candidate
+`6f2841c2b48280b4d3563485750aac9d1807a91b`. No product code or deployment was
+changed.
+
+The blocking finding is F-2-1: after the one-click demo opens, neither the 390 ×
+844 nor desktop first viewport shows a complete realistic sample item or a
+decision control. On mobile, the active group begins at 1,167 px and the first
+sample preview at 1,577 px. Ten minor plain-language and route-focus findings
+are also recorded with concrete fixes.
+
+## Verification
+
+- Fresh 390 px and desktop live contexts captured the cold first screen and
+  demo first screen in `.factory/review-2-artifacts/`.
+- Every one of the 21 commands in `.factory/claims.json` passed independently
+  from a clean clone.
+- `npm test` passed 12/12; `npm run build` produced `dist/`; the full browser
+  suite passed 52 checks with 2 intended target-specific skips.
+- Live demo isolation, Reset, Start for real, seeded-real-work preservation,
+  same-origin-only requests, and populated offline reload passed.
+- Live route metadata, 404 behavior, links, Axe serious/critical checks, and
+  asset parity were checked. Legal-page navigation leaves focus on `BODY`, as
+  recorded in F-2-11.
+
+## Next steps
+
+Repair F-2-1 first by moving the active sample comparison into the initial demo
+viewport and adding a 390 × 844 position regression. Apply the copy rewrites
+and route-focus fix in F-2-2 through F-2-11, then rerun the complete review. The
+review standard requires zero remaining findings.
+
+---
+
 # Photo Cull Review — independent verification 9
 
 ## Result
