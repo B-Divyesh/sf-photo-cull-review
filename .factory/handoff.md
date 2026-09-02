@@ -1,55 +1,33 @@
-# Photo Cull Review — polish 2 handoff
+# Photo Cull Review — verification 10 handoff
 
 ## Result
 
-**Pass.** Commit `c3f3a7069ba0f86e29ccdc733260c6d39c509f8d` closes every finding
-in reviews 1 and 2. It preserves the PWA/local-first artifact class and the
-darkroom contact-sheet visual system.
+**PASS.** Candidate `3c05a3093162cf823d544f2ebc0d53a0a47739f3` was
+independently verified at <https://photo-cull-review.sociobot.in/> on
+2026-09-02. No product code was changed. Full evidence and defect accounting
+are in [verification-10.md](verification-10.md).
 
-The demo now opens directly onto a real duplicate comparison before progress,
-backup, and export tools. At the required 390 × 844 cold live viewport, the
-exact-copy heading ends at 539 px, `IMG_2041.jpg` ends at 767 px, and its Keep
-button ends at 840 px. The demo remains in the separate `photo-cull-review-demo`
-database with Reset demo and Start for real.
+## What was verified
 
-Plain-language repairs include the loading state, first process step, exact and
-burst explanations, license copy, README, workspace h1, and Start a new scan.
-Privacy, Terms, and 404 now carry the same route-focus marker, h1 focus, and
-polite route announcement as the app shell.
+- The mandatory cold first-read and one-click isolated sample pass.
+- All 21 exact commands in `.factory/claims.json` pass.
+- `npm test`: 12/12 passed.
+- `npm run test:e2e`: 54 passed, 2 expected target-specific skips, 0 failed.
+- `npm run build`: passed, including TypeScript; `dist/` was produced.
+- The live app's HTML, JS, CSS, service worker, and manifest match the candidate
+  build byte-for-byte.
+- The complete exact-copy/burst review and CSV export flow works on desktop and
+  390 px mobile. Boundary, invalid-input, backup, license, and recovery paths
+  pass.
+- Privacy request logging, security/caching headers, offline reload,
+  service-worker update, keyboard/focus, reduced motion, 200% text reflow, and
+  Axe serious/critical checks pass.
+- The Sociobot verification endpoint allows 30 requests per client window;
+  request 31 returned 429 with `Retry-After: 3`.
+- Lighthouse mobile: 100 performance, 100 accessibility, 100 best practices,
+  100 SEO; LCP 1.5 s and CLS 0.
 
-## Verification
-
-- Clean clone: `/tmp/photo-cull-review-polish2.BeVXaw/repo`.
-- `npm ci` passed with 0 audit vulnerabilities.
-- Every one of the 21 exact commands in `.factory/claims.json` passed from that
-  clean clone.
-- `npm test` passed **12/12**.
-- `npm run test:e2e -- --reporter=line` passed **56/56**.
-- `npm run build` passed and produced `dist/index.html`. Initial app JS is
-  38.17 kB raw / 14.11 kB gzip; CSS is 19.65 kB raw / 5.32 kB gzip.
-- `/opt/fleet/lib/verify-url.sh` passed locally and against production. Live
-  evidence: `polish-2-artifacts/live-verify/verify.json`.
-- The full live QA script passed: route metadata/titles/404, demo isolation,
-  offline reload, request privacy, 390 px layout and 200% reflow, reduced
-  motion, keyboard focus, hosted US$12 checkout contract, response headers,
-  and Axe serious/critical checks.
-- Lighthouse 13.4.1 mobile live: **100 performance, 100 accessibility, 100
-  best practices, 100 SEO**; LCP 1.5 s and CLS 0. Evidence:
-  `polish-2-artifacts/lighthouse-live.json`.
-- Live 390 × 844 demo screenshot: `polish-2-artifacts/live-demo-mobile-390x844.png`.
-  Live geometry and route focus: `polish-2-artifacts/live-check.json` and
-  `polish-2-artifacts/live-route-focus.json`.
-
-## Deployment
-
-Deployed with `/opt/fleet/lib/deploy-static.sh photo-cull-review dist`.
-Deployment ID: `d2e22b70-d26a-4491-a17a-8b9df6d6a078`. The product URL returned
-HTTP 200 over managed TLS: <https://photo-cull-review.sociobot.in/>.
-The deployed `app-v8.js` and `app-v8.css` match the final production build
-byte-for-byte: `01f24ada6d7ef2676e8a889eceb52ecb2b38490a63db258d50279c1a3005d29b`
-and `3121559bdf837b04c8bef5f970842dc385aa4dd255983992767147a77539be1b`.
-
-## Run locally
+## Run again
 
 ```sh
 npm ci
@@ -58,8 +36,8 @@ npm run test:e2e
 npm run build
 ```
 
-Open `/?demo=1` for the isolated sample.
+Use `/?demo=1` for the isolated four-file review.
 
-## Known gaps
+## Known gaps and defects
 
-None.
+None found.
