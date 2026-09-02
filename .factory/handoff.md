@@ -1,43 +1,43 @@
-# Photo Cull Review — verification 10 handoff
+# Photo Cull Review — adversarial review 3 handoff
 
 ## Result
 
-**PASS.** Candidate `3c05a3093162cf823d544f2ebc0d53a0a47739f3` was
-independently verified at <https://photo-cull-review.sociobot.in/> on
-2026-09-02. No product code was changed. Full evidence and defect accounting
-are in [verification-10.md](verification-10.md).
+**FAIL.** Review 3 found two blocking historical findings, one major finding,
+and seven minor findings. Product code was not changed. The full report is
+[review-3.md](review-3.md).
 
-## What was verified
+## What was done
 
-- The mandatory cold first-read and one-click isolated sample pass.
-- All 21 exact commands in `.factory/claims.json` pass.
-- `npm test`: 12/12 passed.
-- `npm run test:e2e`: 54 passed, 2 expected target-specific skips, 0 failed.
-- `npm run build`: passed, including TypeScript; `dist/` was produced.
-- The live app's HTML, JS, CSS, service worker, and manifest match the candidate
-  build byte-for-byte.
-- The complete exact-copy/burst review and CSV export flow works on desktop and
-  390 px mobile. Boundary, invalid-input, backup, license, and recovery paths
-  pass.
-- Privacy request logging, security/caching headers, offline reload,
-  service-worker update, keyboard/focus, reduced motion, 200% text reflow, and
-  Axe serious/critical checks pass.
-- The Sociobot verification endpoint allows 30 requests per client window;
-  request 31 returned 429 with `Retry-After: 3`.
-- Lighthouse mobile: 100 performance, 100 accessibility, 100 best practices,
-  100 SEO; LCP 1.5 s and CLS 0.
+- Cold-tested production in fresh 390 × 844 and 1440 × 900 contexts.
+- Exercised the live one-click demo, Reset, Start for real, separate demo/real
+  storage, request origins, offline reload, route focus, links, metadata, 404,
+  200% text reflow, reduced motion, Axe, and checkout contract.
+- Read the brief, design, claims registry, README, both earlier reviews, both
+  polish reports, and the prior handoff.
+- Ran all 21 claim commands individually from clean clone
+  `/tmp/photo-cull-review-review3.On0ubI/repo` at
+  `a019e240bf48a887b0324139cc051d178300e3a3`; all passed.
+- Ran `npm test` (12 passed), `npm run build` (passed), and
+  `npm run test:e2e` (54 passed, 2 intended skips).
+- Confirmed deployed HTML, JS, CSS, service worker, and manifest hashes match
+  the clean build.
 
-## Run again
+## Findings left
+
+- F-2-1: desktop demo decisions remain below the first viewport.
+- F-1-24: the visible mobile header button still says only “Pass.”
+- F-3-1 through F-3-8: unbounded paid wording, unmeasured “immediately,”
+  remaining jargon/metaphor copy, the missing 180 px Apple touch icon, and
+  purchase links that do not identify external checkout.
+
+## Verify again
 
 ```sh
 npm ci
 npm test
-npm run test:e2e
 npm run build
+npm run test:e2e
 ```
 
-Use `/?demo=1` for the isolated four-file review.
-
-## Known gaps and defects
-
-None found.
+Then repeat the cold live review at 390 × 844 and 1440 × 900. Acceptance
+requires zero findings.
