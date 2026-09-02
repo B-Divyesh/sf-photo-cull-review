@@ -18,10 +18,12 @@
     <meta name="twitter:description" content="How Photo Cull Review stores local media data and handles license checks.">
     <meta name="twitter:image" content="https://photo-cull-review.sociobot.in/assets/social-preview.jpg">
     <link rel="stylesheet" href="/assets/app-v8.css">
+    <script type="module" src="/route-focus.js"></script>
     <title>Privacy — Photo Cull Review</title>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to main content</a>
+    <div id="route-status" class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"></div>
     <header class="site-header">
       <a class="brand" href="/" aria-label="Photo Cull Review home"><img src="/icons/icon.svg" alt="" width="34" height="34"><span>Photo Cull Review</span></a>
       <nav aria-label="Primary"><a href="/?demo=1">Demo</a><a href="/#how-it-works" aria-label="How it works"><span class="wide-label">How it works</span><span class="compact-label">How</span></a><a href="/privacy/" aria-current="page">Privacy</a><a href="/#archive-pass" aria-label="View Archive pass"><span class="wide-label">View Archive pass</span><span class="compact-label">Pass</span></a></nav>
@@ -32,7 +34,7 @@
       <p>Photo Cull Review keeps your media in your browser. It does not upload photos, videos, thumbnails, paths, hashes, decisions, or move plans.</p>
       <h2>What stays on your device</h2>
       <p>The app stores thumbnails, hashes, file details, candidate groups, and decisions in your browser. A license token stays in browser storage if you provide one.</p>
-      <p>Choose New scan to clear the saved review workspace. You can also remove site data through your browser.</p>
+      <p>Choose Start a new scan to clear the saved review workspace. You can also remove site data through your browser.</p>
       <h2>What leaves your device</h2>
       <p>Free review never contacts another website or service. If you provide a license token, verification is the only request sent outside this app.</p>
       <p>Buying an Archive pass opens Sociobot/Dodo checkout. Sociobot/Dodo handles checkout and billing as merchant of record.</p>
@@ -45,7 +47,7 @@
     <footer class="site-footer">
       <p>Local photo review before anything moves.</p>
       <nav aria-label="Legal"><a href="/privacy/" aria-current="page">Privacy</a><a href="/terms/">Terms</a></nav>
-      <p class="provenance">Original generated archive illustration · Built by Param Factory · v1.0.7</p>
+      <p class="provenance">Original generated archive illustration · Built by Param Factory · v1.0.8</p>
     </footer>
   </body>
 </html>

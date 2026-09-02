@@ -209,7 +209,7 @@ result.textReflow = {};
   page.on('request', (request) => requests.push(request.url()));
   await page.goto(`${base}/?demo=1`, { waitUntil: 'networkidle' });
   const bannerBefore = await page.getByText(/Demo — sample data/).innerText();
-  await page.getByRole('heading', { name: 'Your review desk' }).focus();
+  await page.getByRole('heading', { name: 'Review duplicate and burst photos' }).focus();
   await page.keyboard.press('k');
   await page.keyboard.press('r');
   await page.keyboard.press('ArrowRight');
@@ -249,7 +249,7 @@ result.textReflow = {};
   await page.goto(`${base}/?demo=1`);
   await page.locator('#import-input').setInputFiles({ name: 'bad.json', mimeType: 'application/json', buffer: Buffer.from('{bad') });
   const invalidBackup = await page.getByRole('alert').innerText();
-  result.invalidRecovery = { unsupported, invalidBackup, deskStillVisible: await page.getByRole('heading', { name: 'Your review desk' }).isVisible() };
+  result.invalidRecovery = { unsupported, invalidBackup, deskStillVisible: await page.getByRole('heading', { name: 'Review duplicate and burst photos' }).isVisible() };
   await context.close();
 }
 
@@ -278,7 +278,7 @@ result.textReflow = {};
     ...updateState,
     offlineStatus: await page.getByText(/Offline — your saved review/).innerText(),
     demoBannerOffline: await page.getByText(/Demo — sample data/).isVisible(),
-    headingOffline: await page.getByRole('heading', { name: 'Your review desk' }).isVisible(),
+    headingOffline: await page.getByRole('heading', { name: 'Review duplicate and burst photos' }).isVisible(),
   };
   await context.close();
 }

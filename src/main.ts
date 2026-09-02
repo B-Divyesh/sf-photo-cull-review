@@ -76,7 +76,7 @@ function render(): void {
     <footer class="site-footer">
       <p>Local photo review before anything moves.</p>
       <nav aria-label="Legal"><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a></nav>
-      <p class="provenance">Original generated archive illustration · Built by Param Factory · v1.0.7</p>
+      <p class="provenance">Original generated archive illustration · Built by Param Factory · v1.0.8</p>
     </footer>
     <div class="toast" role="status" aria-live="polite" aria-atomic="true" hidden></div>
     ${licenseDialog()}
@@ -85,7 +85,7 @@ function render(): void {
 }
 
 function loadingView(): string {
-  return '<main id="main" class="loading"><p class="eyebrow">Opening the archive desk</p><h1>Loading your local review…</h1></main>';
+  return '<main id="main" class="loading"><p class="eyebrow">Opening Photo Cull Review</p><h1>Loading your photo review…</h1></main>';
 }
 
 function welcomeView(): string {
@@ -113,7 +113,7 @@ function welcomeView(): string {
     <section id="how-it-works" class="method" aria-labelledby="method-title">
       <p class="eyebrow">How it works</p><h2 id="method-title">Review duplicate and burst photos in three steps.</h2>
       <ol class="method-list">
-        <li><span>01</span><h3>Index locally</h3><p>Complete SHA-256 hashes find exact files. A small visual hash suggests nearby burst frames.</p></li>
+        <li><span>01</span><h3>Find exact copies and likely bursts</h3><p>The app checks every byte to find exact copies. It compares photos and capture times to suggest likely bursts.</p></li>
         <li><span>02</span><h3>Review every group</h3><p>See why files were grouped. Mark each one keep or move to review; suggestions never become facts.</p></li>
         <li><span>03</span><h3>Export, don’t delete</h3><p>Download a CSV move plan for a separate review folder. Your source archive remains untouched.</p></li>
       </ol>
@@ -131,24 +131,28 @@ function workspaceView(): string {
   const candidates = new Set(data.groups.flatMap((item) => item.assetIds)).size;
   const reviewCount = data.assets.filter((asset) => asset.decision === 'review').length;
   const completeGroups = data.groups.filter((item) => item.assetIds.every((id) => assetById(id)?.decision !== 'undecided')).length;
-  return `<main id="main" class="workspace">
-    <section class="workspace-head">
-      <div><p class="eyebrow">${escapeHtml(data.scan?.rootName ?? 'Local folder')} · ${formatDate(data.scan?.scannedAt)}</p><h1 tabindex="-1">Your review desk</h1><p>${data.scan?.scanned.toLocaleString()} files indexed on this device. ${data.groups.length ? `${data.groups.length} candidate groups need a human decision.` : 'No duplicate or burst groups were found.'}</p></div>
-      <div class="head-actions">
-        <button class="text-button" data-action="reset">New scan</button>
+  const activeReview = !data.groups.length ? noCandidatesView() : group ? groupView(group, reviewCount) : completedView(reviewCount);
+  const tools = `<div class="head-actions workspace-tools">
+        <button class="text-button" data-action="reset">Start a new scan</button>
         <button class="button secondary" data-action="export-csv">Export move plan</button>
         <button class="text-button" data-action="export-json">Back up workspace</button>
         <button class="text-button import-label" data-action="choose-import">Restore workspace</button><input class="visually-hidden" id="import-input" type="file" aria-label="Choose a workspace backup" accept="application/json">
-      </div>
+      </div>`;
+  return `<main id="main" class="workspace ${demoMode ? 'demo-workspace' : ''}">
+    <section class="workspace-head">
+      <div><p class="eyebrow">${escapeHtml(data.scan?.rootName ?? 'Local folder')} · ${formatDate(data.scan?.scannedAt)}</p><h1 tabindex="-1">Review duplicate and burst photos</h1><p>${data.scan?.scanned.toLocaleString()} files indexed on this device. ${data.groups.length ? `${data.groups.length} candidate groups need a human decision.` : 'No duplicate or burst groups were found.'}</p></div>
+      ${demoMode ? '' : tools}
     </section>
     ${globalError ? `<p class="error page-error" role="alert">${escapeHtml(globalError)}</p>` : ''}
+    ${demoMode ? activeReview : ''}
+    ${demoMode ? tools : ''}
     <section class="summary" aria-label="Review progress">
       <div><strong>${completeGroups}</strong><span>of ${data.groups.length} groups reviewed</span></div>
       <div><strong>${decided}</strong><span>of ${candidates} candidates decided</span></div>
       <div><strong>${formatBytes(data.assets.filter((asset) => asset.decision === 'review').reduce((sum, asset) => sum + asset.size, 0))}</strong><span>marked for review folder</span></div>
       <div class="progress-wrap"><span class="visually-hidden">${candidates ? Math.round((decided / candidates) * 100) : 100}% decided</span><div class="progress"><i style="width:${candidates ? (decided / candidates) * 100 : 100}%"></i></div></div>
     </section>
-    ${!data.groups.length ? noCandidatesView() : group ? groupView(group, reviewCount) : completedView(reviewCount)}
+    ${demoMode ? '' : activeReview}
   </main>`;
 }
 
@@ -163,6 +167,8 @@ function completedView(reviewCount: number): string {
 function groupView(group: ReviewGroup, reviewCount: number): string {
   const groupAssets = group.assetIds.map(assetById).filter((item): item is MediaAsset => Boolean(item));
   const exact = group.kind === 'exact';
+  const reason = `<p class="explanation"><strong>Why grouped:</strong> ${escapeHtml(group.explanation)}</p>
+      ${exact ? '<p class="recommendation">Start by keeping the clearest path you recognize. Identical bytes mean image quality is the same.</p>' : '<p class="recommendation warning">Look closely at expressions, focus, and motion. Similarity is only a lead—keep every frame you value.</p>'}`;
   return `<section class="review-stage" aria-labelledby="group-title">
     <aside class="queue" aria-label="Candidate groups">
       <div class="queue-head"><h2>Candidate groups</h2><span>${data.activeGroup + 1}/${data.groups.length}</span></div>
@@ -173,9 +179,9 @@ function groupView(group: ReviewGroup, reviewCount: number): string {
     </aside>
     <div class="group-panel">
       <div class="group-title-row"><div><p class="eyebrow">Group ${data.activeGroup + 1} of ${data.groups.length}</p><h2 id="group-title">${exact ? 'These files are exact copies' : 'These frames look related'}</h2></div><span class="evidence-stamp ${group.kind}">${exact ? 'Same bytes' : 'Suggestion'}</span></div>
-      <p class="explanation"><strong>Why grouped:</strong> ${escapeHtml(group.explanation)}</p>
-      ${exact ? '<p class="recommendation">Start by keeping the clearest path you recognize. Identical bytes mean image quality is the same.</p>' : '<p class="recommendation warning">Look closely at expressions, focus, and motion. Similarity is only a lead—keep every frame you value.</p>'}
+      ${demoMode ? '' : reason}
       <div class="asset-grid">${groupAssets.map(assetView).join('')}</div>
+      ${demoMode ? reason : ''}
       <div class="group-controls">
         <button class="button secondary" data-action="previous" ${data.activeGroup === 0 ? 'disabled' : ''}>← Previous group</button>
         <button class="text-button" data-action="undo" ${data.history.length ? '' : 'disabled'}>Undo last decision</button>
@@ -199,7 +205,7 @@ function assetView(asset: MediaAsset, index: number): string {
 }
 
 function licenseDialog(): string {
-  return `<dialog id="license-dialog" aria-labelledby="license-title"><form method="dialog" class="dialog-close"><button aria-label="Close license dialog">×</button></form><p class="eyebrow">One-time pass</p><h2 id="license-title">Archive pass</h2>${paid ? '<p class="license-good">✓ This device has an active archive pass.</p>' : `<p>Scan folders of any size for ${ARCHIVE_PASS_PRICE} once. The free desk handles up to ${FREE_FILE_LIMIT} files. Exporting your move plan is always free.</p><a class="button primary wide" href="${checkoutUrl()}">Buy Archive pass</a><hr><form id="restore-form"><label for="license-token">Have a license? Paste it here</label><input id="license-token" name="license" autocomplete="off" required><button class="button secondary wide" type="submit">Verify and restore</button><p class="form-status" role="status" aria-live="polite"></p></form>`}<p class="legal-small">Sociobot/Dodo is the merchant of record. Refunds are handled there and revoke the license. <a href="/terms/">Terms</a> · <a href="/privacy/">Privacy</a></p></dialog>`;
+  return `<dialog id="license-dialog" aria-labelledby="license-title"><form method="dialog" class="dialog-close"><button aria-label="Close license dialog">×</button></form><p class="eyebrow">One-time pass</p><h2 id="license-title">Archive pass</h2>${paid ? '<p class="license-good">✓ This device has an active archive pass.</p>' : `<p>Scan folders of any size for ${ARCHIVE_PASS_PRICE} once. The free product handles up to ${FREE_FILE_LIMIT} files. Exporting your move plan is always free.</p><a class="button primary wide" href="${checkoutUrl()}">Buy Archive pass</a><hr><form id="restore-form"><label for="license-token">Have a license? Paste it here</label><input id="license-token" name="license" autocomplete="off" required><button class="button secondary wide" type="submit">Verify and restore</button><p class="form-status" role="status" aria-live="polite"></p></form>`}<p class="legal-small">Sociobot/Dodo is the merchant of record. Refunds are handled there and revoke the license. <a href="/terms/">Terms</a> · <a href="/privacy/">Privacy</a></p></dialog>`;
 }
 
 function licenseNoticeView(): string {
@@ -455,7 +461,7 @@ function markRouteNavigation(event: MouseEvent): void {
   const link = (event.target as Element | null)?.closest<HTMLAnchorElement>('a[href]');
   if (!link || link.target || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
   const destination = new URL(link.href, location.href);
-  if (destination.origin === location.origin && (destination.pathname === '/' || destination.searchParams.get('demo') === '1')) {
+  if (destination.origin === location.origin && (destination.pathname !== location.pathname || destination.search !== location.search)) {
     sessionStorage.setItem(ROUTE_FOCUS_KEY, '1');
   }
 }

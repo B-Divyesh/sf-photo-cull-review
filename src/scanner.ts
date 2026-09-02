@@ -20,7 +20,7 @@ export function selectMediaFiles(incoming: File[], paid: boolean): { media: File
   const skipped = incoming.length - media.length;
   if (!media.length) throw new Error('No supported photos or videos were found. Choose a folder containing JPEG, PNG, WebP, GIF, BMP, MP4, MOV, M4V, or WebM files.');
   if (!paid && media.length > FREE_FILE_LIMIT) {
-    throw new Error(`This folder contains ${media.length.toLocaleString()} supported files. The free archive desk scans up to ${FREE_FILE_LIMIT}; choose a smaller folder or unlock unlimited scans.`);
+    throw new Error(`This folder contains ${media.length.toLocaleString()} supported files. The free product scans up to ${FREE_FILE_LIMIT}; choose a smaller folder or unlock unlimited scans.`);
   }
   return { media, skipped };
 }

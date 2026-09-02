@@ -9,13 +9,13 @@ test('@claim:offline-reload the installed demo reopens offline with sample data 
   try {
     const page = await offlineContext.newPage();
     await page.goto('/?demo=1');
-    await expect(page.getByRole('heading', { name: 'Your review desk' })).toBeVisible();
-    await page.getByRole('heading', { name: 'Your review desk' }).focus();
+    await expect(page.getByRole('heading', { name: 'Review duplicate and burst photos' })).toBeVisible();
+    await page.getByRole('heading', { name: 'Review duplicate and burst photos' }).focus();
     await page.keyboard.press('r');
     await expect(page.getByRole('button', { name: /Move to review/ }).first()).toHaveAttribute('aria-pressed', 'true');
     await page.evaluate(async () => { await navigator.serviceWorker.ready; });
     await page.reload();
-    await expect(page.getByRole('heading', { name: 'Your review desk' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Review duplicate and burst photos' })).toBeVisible();
     await expect(page.getByText('Demo — sample data, separate from your workspace')).toBeVisible();
     await expect(page.locator('img[alt^="Preview of"]')).toHaveCount(2);
     await expect(page.getByRole('button', { name: /Move to review/ }).first()).toHaveAttribute('aria-pressed', 'true');
@@ -49,7 +49,7 @@ test('@regression:preview-lifecycle offline teardown leaves the shared browser a
 
     const page = await recoveryContext.newPage();
     await page.goto('/?demo=1');
-    await expect(page.getByRole('heading', { name: 'Your review desk' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Review duplicate and burst photos' })).toBeVisible();
   } finally {
     await recoveryContext.close();
   }

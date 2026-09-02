@@ -8,8 +8,8 @@ Try the isolated sample at <https://photo-cull-review.sociobot.in/?demo=1>. It o
 
 ## What it does
 
-- Streams complete files through local SHA-256 hashing to find exact copies without loading a large video whole into memory.
-- Compares compact visual fingerprints and JPEG capture times to suggest photos taken in one burst. It never uses file modification dates for this suggestion.
+- Checks every byte to find exact copies. Large videos are checked in small pieces to limit memory use.
+- Compares how photos look and when the camera recorded them to suggest likely bursts. It never uses file modification dates for this suggestion.
 - Saves thumbnails, file details, groups, and decisions in your browser. Your review survives refreshes and remains available offline.
 - Exports a CSV move plan and a restorable JSON workspace backup. Exporting is never paywalled.
 - Folders with up to 750 supported files are free. A validated one-time US$12 Archive pass scans larger folders.

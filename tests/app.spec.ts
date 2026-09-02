@@ -66,6 +66,27 @@ test('@regression:first-viewport cold desktop first screen shows the sample acti
   }
 });
 
+test('@regression:demo-first-viewport shows a realistic sample item and decision at 390 by 844', async ({ browser }) => {
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  try {
+    const page = await context.newPage();
+    await page.goto('/?demo=1');
+    const group = page.getByRole('heading', { name: 'These files are exact copies' });
+    const filename = page.getByRole('heading', { name: 'IMG_2041.jpg' });
+    const decision = page.locator('[data-id="demo-picnic-1"][data-decision="keep"]');
+    await expect(group).toBeVisible();
+    await expect(filename).toBeVisible();
+    await expect(decision).toBeVisible();
+    for (const locator of [group, filename, decision]) {
+      const box = await locator.boundingBox();
+      expect(box, 'demo task content needs a rendered box').not.toBeNull();
+      expect(box!.y + box!.height, 'demo task content must be visible without scrolling').toBeLessThanOrEqual(844);
+    }
+  } finally {
+    await context.close();
+  }
+});
+
 test('invalid workspace JSON explains the problem and the next step without parser text', async ({ page }) => {
   await page.goto('/?demo=1');
   await page.locator('#import-input').setInputFiles({
@@ -79,7 +100,7 @@ test('invalid workspace JSON explains the problem and the next step without pars
     'That file is not a Photo Cull Review backup. Choose a valid JSON backup exported from Photo Cull Review.',
   );
   await expect(alert).not.toContainText(/Expected|position|line|column/i);
-  await expect(page.getByRole('heading', { name: 'Your review desk' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Review duplicate and burst photos' })).toBeVisible();
 
   await page.locator('#import-input').setInputFiles({
     name: 'wrong-shape.json',
@@ -99,7 +120,7 @@ test('@claim:exact-duplicates @claim:csv-export @claim:workspace-persistence ind
   ] as const)));
   await page.goto('/');
   await page.locator('#folder-input').setInputFiles(path.join(process.cwd(), 'tests/fixtures'));
-  await expect(page.getByRole('heading', { name: 'Your review desk' })).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByRole('heading', { name: 'Review duplicate and burst photos' })).toBeVisible({ timeout: 20_000 });
   await expect(page.getByRole('heading', { name: 'These files are exact copies' })).toBeVisible();
   const accessibility = await new AxeBuilder({ page }).analyze();
   expect(accessibility.violations.filter((violation) => ['serious', 'critical'].includes(violation.impact ?? ''))).toEqual([]);
@@ -126,7 +147,7 @@ test('@claim:exact-duplicates @claim:csv-export @claim:workspace-persistence ind
   }
   for (const name of fixtures) expect(createHash('sha256').update(await readFile(path.join(process.cwd(), 'tests/fixtures', name))).digest('hex')).toBe(expectedHashes.get(name));
   await page.reload();
-  await expect(page.getByRole('heading', { name: 'Your review desk' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Review duplicate and burst photos' })).toBeVisible();
   await expect(page.getByText('2 marked for the review folder so far.')).toBeVisible();
 });
 
@@ -134,7 +155,7 @@ test('@claim:workspace-backup @claim:free-export exports CSV and JSON without a 
   const fixtureDirectory = path.join(process.cwd(), 'tests/fixtures');
   await page.goto('/');
   await page.locator('#folder-input').setInputFiles(fixtureDirectory);
-  await expect(page.getByRole('heading', { name: 'Your review desk' })).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByRole('heading', { name: 'Review duplicate and burst photos' })).toBeVisible({ timeout: 20_000 });
   expect(await page.evaluate(() => localStorage.getItem('sb_license:photo-cull-review'))).toBeNull();
   await page.getByRole('button', { name: /Move to review/ }).first().click();
 
@@ -155,10 +176,10 @@ test('@claim:workspace-backup @claim:free-export exports CSV and JSON without a 
   expect(parsedBackup.data.assets[0]).toMatchObject({ path: expect.stringContaining('frame-001.jpg'), sha256: expect.stringMatching(/^[a-f0-9]{64}$/) });
 
   page.once('dialog', (dialog) => dialog.accept());
-  await page.getByRole('button', { name: 'New scan' }).click();
+  await page.getByRole('button', { name: 'Start a new scan' }).click();
   await expect(page.getByRole('heading', { name: /Clean up duplicate photos/ })).toBeVisible();
   await page.locator('#folder-input').setInputFiles(fixtureDirectory);
-  await expect(page.getByRole('heading', { name: 'Your review desk' })).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByRole('heading', { name: 'Review duplicate and burst photos' })).toBeVisible({ timeout: 20_000 });
   await expect(page.getByRole('button', { name: /Move to review/ }).first()).toHaveAttribute('aria-pressed', 'false');
 
   await page.locator('#import-input').setInputFiles({
@@ -173,7 +194,7 @@ test('@claim:workspace-backup @claim:free-export exports CSV and JSON without a 
 test('sequential review shortcuts continue after focus moves to a decision button', async ({ page }) => {
   await page.goto('/');
   await page.locator('#folder-input').setInputFiles(path.join(process.cwd(), 'tests/fixtures'));
-  const desk = page.getByRole('heading', { name: 'Your review desk' });
+  const desk = page.getByRole('heading', { name: 'Review duplicate and burst photos' });
   await expect(desk).toBeVisible({ timeout: 20_000 });
 
   await desk.focus();
@@ -286,7 +307,7 @@ test('@regression:unverified-license an unavailable first verification stays fre
 
   await set751VideoFiles(page);
 
-  await expect(page.getByRole('alert')).toContainText('free archive desk scans up to 750');
+  await expect(page.getByRole('alert')).toContainText('free product scans up to 750');
   await expect(page.locator('.scan-count')).toHaveCount(0);
 });
 
@@ -340,24 +361,24 @@ test.describe('@suite:claims', () => {
 test('@claim:demo-sandbox sample decisions stay separate and reset without setup', async ({ page }) => {
   await page.goto('/');
   await page.locator('#folder-input').setInputFiles(path.join(process.cwd(), 'tests/fixtures'));
-  await expect(page.getByRole('heading', { name: 'Your review desk' })).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByRole('heading', { name: 'Review duplicate and burst photos' })).toBeVisible({ timeout: 20_000 });
   await page.getByRole('button', { name: /^Keep$/ }).first().click();
   await page.goto('/?demo=1');
-  await expect(page.getByRole('heading', { name: 'Your review desk' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Review duplicate and burst photos' })).toBeVisible();
   await expect(page.getByText('4 files indexed on this device.')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'These files are exact copies' })).toBeVisible();
   await page.getByRole('button', { name: 'Next group →' }).click();
   await expect(page.getByRole('heading', { name: 'These frames look related' })).toBeVisible();
   const accessibility = await new AxeBuilder({ page }).analyze();
   expect(accessibility.violations.filter((violation) => ['serious', 'critical'].includes(violation.impact ?? ''))).toEqual([]);
-  await page.getByRole('heading', { name: 'Your review desk' }).focus();
+  await page.getByRole('heading', { name: 'Review duplicate and burst photos' }).focus();
   await page.keyboard.press('k');
   await expect(page.getByRole('button', { name: /^Keep$/ }).first()).toHaveAttribute('aria-pressed', 'true');
   await page.getByRole('button', { name: 'Reset demo' }).click();
   await expect(page.getByRole('button', { name: /^Keep$/ }).first()).toHaveAttribute('aria-pressed', 'false');
   await page.getByRole('link', { name: 'Start for real' }).click();
   await expect(page).toHaveURL(/\/$/);
-  await expect(page.getByRole('heading', { name: 'Your review desk' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Review duplicate and burst photos' })).toBeVisible();
   await expect(page.getByRole('button', { name: /^Keep$/ }).first()).toHaveAttribute('aria-pressed', 'true');
 });
 
@@ -380,7 +401,7 @@ test('@claim:archive-pass-unlimited validates a license, matches the live US$12 
   expect(checkoutPage).toMatch(/Total<\/span><span[^>]*>\$12\.00/);
 
   await set751VideoFiles(page);
-  await expect(page.getByRole('heading', { name: 'Your review desk' })).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByRole('heading', { name: 'Review duplicate and burst photos' })).toBeVisible({ timeout: 30_000 });
   await expect(page.getByText('751 files indexed on this device.')).toBeVisible();
 });
 
@@ -408,20 +429,20 @@ test('@claim:no-setup starts a free review in a fresh browser with no account or
   await page.goto('/');
   expect(await page.evaluate(() => ({ storage: Object.keys(localStorage), cookies: document.cookie }))).toEqual({ storage: [], cookies: '' });
   await page.locator('#folder-input').setInputFiles(path.join(process.cwd(), 'tests/fixtures'));
-  await expect(page.getByRole('heading', { name: 'Your review desk' })).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByRole('heading', { name: 'Review duplicate and burst photos' })).toBeVisible({ timeout: 20_000 });
   expect(requests.every((url) => new URL(url).origin === 'http://127.0.0.1:4173')).toBe(true);
 });
 
-test('@claim:storage-controls stores a supplied license and New scan removes the real workspace', async ({ page }) => {
+test('@claim:storage-controls stores a supplied license and Start a new scan removes the real workspace', async ({ page }) => {
   await page.route('https://api.sociobot.in/api/v1/products/photo-cull-review/verify?license=stored-claim-license', (route) => route.fulfill({
     contentType: 'application/json', body: JSON.stringify({ valid: true, reason: 'ok' }),
   }));
   await page.goto('/?license=stored-claim-license');
   expect(await page.evaluate(() => localStorage.getItem('sb_license:photo-cull-review'))).toBe('stored-claim-license');
   await page.locator('#folder-input').setInputFiles(path.join(process.cwd(), 'tests/fixtures'));
-  await expect(page.getByRole('heading', { name: 'Your review desk' })).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByRole('heading', { name: 'Review duplicate and burst photos' })).toBeVisible({ timeout: 20_000 });
   page.once('dialog', (dialog) => dialog.accept());
-  await page.getByRole('button', { name: 'New scan' }).click();
+  await page.getByRole('button', { name: 'Start a new scan' }).click();
   await expect(page.getByRole('heading', { name: /Clean up duplicate photos/ })).toBeVisible();
   await page.reload();
   await expect(page.getByRole('heading', { name: /Clean up duplicate photos/ })).toBeVisible();
@@ -450,12 +471,21 @@ test('@claim:merchant-refund uses the documented merchant checkout and locks a r
 });
 
 test.describe('@suite:routes', () => {
-test('@regression:route-focus moves focus to the new page heading after demo navigation and Back', async ({ page }) => {
+test('@regression:route-focus moves focus and announces every linked public route and Back', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('link', { name: 'Try it with sample data' }).click();
-  await expect(page.getByRole('heading', { name: 'Your review desk' })).toBeFocused();
+  await expect(page.getByRole('heading', { name: 'Review duplicate and burst photos' })).toBeFocused();
   await page.goBack();
   await expect(page.getByRole('heading', { name: /Clean up duplicate photos/ })).toBeFocused();
+  await page.getByRole('link', { name: 'Privacy' }).first().click();
+  await expect(page.getByRole('heading', { name: 'How your photo review stays private' })).toBeFocused();
+  await expect(page.locator('#route-status')).toContainText('How your photo review stays private opened.');
+  await page.getByRole('link', { name: 'Terms' }).last().click();
+  await expect(page.getByRole('heading', { name: 'Terms for reviewing photo moves' })).toBeFocused();
+  await page.goBack();
+  await expect(page.getByRole('heading', { name: 'How your photo review stays private' })).toBeFocused();
+  await page.getByRole('link', { name: 'Demo' }).click();
+  await expect(page.getByRole('heading', { name: 'Review duplicate and burst photos' })).toBeFocused();
 });
 
 test('privacy, terms, and 404 use the complete shared shell without serious accessibility issues', async ({ page }) => {
