@@ -160,12 +160,15 @@ for (const path of ['/', '/?demo=1', '/privacy/', '/terms/', '/missing-verificat
 for (const viewport of [{ width: 390, height: 844 }, { width: 1440, height: 900 }]) {
   const context = await browser.newContext({ viewport });
   const page = await context.newPage();
-  await page.goto(`${base}/?demo=1`, { waitUntil: 'networkidle' });
+  await page.goto(base, { waitUntil: 'networkidle' });
+  await page.getByRole('link', { name: 'Try it with sample data' }).click();
+  await page.getByRole('heading', { name: 'Review duplicate and burst photos' }).waitFor();
   const boxes = {};
   for (const [name, locator] of [
     ['group', page.getByRole('heading', { name: 'These files are exact copies' })],
     ['filename', page.getByRole('heading', { name: 'IMG_2041.jpg' })],
-    ['decision', page.locator('[data-id="demo-picnic-1"][data-decision="keep"]')],
+    ['keep', page.locator('[data-id="demo-picnic-1"][data-decision="keep"]')],
+    ['moveToReview', page.locator('[data-id="demo-picnic-1"][data-decision="review"]')],
   ]) {
     const box = await locator.boundingBox();
     boxes[name] = box ? { ...box, bottom: box.y + box.height } : null;
@@ -177,6 +180,17 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 1440, height: 900 
     boxes,
     allFit: Object.values(boxes).every((box) => box && box.bottom <= viewport.height),
     summary: await page.locator('.workspace-head p:not(.eyebrow)').innerText(),
+    routeFocus: await page.evaluate(() => document.activeElement?.tagName === 'H1'),
+    routeAnnouncement: await page.locator('#route-status').innerText(),
+    receivesPointerEvents: await page.evaluate(() => Object.fromEntries(['IMG_2041.jpg', 'keep', 'review'].map((target) => {
+      const element = target === 'IMG_2041.jpg'
+        ? [...document.querySelectorAll('h3')].find((heading) => heading.textContent === target)
+        : document.querySelector(`[data-id="demo-picnic-1"][data-decision="${target}"]`);
+      if (!element) return [target, false];
+      const rect = element.getBoundingClientRect();
+      const topElement = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      return [target, topElement === element || element.contains(topElement)];
+    }))),
   };
   await context.close();
 }
@@ -385,7 +399,7 @@ result.textReflow = {};
 }
 
 {
-  const paths = ['/', '/assets/app-v10.js', '/assets/app-v10.css', '/icons/apple-touch-icon.png', '/sw.js', '/manifest.webmanifest', '/missing-verification-route'];
+  const paths = ['/', '/assets/app-v11.js', '/assets/app-v11.css', '/icons/apple-touch-icon.png', '/sw.js', '/manifest.webmanifest', '/missing-verification-route'];
   result.responses = {};
   for (const path of paths) {
     const response = await fetch(`${base}${path}`, { redirect: 'manual' });

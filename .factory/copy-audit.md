@@ -30,6 +30,12 @@ sentence exceeds 22 words. No banned marketing word remains in visitor copy.
 | A one-time US$12 pass scans folders above the 750-file free limit. | 11 | Pass — `archive-pass-above-limit` |
 | Buy Archive pass at checkout | 5 | Pass — destination is explicit |
 
+## Catalog description
+
+| Text | Words | Result |
+| --- | ---: | --- |
+| Review duplicate photos and likely bursts before exporting a move plan. | 10 | Pass — verb first; `similar-suggestions`, `csv-export` |
+
 ## Demo, scan, license, and error states
 
 | Text | Words | Result |
