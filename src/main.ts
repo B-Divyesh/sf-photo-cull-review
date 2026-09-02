@@ -76,8 +76,9 @@ function render(): void {
     <footer class="site-footer">
       <p>Local photo review before anything moves.</p>
       <nav aria-label="Legal"><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a></nav>
-      <p class="provenance">Original generated archive illustration · Built by Param Factory · v1.0.10</p>
+      <p class="provenance">Original generated archive illustration · Built by Param Factory · v1.0.11</p>
     </footer>
+    <div id="route-status" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
     <div class="toast" role="status" aria-live="polite" aria-atomic="true" hidden></div>
     ${licenseDialog()}
   `;
@@ -479,7 +480,12 @@ function focusRouteHeading(): void {
   if (!heading) return;
   heading.setAttribute('tabindex', '-1');
   heading.focus();
-  showToast(`${heading.textContent?.replace(/\s+/g, ' ').trim() ?? 'Page'} opened.`);
+  announceRoute(`${heading.textContent?.replace(/\s+/g, ' ').trim() ?? 'Page'} opened.`);
+}
+
+function announceRoute(text: string): void {
+  const status = document.querySelector<HTMLElement>('#route-status');
+  if (status) status.textContent = text;
 }
 
 function setMeta(selector: string, attribute: string, value: string): void {

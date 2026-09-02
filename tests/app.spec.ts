@@ -88,17 +88,32 @@ test('@regression:demo-first-viewport shows a realistic sample item and decision
     const context = await browser.newContext({ viewport });
     try {
       const page = await context.newPage();
-      await page.goto('/?demo=1');
+      await page.goto('/');
+      await page.getByRole('link', { name: 'Try it with sample data' }).click();
       const group = page.getByRole('heading', { name: 'These files are exact copies' });
       const filename = page.getByRole('heading', { name: 'IMG_2041.jpg' });
-      const decision = page.locator('[data-id="demo-picnic-1"][data-decision="keep"]');
+      const keep = page.locator('[data-id="demo-picnic-1"][data-decision="keep"]');
+      const move = page.locator('[data-id="demo-picnic-1"][data-decision="review"]');
       await expect(group).toBeVisible();
       await expect(filename).toBeVisible();
-      await expect(decision).toBeVisible();
-      for (const locator of [group, filename, decision]) {
+      await expect(keep).toBeVisible();
+      await expect(move).toBeVisible();
+      for (const locator of [group, filename, keep, move]) {
         const box = await locator.boundingBox();
         expect(box, 'demo task content needs a rendered box').not.toBeNull();
         expect(box!.y + box!.height, `demo task content must fit ${viewport.width}x${viewport.height} without scrolling`).toBeLessThanOrEqual(viewport.height);
+      }
+      if (viewport.width === 390) {
+        await expect(page.getByRole('heading', { name: 'Review duplicate and burst photos' })).toBeFocused();
+        await expect(page.locator('#route-status')).toHaveText('Review duplicate and burst photos opened.');
+        for (const [name, locator] of [['filename', filename], ['Keep control', keep], ['Move to review control', move]] as const) {
+          const receivesPointerEvents = await locator.evaluate((element) => {
+            const rect = element.getBoundingClientRect();
+            const topElement = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+            return topElement === element || element.contains(topElement);
+          });
+          expect(receivesPointerEvents, `${name} must receive pointer events immediately after demo navigation`).toBe(true);
+        }
       }
     } finally {
       await context.close();
