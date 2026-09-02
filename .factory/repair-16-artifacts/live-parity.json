@@ -1,0 +1,222 @@
+{
+  "compared": 24,
+  "matched": 24,
+  "artifacts": [
+    {
+      "relative": "404.html",
+      "route": "/404.html",
+      "status": 200,
+      "bytes": 2982,
+      "localSha256": "c4c7796a6ee81e081f68eb5b8327574c1fc5640832058e93f2000f2a52603573",
+      "liveSha256": "c4c7796a6ee81e081f68eb5b8327574c1fc5640832058e93f2000f2a52603573",
+      "matches": true
+    },
+    {
+      "relative": "assets/app-v10.css",
+      "route": "/assets/app-v10.css",
+      "status": 200,
+      "bytes": 20340,
+      "localSha256": "d95e45fc2364672a60f7e6a1ca867acfdff21459bed278fdb9ffa9701ade03cb",
+      "liveSha256": "d95e45fc2364672a60f7e6a1ca867acfdff21459bed278fdb9ffa9701ade03cb",
+      "matches": true
+    },
+    {
+      "relative": "assets/app-v10.js",
+      "route": "/assets/app-v10.js",
+      "status": 200,
+      "bytes": 38511,
+      "localSha256": "177bc0e279db0b460410c827ab4809c6b9f9797cbfcbcfbab7b9ef16f85b23f9",
+      "liveSha256": "177bc0e279db0b460410c827ab4809c6b9f9797cbfcbcfbab7b9ef16f85b23f9",
+      "matches": true
+    },
+    {
+      "relative": "assets/archive-room-mobile.webp",
+      "route": "/assets/archive-room-mobile.webp",
+      "status": 200,
+      "bytes": 37170,
+      "localSha256": "d8506b103f6519a4135cb13ae3c838bfeb99dd91f4c66f0288d1aa7d1fd1c2d4",
+      "liveSha256": "d8506b103f6519a4135cb13ae3c838bfeb99dd91f4c66f0288d1aa7d1fd1c2d4",
+      "matches": true
+    },
+    {
+      "relative": "assets/archive-room.webp",
+      "route": "/assets/archive-room.webp",
+      "status": 200,
+      "bytes": 62082,
+      "localSha256": "cd722af2a5773095708433417d366d43973455777cb6c761d30c2e1c739bac04",
+      "liveSha256": "cd722af2a5773095708433417d366d43973455777cb6c761d30c2e1c739bac04",
+      "matches": true
+    },
+    {
+      "relative": "assets/newsreader-latin.woff2",
+      "route": "/assets/newsreader-latin.woff2",
+      "status": 200,
+      "bytes": 56976,
+      "localSha256": "9509290630ca06f66e66cfdd3a2018a967582f5f962709a281dd961245054fc4",
+      "liveSha256": "9509290630ca06f66e66cfdd3a2018a967582f5f962709a281dd961245054fc4",
+      "matches": true
+    },
+    {
+      "relative": "assets/social-preview.jpg",
+      "route": "/assets/social-preview.jpg",
+      "status": 200,
+      "bytes": 113073,
+      "localSha256": "8bb6fefc7b20a8f95bd58a7569a4760c8ec5dbc017cde23913d09aab0e2ccaa2",
+      "liveSha256": "8bb6fefc7b20a8f95bd58a7569a4760c8ec5dbc017cde23913d09aab0e2ccaa2",
+      "matches": true
+    },
+    {
+      "relative": "icons/apple-touch-icon.png",
+      "route": "/icons/apple-touch-icon.png",
+      "status": 200,
+      "bytes": 16469,
+      "localSha256": "f00195c699dd7471aabedc43944dd2bf2992a275ae5db9e9022f8d885f3097c8",
+      "liveSha256": "f00195c699dd7471aabedc43944dd2bf2992a275ae5db9e9022f8d885f3097c8",
+      "matches": true
+    },
+    {
+      "relative": "icons/icon-192.png",
+      "route": "/icons/icon-192.png",
+      "status": 200,
+      "bytes": 14266,
+      "localSha256": "8bb4748abcb57c485d1434139dcbd6178205f04cdfaf514776403eda99786fa2",
+      "liveSha256": "8bb4748abcb57c485d1434139dcbd6178205f04cdfaf514776403eda99786fa2",
+      "matches": true
+    },
+    {
+      "relative": "icons/icon-512.png",
+      "route": "/icons/icon-512.png",
+      "status": 200,
+      "bytes": 17395,
+      "localSha256": "21c221dd9e03afbe464b6f82f38816feff573e3940f837542fbc16900bff1085",
+      "liveSha256": "21c221dd9e03afbe464b6f82f38816feff573e3940f837542fbc16900bff1085",
+      "matches": true
+    },
+    {
+      "relative": "icons/icon-maskable-512.png",
+      "route": "/icons/icon-maskable-512.png",
+      "status": 200,
+      "bytes": 17395,
+      "localSha256": "21c221dd9e03afbe464b6f82f38816feff573e3940f837542fbc16900bff1085",
+      "liveSha256": "21c221dd9e03afbe464b6f82f38816feff573e3940f837542fbc16900bff1085",
+      "matches": true
+    },
+    {
+      "relative": "icons/icon.svg",
+      "route": "/icons/icon.svg",
+      "status": 200,
+      "bytes": 463,
+      "localSha256": "11fbff486f97e38b7496e1ed766aeed3c418b64c040c94ab795fdacf9edcc192",
+      "liveSha256": "11fbff486f97e38b7496e1ed766aeed3c418b64c040c94ab795fdacf9edcc192",
+      "matches": true
+    },
+    {
+      "relative": "index.html",
+      "route": "/",
+      "status": 200,
+      "bytes": 1892,
+      "localSha256": "af714cdf0e32b5b233189392af33fd42eecd6661724ab915ab2dc78a06da60e1",
+      "liveSha256": "af714cdf0e32b5b233189392af33fd42eecd6661724ab915ab2dc78a06da60e1",
+      "matches": true
+    },
+    {
+      "relative": "manifest.webmanifest",
+      "route": "/manifest.webmanifest",
+      "status": 200,
+      "bytes": 625,
+      "localSha256": "a52a2622ab6b41d6b44798f7f9d1b09c60584bd8571653102efc925b786ab362",
+      "liveSha256": "a52a2622ab6b41d6b44798f7f9d1b09c60584bd8571653102efc925b786ab362",
+      "matches": true
+    },
+    {
+      "relative": "offline.html",
+      "route": "/offline.html",
+      "status": 200,
+      "bytes": 726,
+      "localSha256": "47a932f0898da71766b5c36f05744eb3b4e9ab039382644a4cfda107f27b18a6",
+      "liveSha256": "47a932f0898da71766b5c36f05744eb3b4e9ab039382644a4cfda107f27b18a6",
+      "matches": true
+    },
+    {
+      "relative": "privacy/index.html",
+      "route": "/privacy/",
+      "status": 200,
+      "bytes": 4113,
+      "localSha256": "cb41d8472e12810349ee2ae4bf5b7b670086d310a3412ab626ed7a8f2d747cda",
+      "liveSha256": "cb41d8472e12810349ee2ae4bf5b7b670086d310a3412ab626ed7a8f2d747cda",
+      "matches": true
+    },
+    {
+      "relative": "robots.txt",
+      "route": "/robots.txt",
+      "status": 200,
+      "bytes": 82,
+      "localSha256": "1b7ec0b83183951ae872b154dd926eb3b0f110a94d86e90a7647bd9479e55d6a",
+      "liveSha256": "1b7ec0b83183951ae872b154dd926eb3b0f110a94d86e90a7647bd9479e55d6a",
+      "matches": true
+    },
+    {
+      "relative": "route-focus.js",
+      "route": "/route-focus.js",
+      "status": 200,
+      "bytes": 1181,
+      "localSha256": "a6755621f647db31334d880de813881b620d6b32d5aaf0c80fd73f9aef1e66ba",
+      "liveSha256": "a6755621f647db31334d880de813881b620d6b32d5aaf0c80fd73f9aef1e66ba",
+      "matches": true
+    },
+    {
+      "relative": "samples/picnic-wide.svg",
+      "route": "/samples/picnic-wide.svg",
+      "status": 200,
+      "bytes": 852,
+      "localSha256": "ca98249482d8befae9c84ed54112d6600363f8da6a7455b8a0b89c39526464e3",
+      "liveSha256": "ca98249482d8befae9c84ed54112d6600363f8da6a7455b8a0b89c39526464e3",
+      "matches": true
+    },
+    {
+      "relative": "samples/sparklers-close.svg",
+      "route": "/samples/sparklers-close.svg",
+      "status": 200,
+      "bytes": 821,
+      "localSha256": "c812c09eb9b80619d971b20396d3dd306267986938707b7817233efdd5ba7bcd",
+      "liveSha256": "c812c09eb9b80619d971b20396d3dd306267986938707b7817233efdd5ba7bcd",
+      "matches": true
+    },
+    {
+      "relative": "samples/sparklers-wide.svg",
+      "route": "/samples/sparklers-wide.svg",
+      "status": 200,
+      "bytes": 817,
+      "localSha256": "304323a10ec02405912669f70d5e7741a9a4f1dc4c64a3c30769a69832aa5479",
+      "liveSha256": "304323a10ec02405912669f70d5e7741a9a4f1dc4c64a3c30769a69832aa5479",
+      "matches": true
+    },
+    {
+      "relative": "sitemap.xml",
+      "route": "/sitemap.xml",
+      "status": 200,
+      "bytes": 383,
+      "localSha256": "76f31bbb4ad04f9ab8b6ab5c5230da5d724956b779f93ff7b92892f35ff05a04",
+      "liveSha256": "76f31bbb4ad04f9ab8b6ab5c5230da5d724956b779f93ff7b92892f35ff05a04",
+      "matches": true
+    },
+    {
+      "relative": "sw.js",
+      "route": "/sw.js",
+      "status": 200,
+      "bytes": 2015,
+      "localSha256": "796c6246cb375d42af598d78e622a47543a033d66f302610486970b3d38d8aa0",
+      "liveSha256": "796c6246cb375d42af598d78e622a47543a033d66f302610486970b3d38d8aa0",
+      "matches": true
+    },
+    {
+      "relative": "terms/index.html",
+      "route": "/terms/",
+      "status": 200,
+      "bytes": 4176,
+      "localSha256": "daf7e5cb20a89e228cfbcdc29cdb61eec5928f63bd5fa96e7562ca4e6e73ca28",
+      "liveSha256": "daf7e5cb20a89e228cfbcdc29cdb61eec5928f63bd5fa96e7562ca4e6e73ca28",
+      "matches": true
+    }
+  ]
+}

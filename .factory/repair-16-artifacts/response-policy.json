@@ -1,0 +1,45 @@
+{
+  "endpoint": "https://api.sociobot.in/api/v1/products/photo-cull-review/verify",
+  "totalRequests": 35,
+  "counts": {
+    "200": 30,
+    "429": 5
+  },
+  "firstRateLimit": {
+    "request": 31,
+    "status": 429,
+    "retryAfter": "4",
+    "cacheControl": null,
+    "allowOrigin": "https://photo-cull-review.sociobot.in"
+  },
+  "samples": [
+    {
+      "request": 1,
+      "status": 200,
+      "retryAfter": null,
+      "cacheControl": "no-store",
+      "allowOrigin": "https://photo-cull-review.sociobot.in"
+    },
+    {
+      "request": 30,
+      "status": 200,
+      "retryAfter": null,
+      "cacheControl": "no-store",
+      "allowOrigin": "https://photo-cull-review.sociobot.in"
+    },
+    {
+      "request": 31,
+      "status": 429,
+      "retryAfter": "4",
+      "cacheControl": null,
+      "allowOrigin": "https://photo-cull-review.sociobot.in"
+    },
+    {
+      "request": 35,
+      "status": 429,
+      "retryAfter": "4",
+      "cacheControl": null,
+      "allowOrigin": "https://photo-cull-review.sociobot.in"
+    }
+  ]
+}
