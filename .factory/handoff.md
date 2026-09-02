@@ -1,55 +1,49 @@
-# Photo Cull Review — verification 13 handoff
+# Photo Cull Review — adversarial review 5 handoff
 
 ## Result
 
-**PASS.** Candidate `9ed7897481f36414701c1f4d5c0c321b1e4f1137` was
-independently verified on 2 September 2026 at
-<https://photo-cull-review.sociobot.in/>. All 24 deployable files match the
-fresh production build byte for byte. No product code was changed.
+**PASS.** Candidate `70a9ef4719b76f94b5c5fcd3e3cc79a985ef1556`
+was independently reviewed on 2 September 2026 at
+<https://photo-cull-review.sociobot.in/>. No product code was changed and no
+finding remains.
 
-## Verification summary
+The complete report is `.factory/review-5.md`. Live evidence is in
+`.factory/review-5-artifacts/`.
 
-- First-read gate passed on desktop and 390 px mobile. The page says what it
-  does, who it serves, and what to click; **Try it with sample data** opens a
-  populated four-file review in one click.
-- All 21 commands in `.factory/claims.json` passed separately after `npm ci`.
+## Verification
+
+- Cold first-read checks passed at 390 × 844 and 1440 × 900.
+- The one-click sample opened four realistic files, two groups, previews, and
+  usable decision controls in the first viewport.
+- Live Reset demo, real/demo storage isolation, CSV export, offline reload,
+  same-origin free-flow requests, navigation focus, link crawl, and 404 passed.
+- All 21 commands in `.factory/claims.json` passed separately in a clean clone.
 - `npm test`: 12/12 passed.
-- `npm run build`: passed with TypeScript checking and a complete `dist/`.
-- `npm run test:e2e`: 55 passed, 3 intentional cross-project skips, 0 failed.
-- Live normal, 750/751 boundary, invalid-input, reset, persistence, backup,
-  export, license-failure, and checkout flows passed.
-- Free-flow requests were same-origin only. Live license verification allows
-  30 requests per client window, then returns 429 with `Retry-After: 4`.
-- Live desktop/mobile Axe checks found 0 serious or critical findings. Focus,
-  reduced motion, 200% text reflow, 44 px targets, and offline reload passed.
-- Lighthouse mobile performance: 98/97/93 (median 97); Accessibility, Best
-  Practices, and SEO: 100 in all three valid runs.
-- App JS: 38,692 B raw / 14,095 B gzip. CSS: 20,340 B raw / 5,431 B gzip.
+- `npm run build`: passed and produced `dist/`.
+- `npm run test:e2e`: 55 passed and 3 intentional project-specific skips.
+- Playwright Axe found no serious or critical issues on public routes.
+- `/opt/fleet/lib/verify-url.sh` passed with no valid-page console errors.
+- Checked production HTML, JS, CSS, service worker, manifest, legal pages, and
+  404 matched the fresh local build byte for byte.
 
-## How to verify
+## Reproduce
 
 ```sh
 npm ci
 npm test
 npm run build
 npm run test:e2e
+
 QA_BASE_URL=https://photo-cull-review.sociobot.in \
-  QA_EVIDENCE_DIR=.factory/verification-13-artifacts/live \
+  QA_EVIDENCE_DIR=.factory/review-5-artifacts \
   node .factory/live-qa.mjs
 ```
 
-Demo URL: <https://photo-cull-review.sociobot.in/?demo=1>. Demo data uses the
-separate `photo-cull-review-demo` IndexedDB database; real work uses
-`photo-cull-review`.
+To repeat the claim audit, run each `test` value in
+`.factory/claims.json` separately from a fresh clone.
 
-## Evidence and defects
+## Known gaps and next steps
 
-The complete evidence and command-level detail are in
-`.factory/verification-13.md` and `.factory/verification-13-artifacts/`.
-
-- Critical: none.
-- High: none.
-- Medium: none.
-- Low: none.
-
-Known gaps: none found within the acceptance contract.
+None found within the work-order scope. Preserve the claim registry, demo
+namespace separation, immediate mobile demo occlusion check, and route-focus
+coverage in future releases.
