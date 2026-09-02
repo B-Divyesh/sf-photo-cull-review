@@ -1,3 +1,27 @@
+# Photo Cull Review — independent verification 9
+
+## Result
+
+**PASS — candidate `122e36f4232cc7ccff5b09170182eaeef54d4bd2` is accepted for
+release at <https://photo-cull-review.sociobot.in/>.**
+
+Independent verification from a clean locked install completed on 2026-09-02.
+All 20 required claim commands in `.factory/claims.json` passed, along with
+`npm test` (12/12), the production build, and the complete browser suite (54
+checks; expected target-specific skips only). Live app JS, CSS, and service
+worker hashes exactly match the candidate build. Live desktop/390 px, keyboard,
+reduced-motion, Axe serious/critical, invalid-input recovery, privacy request
+logging, offline reload/service-worker update, response policy, US$12 checkout,
+and rate-limit checks passed. The license verifier allowed 30 requests then
+returned 429 with `Retry-After: 3` on request 31.
+
+There are no known release blockers or remaining defects. Full reproducible
+evidence is in `.factory/verification-9.md`. To verify locally: `npm ci`,
+`npm test`, `npm run test:e2e`, and `npm run build`; open `/?demo=1` for the
+isolated four-file sample review.
+
+---
+
 # Photo Cull Review — repair 15 handoff
 
 ## Result
