@@ -1,0 +1,11 @@
+{
+  "endpoint": "https://api.sociobot.in/api/v1/products/photo-cull-review/verify",
+  "origin": "https://photo-cull-review.sociobot.in",
+  "observed_allowance": 30,
+  "requests_1_through_30": 200,
+  "requests_31_through_35": 429,
+  "retry_after_seconds": 4,
+  "successful_cache_control": "no-store",
+  "cors_allow_origin": "https://photo-cull-review.sociobot.in",
+  "observed_at": "2026-09-02"
+}
