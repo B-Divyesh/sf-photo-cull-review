@@ -1,0 +1,27 @@
+{
+  "boxes": {
+    "group": {
+      "x": 14,
+      "y": 473.734375,
+      "width": 362,
+      "height": 64.96875
+    },
+    "filename": {
+      "x": 29,
+      "y": 748.078125,
+      "width": 332,
+      "height": 19.1875
+    },
+    "keep": {
+      "x": 25,
+      "y": 794.109375,
+      "width": 132.796875,
+      "height": 46
+    }
+  },
+  "allWithin844": true,
+  "privacyFocus": "How your photo review stays private",
+  "termsFocus": "Skip to main content Photo Cull Review DemoHow it worksHowPrivacyView Archive passPass Effective 1 September 2026 Terms for reviewing photo moves Photo Cull Review prepares a human-reviewed move plan. It never moves or deletes originals. Check every move plan before using a file manager. Similarity is a suggestion SHA-256 matches identify byte-for-byte copies. Visual comparisons are approximate. A likely burst is never proof that a file is safe to remove. Similar-photo timing uses embedded JPEG camera metadata. Files without it can still appear as exact copies. Archive pass The free product scans up to 750 supported files. A one-time US$12 Archive pass allows folders above that limit for the licensed user. Core safety behavior and exports remain free. Sociobot/Dodo is merchant of record and handles checkout and refunds. A refund revokes the license. Availability and warranty The software is provided as is. Browser storage can be cleared by settings, device policy, or you. Export a workspace backup when decisions matter. Do not use this product as your only backup system. Acceptable use Use the product only with media you are authorized to inspect. Do not bypass licensing or disrupt license verification. Changes Material changes will have a new effective date. Continuing to use the product after a change accepts the revised terms. Local photo review before anything moves. PrivacyTerms Original generated archive illustration · Built by Param Factory · v1.0.8",
+  "backFocus": "Skip to main content Photo Cull Review DemoHow it worksHowPrivacyView Archive passPass Effective 1 September 2026 How your photo review stays private Photo Cull Review keeps your media in your browser. It does not upload photos, videos, thumbnails, paths, hashes, decisions, or move plans. What stays on your device The app stores thumbnails, hashes, file details, candidate groups, and decisions in your browser. A license token stays in browser storage if you provide one. Choose Start a new scan to clear the saved review workspace. You can also remove site data through your browser. What leaves your device Free review never contacts another website or service. If you provide a license token, verification is the only request sent outside this app. Buying an Archive pass opens Sociobot/Dodo checkout. Sociobot/Dodo handles checkout and billing as merchant of record. The app includes no ads, analytics, tracking pixels, third-party fonts, or runtime scripts. Your exports CSV move plans and JSON workspace backups download locally. They can contain file paths and hashes, so store them carefully. Contact Questions may be sent through sociobot.in. This policy changes only when the product’s data behavior changes. Local photo review before anything moves. PrivacyTerms Original generated archive illustration · Built by Param Factory · v1.0.8",
+  "errors": []
+}
