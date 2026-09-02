@@ -3,7 +3,7 @@
   "short_name": "Cull Review",
   "description": "A private, local review queue for duplicate and burst photos.",
   "id": "/",
-  "start_url": "/?source=install-v8",
+  "start_url": "/?source=install-v9",
   "scope": "/",
   "display": "standalone",
   "background_color": "#F4EEDC",

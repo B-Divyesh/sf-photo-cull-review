@@ -51,7 +51,7 @@ test('@regression:first-viewport cold desktop first screen shows the sample acti
       'For households with large or crowded photo archives, compare exact copies and likely bursts before exporting a move plan.',
     );
     const sample = page.getByRole('link', { name: 'Try it with sample data' });
-    const outcome = page.getByText('Opens a four-file sample review immediately.');
+    const outcome = page.getByText('Opens a four-file sample review in this browser.');
     const facts = page.locator('.trust-facts');
     await expect(sample).toBeVisible();
     await expect(outcome).toBeVisible();
@@ -66,24 +66,26 @@ test('@regression:first-viewport cold desktop first screen shows the sample acti
   }
 });
 
-test('@regression:demo-first-viewport shows a realistic sample item and decision at 390 by 844', async ({ browser }) => {
-  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
-  try {
-    const page = await context.newPage();
-    await page.goto('/?demo=1');
-    const group = page.getByRole('heading', { name: 'These files are exact copies' });
-    const filename = page.getByRole('heading', { name: 'IMG_2041.jpg' });
-    const decision = page.locator('[data-id="demo-picnic-1"][data-decision="keep"]');
-    await expect(group).toBeVisible();
-    await expect(filename).toBeVisible();
-    await expect(decision).toBeVisible();
-    for (const locator of [group, filename, decision]) {
-      const box = await locator.boundingBox();
-      expect(box, 'demo task content needs a rendered box').not.toBeNull();
-      expect(box!.y + box!.height, 'demo task content must be visible without scrolling').toBeLessThanOrEqual(844);
+test('@regression:demo-first-viewport shows a realistic sample item and decision on phone and desktop', async ({ browser }) => {
+  for (const viewport of [{ width: 390, height: 844 }, { width: 1440, height: 900 }]) {
+    const context = await browser.newContext({ viewport });
+    try {
+      const page = await context.newPage();
+      await page.goto('/?demo=1');
+      const group = page.getByRole('heading', { name: 'These files are exact copies' });
+      const filename = page.getByRole('heading', { name: 'IMG_2041.jpg' });
+      const decision = page.locator('[data-id="demo-picnic-1"][data-decision="keep"]');
+      await expect(group).toBeVisible();
+      await expect(filename).toBeVisible();
+      await expect(decision).toBeVisible();
+      for (const locator of [group, filename, decision]) {
+        const box = await locator.boundingBox();
+        expect(box, 'demo task content needs a rendered box').not.toBeNull();
+        expect(box!.y + box!.height, `demo task content must fit ${viewport.width}x${viewport.height} without scrolling`).toBeLessThanOrEqual(viewport.height);
+      }
+    } finally {
+      await context.close();
     }
-  } finally {
-    await context.close();
   }
 });
 
@@ -236,13 +238,14 @@ test('@regression:mobile-header every visible header control is readable, separa
 
   for (const locator of [
     page.getByRole('link', { name: 'Try it with sample data' }),
-    page.getByText('Opens a four-file sample review immediately.'),
+    page.getByText('Opens a four-file sample review in this browser.'),
     page.locator('.trust-facts'),
   ]) {
     const box = await locator.boundingBox();
     expect(box, 'sample start needs a rendered box').not.toBeNull();
     expect(box!.y + box!.height).toBeLessThanOrEqual(844);
   }
+  await expect(page.getByRole('button', { name: 'View Archive pass' }).locator('.compact-label')).toHaveText('View pass');
 });
 });
 
@@ -336,7 +339,7 @@ test('an invalid checkout return shows the quiet inactive-license notice and buy
 
   const notice = page.getByRole('status').filter({ hasText: 'This license is no longer active.' });
   await expect(notice).toBeVisible();
-  await expect(notice.getByRole('link', { name: 'Buy Archive pass' })).toHaveAttribute('href', 'https://api.sociobot.in/api/v1/products/photo-cull-review/checkout');
+  await expect(notice.getByRole('link', { name: 'Buy Archive pass at checkout (opens external checkout)' })).toHaveAttribute('href', 'https://api.sociobot.in/api/v1/products/photo-cull-review/checkout');
   await expect(page.getByRole('button', { name: 'Archive pass active' })).toHaveCount(0);
   const accessibility = await new AxeBuilder({ page }).analyze();
   expect(accessibility.violations.filter((violation) => ['serious', 'critical'].includes(violation.impact ?? ''))).toEqual([]);
@@ -365,7 +368,7 @@ test('@claim:demo-sandbox sample decisions stay separate and reset without setup
   await page.getByRole('button', { name: /^Keep$/ }).first().click();
   await page.goto('/?demo=1');
   await expect(page.getByRole('heading', { name: 'Review duplicate and burst photos' })).toBeVisible();
-  await expect(page.getByText('4 files indexed on this device.')).toBeVisible();
+  await expect(page.getByText('4 files are ready to review on this device.')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'These files are exact copies' })).toBeVisible();
   await page.getByRole('button', { name: 'Next group →' }).click();
   await expect(page.getByRole('heading', { name: 'These frames look related' })).toBeVisible();
@@ -382,14 +385,14 @@ test('@claim:demo-sandbox sample decisions stay separate and reset without setup
   await expect(page.getByRole('button', { name: /^Keep$/ }).first()).toHaveAttribute('aria-pressed', 'true');
 });
 
-test('@claim:archive-pass-unlimited validates a license, matches the live US$12 checkout contract, and accepts 751 files', async ({ page }) => {
+test('@claim:archive-pass-above-limit validates a license, matches the live US$12 checkout contract, and accepts 751 files', async ({ page }) => {
   await page.route('https://api.sociobot.in/api/v1/products/photo-cull-review/verify?license=valid-claim-license', (route) => route.fulfill({
     contentType: 'application/json', body: JSON.stringify({ valid: true, reason: 'ok' }),
   }));
   await page.goto('/?license=valid-claim-license');
   await expect(page.getByRole('button', { name: 'Archive pass active' })).toBeVisible();
-  await expect(page.getByText('A one-time US$12 pass removes the 750-file scan limit.')).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Buy archive pass' })).toHaveAttribute('href', 'https://api.sociobot.in/api/v1/products/photo-cull-review/checkout');
+  await expect(page.getByText('A one-time US$12 pass scans folders above the 750-file free limit.')).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Buy Archive pass at checkout (opens external checkout)' })).toHaveAttribute('href', 'https://api.sociobot.in/api/v1/products/photo-cull-review/checkout');
 
   const checkout = await page.request.get('https://api.sociobot.in/api/v1/products/photo-cull-review/checkout', { maxRedirects: 5 });
   expect(checkout.ok()).toBe(true);
@@ -402,7 +405,7 @@ test('@claim:archive-pass-unlimited validates a license, matches the live US$12 
 
   await set751VideoFiles(page);
   await expect(page.getByRole('heading', { name: 'Review duplicate and burst photos' })).toBeVisible({ timeout: 30_000 });
-  await expect(page.getByText('751 files indexed on this device.')).toBeVisible();
+  await expect(page.getByText('751 files are ready to review on this device.')).toBeVisible();
 });
 
 test('@claim:group-explanations shows complete-hash evidence and cautious burst evidence', async ({ page }) => {
@@ -466,7 +469,7 @@ test('@claim:merchant-refund uses the documented merchant checkout and locks a r
   await expect(page.getByRole('status').filter({ hasText: 'This license is no longer active.' })).toBeVisible();
   await page.getByRole('button', { name: 'View Archive pass' }).click();
   await expect(page.getByText('Sociobot/Dodo is the merchant of record. Refunds are handled there and revoke the license.')).toBeVisible();
-  await expect(page.locator('#license-dialog').getByRole('link', { name: 'Buy Archive pass' })).toHaveAttribute('href', 'https://api.sociobot.in/api/v1/products/photo-cull-review/checkout');
+  await expect(page.locator('#license-dialog').getByRole('link', { name: 'Buy Archive pass at checkout (opens external checkout)' })).toHaveAttribute('href', 'https://api.sociobot.in/api/v1/products/photo-cull-review/checkout');
 });
 });
 
@@ -524,7 +527,15 @@ test('@regression:route-social-metadata every public route provides its own comp
     await expect(page.locator('meta[name="twitter:title"]')).toHaveAttribute('content', route.title);
     await expect(page.locator('meta[name="twitter:description"]')).toHaveAttribute('content', /\S+/);
     await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute('content', 'https://photo-cull-review.sociobot.in/assets/social-preview.jpg');
+    await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute('href', '/icons/apple-touch-icon.png');
+    await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute('sizes', '180x180');
   }
+  expect(await page.evaluate(async () => {
+    const image = new Image();
+    image.src = '/icons/apple-touch-icon.png';
+    await image.decode();
+    return { width: image.naturalWidth, height: image.naturalHeight };
+  })).toEqual({ width: 180, height: 180 });
 });
 
 test('@regression:text-reflow home, demo, legal, and not-found routes reflow at 200% on 390px', async ({ page }, testInfo) => {

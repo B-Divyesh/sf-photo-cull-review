@@ -68,7 +68,7 @@ function render(): void {
         <a href="/?demo=1">Demo</a>
         <a href="/#how-it-works" aria-label="How it works"><span class="wide-label">How it works</span><span class="compact-label">How</span></a>
         <a href="/privacy/">Privacy</a>
-        <button class="text-button" data-action="open-license" aria-label="${paid ? 'Archive pass active' : 'View Archive pass'}"><span class="wide-label">${paid ? 'Archive pass active' : 'View Archive pass'}</span><span class="compact-label">${paid ? 'Pass active' : 'Pass'}</span></button>
+        <button class="text-button" data-action="open-license" aria-label="${paid ? 'Archive pass active' : 'View Archive pass'}"><span class="wide-label">${paid ? 'Archive pass active' : 'View Archive pass'}</span><span class="compact-label">${paid ? 'Pass active' : 'View pass'}</span></button>
       </nav>
     </header>
     ${licenseNotice ? licenseNoticeView() : ''}
@@ -76,7 +76,7 @@ function render(): void {
     <footer class="site-footer">
       <p>Local photo review before anything moves.</p>
       <nav aria-label="Legal"><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a></nav>
-      <p class="provenance">Original generated archive illustration · Built by Param Factory · v1.0.8</p>
+      <p class="provenance">Original generated archive illustration · Built by Param Factory · v1.0.9</p>
     </footer>
     <div class="toast" role="status" aria-live="polite" aria-atomic="true" hidden></div>
     ${licenseDialog()}
@@ -97,7 +97,7 @@ function welcomeView(): string {
         <p class="lede">For households with large or crowded photo archives, compare exact copies and likely bursts before exporting a move plan.</p>
         <div class="hero-actions">
           <a class="button primary" href="/?demo=1">Try it with sample data</a>
-          <span class="button-note">Opens a four-file sample review immediately.</span>
+          <span class="button-note">Opens a four-file sample review in this browser.</span>
           <button class="button secondary" data-action="choose-folder">Choose your photo folder</button>
           <span class="format-note">JPEG, PNG, WebP, GIF, BMP, MP4, MOV, M4V, WebM</span>
         </div>
@@ -119,8 +119,8 @@ function welcomeView(): string {
       </ol>
     </section>
     <section id="archive-pass" class="pricing" aria-labelledby="price-title">
-      <div><p class="eyebrow">For folders over ${FREE_FILE_LIMIT} files</p><h2 id="price-title">Archive pass</h2><p>Free for folders up to ${FREE_FILE_LIMIT} supported files. A one-time ${ARCHIVE_PASS_PRICE} pass removes the ${FREE_FILE_LIMIT}-file scan limit.</p></div>
-      <div class="price-action"><strong>${ARCHIVE_PASS_PRICE} <small>one time</small></strong><a class="button secondary" href="${checkoutUrl()}">Buy archive pass</a><button class="text-button" data-action="open-license">Restore a license</button></div>
+      <div><p class="eyebrow">For folders over ${FREE_FILE_LIMIT} files</p><h2 id="price-title">Archive pass</h2><p>Free for folders up to ${FREE_FILE_LIMIT} supported files. A one-time ${ARCHIVE_PASS_PRICE} pass scans folders above the ${FREE_FILE_LIMIT}-file free limit.</p></div>
+      <div class="price-action"><strong>${ARCHIVE_PASS_PRICE} <small>one time</small></strong><a class="button secondary" href="${checkoutUrl()}">Buy Archive pass at checkout<span class="visually-hidden"> (opens external checkout)</span></a><button class="text-button" data-action="open-license">Restore a license</button></div>
     </section>
   </main>`;
 }
@@ -140,7 +140,7 @@ function workspaceView(): string {
       </div>`;
   return `<main id="main" class="workspace ${demoMode ? 'demo-workspace' : ''}">
     <section class="workspace-head">
-      <div><p class="eyebrow">${escapeHtml(data.scan?.rootName ?? 'Local folder')} · ${formatDate(data.scan?.scannedAt)}</p><h1 tabindex="-1">Review duplicate and burst photos</h1><p>${data.scan?.scanned.toLocaleString()} files indexed on this device. ${data.groups.length ? `${data.groups.length} candidate groups need a human decision.` : 'No duplicate or burst groups were found.'}</p></div>
+      <div><p class="eyebrow">${escapeHtml(data.scan?.rootName ?? 'Local folder')} · ${formatDate(data.scan?.scannedAt)}</p><h1 tabindex="-1">Review duplicate and burst photos</h1><p>${data.scan?.scanned.toLocaleString()} files are ready to review on this device. ${data.groups.length ? `${data.groups.length} candidate groups need a human decision.` : 'No duplicate or burst groups were found.'}</p></div>
       ${demoMode ? '' : tools}
     </section>
     ${globalError ? `<p class="error page-error" role="alert">${escapeHtml(globalError)}</p>` : ''}
@@ -205,11 +205,11 @@ function assetView(asset: MediaAsset, index: number): string {
 }
 
 function licenseDialog(): string {
-  return `<dialog id="license-dialog" aria-labelledby="license-title"><form method="dialog" class="dialog-close"><button aria-label="Close license dialog">×</button></form><p class="eyebrow">One-time pass</p><h2 id="license-title">Archive pass</h2>${paid ? '<p class="license-good">✓ This device has an active archive pass.</p>' : `<p>Scan folders of any size for ${ARCHIVE_PASS_PRICE} once. The free product handles up to ${FREE_FILE_LIMIT} files. Exporting your move plan is always free.</p><a class="button primary wide" href="${checkoutUrl()}">Buy Archive pass</a><hr><form id="restore-form"><label for="license-token">Have a license? Paste it here</label><input id="license-token" name="license" autocomplete="off" required><button class="button secondary wide" type="submit">Verify and restore</button><p class="form-status" role="status" aria-live="polite"></p></form>`}<p class="legal-small">Sociobot/Dodo is the merchant of record. Refunds are handled there and revoke the license. <a href="/terms/">Terms</a> · <a href="/privacy/">Privacy</a></p></dialog>`;
+  return `<dialog id="license-dialog" aria-labelledby="license-title"><form method="dialog" class="dialog-close"><button aria-label="Close license dialog">×</button></form><p class="eyebrow">One-time pass</p><h2 id="license-title">Archive pass</h2>${paid ? '<p class="license-good">✓ This device has an active archive pass.</p>' : `<p>Scan folders above the ${FREE_FILE_LIMIT}-file free limit for ${ARCHIVE_PASS_PRICE} once. The free product handles up to ${FREE_FILE_LIMIT} files. Exporting your move plan is always free.</p><a class="button primary wide" href="${checkoutUrl()}">Buy Archive pass at checkout<span class="visually-hidden"> (opens external checkout)</span></a><hr><form id="restore-form"><label for="license-token">Have a license? Paste it here</label><input id="license-token" name="license" autocomplete="off" required><button class="button secondary wide" type="submit">Verify and restore</button><p class="form-status" role="status" aria-live="polite"></p></form>`}<p class="legal-small">Sociobot/Dodo is the merchant of record. Refunds are handled there and revoke the license. <a href="/terms/">Terms</a> · <a href="/privacy/">Privacy</a></p></dialog>`;
 }
 
 function licenseNoticeView(): string {
-  return `<aside class="license-notice" role="status"><span>${escapeHtml(licenseNotice)}</span>${paid ? '' : `<a href="${checkoutUrl()}">Buy Archive pass</a><button class="text-button" data-action="open-license">Restore a license</button>`}</aside>`;
+  return `<aside class="license-notice" role="status"><span>${escapeHtml(licenseNotice)}</span>${paid ? '' : `<a href="${checkoutUrl()}">Buy Archive pass at checkout<span class="visually-hidden"> (opens external checkout)</span></a><button class="text-button" data-action="open-license">Restore a license</button>`}</aside>`;
 }
 
 function bindViewEvents(): void {
@@ -261,7 +261,7 @@ async function handleFolder(event: Event): Promise<void> {
 }
 
 function scanProgressView(total: number): string {
-  return `<header class="site-header"><span class="brand"><img src="/icons/icon.svg" alt="" width="34" height="34"><span>Photo Cull Review</span></span></header><main id="main" class="scan-screen"><div class="scan-orbit" aria-hidden="true"><i></i></div><p class="eyebrow">Local scan</p><h1>Reading evidence,<br>not changing files.</h1><p id="scan-name">Preparing ${total.toLocaleString()} files…</p><div class="scan-progress" role="progressbar" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="0" aria-label="Files scanned"><i></i></div><p class="scan-count">0 / ${total.toLocaleString()}</p><p class="scan-assurance">Keep this tab open. Hashes and small previews stay on this device.</p></main>`;
+  return `<header class="site-header"><span class="brand"><img src="/icons/icon.svg" alt="" width="34" height="34"><span>Photo Cull Review</span></span></header><main id="main" class="scan-screen"><div class="scan-orbit" aria-hidden="true"><i></i></div><p class="eyebrow">Local scan</p><h1>Checking photos for copies<br>and likely bursts.</h1><p id="scan-name">Preparing ${total.toLocaleString()} files…</p><div class="scan-progress" role="progressbar" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="0" aria-label="Files scanned"><i></i></div><p class="scan-count">0 / ${total.toLocaleString()}</p><p class="scan-assurance">Keep this tab open. File checks and small previews stay on this device.</p></main>`;
 }
 
 function updateScanProgress(complete: number, total: number, name: string): void {

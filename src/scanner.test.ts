@@ -71,7 +71,7 @@ describe('candidate grouping', () => {
   it('@claim:free-limit accepts 750 supported files and rejects 751 before scanning', () => {
     const files = Array.from({ length: 751 }, (_, index) => new File([String(index)], `clip-${index}.mp4`, { type: 'video/mp4' }));
     expect(selectMediaFiles(files.slice(0, 750), false).media).toHaveLength(750);
-    expect(() => selectMediaFiles(files, false)).toThrow('free product scans up to 750');
+    expect(() => selectMediaFiles(files, false)).toThrow('free product scans up to 750; choose a smaller folder or buy an Archive pass');
   });
 
   it('@regression:archive-pass-limit accepts folders above the free limit before any file read', () => {
