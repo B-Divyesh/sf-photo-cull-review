@@ -37,6 +37,10 @@ async function inspectRoute(path, viewport = { width: 1440, height: 900 }) {
       twitterDescription: document.querySelector('meta[name="twitter:description"]')?.getAttribute('content'),
       twitterImage: document.querySelector('meta[name="twitter:image"]')?.getAttribute('content'),
     },
+    appleTouch: {
+      href: document.querySelector('link[rel="apple-touch-icon"]')?.getAttribute('href'),
+      sizes: document.querySelector('link[rel="apple-touch-icon"]')?.getAttribute('sizes'),
+    },
   }));
   await context.close();
   return {
@@ -63,6 +67,7 @@ for (const path of ['/', '/?demo=1', '/privacy/', '/terms/', '/missing-verificat
     heading: (await page.getByRole('heading', { level: 1 }).innerText()).replace(/\s+/g, ' ').trim(),
     audience: await page.locator('.lede').innerText(),
     actionText: await action.innerText(),
+    actionOutcome: await page.locator('.button-note').innerText(),
     actionBox: box,
     actionFullyInFirstScreen: Boolean(box && box.y >= 0 && box.y + box.height <= 900),
   };
@@ -100,6 +105,7 @@ for (const path of ['/', '/?demo=1', '/privacy/', '/terms/', '/missing-verificat
     actionFullyInFirstScreen: Boolean(actionBox && actionBox.y >= 0 && actionBox.y + actionBox.height <= 844),
     factsFullyInFirstScreen: Boolean(factsBox && factsBox.y >= 0 && factsBox.y + factsBox.height <= 844),
     targets,
+    passVisibleText: await page.locator('header .compact-label').last().innerText(),
     errors,
   };
   await context.close();
@@ -124,7 +130,33 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 1440, height: 900 
     viewport,
     boxes,
     allFit: Object.values(boxes).every((box) => box && box.bottom <= viewport.height),
+    summary: await page.locator('.workspace-head p:not(.eyebrow)').innerText(),
   };
+  await context.close();
+}
+
+{
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  await page.goto(base, { waitUntil: 'networkidle' });
+  const landingCheckout = page.locator('#archive-pass a[href*="/checkout"]');
+  await page.getByRole('button', { name: 'View Archive pass' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Archive pass' });
+  result.review3Copy = {
+    landingCheckoutVisible: await landingCheckout.innerText(),
+    landingCheckoutAccessible: await landingCheckout.getAttribute('aria-label') ?? await landingCheckout.textContent(),
+    dialogCopy: await dialog.locator('p').nth(1).innerText(),
+    dialogCheckoutVisible: await dialog.locator('a[href*="/checkout"]').innerText(),
+    dialogCheckoutAccessible: await dialog.locator('a[href*="/checkout"]').textContent(),
+  };
+  await page.goto(`${base}/404.html`, { waitUntil: 'networkidle' });
+  result.review3Copy.notFoundAction = await page.getByRole('link', { name: 'Return to photo review' }).innerText();
+  result.review3Copy.appleTouchDimensions = await page.evaluate(async () => {
+    const image = new Image();
+    image.src = '/icons/apple-touch-icon.png';
+    await image.decode();
+    return { width: image.naturalWidth, height: image.naturalHeight };
+  });
   await context.close();
 }
 

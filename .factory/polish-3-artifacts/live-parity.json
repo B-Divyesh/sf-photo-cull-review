@@ -1,0 +1,70 @@
+{
+  "checkedAt": "2026-09-02T03:46:53.330Z",
+  "commit": "5d8fd35",
+  "allMatch": true,
+  "rows": [
+    {
+      "path": "index.html",
+      "status": 200,
+      "localSha256": "719a5d1a8bf676d558bf6800e326ec435485fb9e09db25e1c47e244b1b61d27e",
+      "liveSha256": "719a5d1a8bf676d558bf6800e326ec435485fb9e09db25e1c47e244b1b61d27e",
+      "match": true
+    },
+    {
+      "path": "assets/app-v9.js",
+      "status": 200,
+      "localSha256": "9de526ad9bd25c47bf5cf0a0200b7bdda16797a18cc584afa139fa0b9cb8b81f",
+      "liveSha256": "9de526ad9bd25c47bf5cf0a0200b7bdda16797a18cc584afa139fa0b9cb8b81f",
+      "match": true
+    },
+    {
+      "path": "assets/app-v9.css",
+      "status": 200,
+      "localSha256": "2c136ba5a28f113fb0472f1bee836768e7d73256758ff18bfa289033b835eb20",
+      "liveSha256": "2c136ba5a28f113fb0472f1bee836768e7d73256758ff18bfa289033b835eb20",
+      "match": true
+    },
+    {
+      "path": "sw.js",
+      "status": 200,
+      "localSha256": "27e8960738a0671246bd5a0ba517f9e17889a7dae74b187db2ddf972abbbe68e",
+      "liveSha256": "27e8960738a0671246bd5a0ba517f9e17889a7dae74b187db2ddf972abbbe68e",
+      "match": true
+    },
+    {
+      "path": "manifest.webmanifest",
+      "status": 200,
+      "localSha256": "45d19610f3699ef32fb8d2ec9e3f95e3598f6c7bbc42b9e04a5d8305455294d5",
+      "liveSha256": "45d19610f3699ef32fb8d2ec9e3f95e3598f6c7bbc42b9e04a5d8305455294d5",
+      "match": true
+    },
+    {
+      "path": "icons/apple-touch-icon.png",
+      "status": 200,
+      "localSha256": "f00195c699dd7471aabedc43944dd2bf2992a275ae5db9e9022f8d885f3097c8",
+      "liveSha256": "f00195c699dd7471aabedc43944dd2bf2992a275ae5db9e9022f8d885f3097c8",
+      "match": true
+    },
+    {
+      "path": "privacy/index.html",
+      "status": 200,
+      "localSha256": "068f7396f3d1e44ea0a2e8ad1a5a6c33846f00e4f17adad46f75f8b822a6034e",
+      "liveSha256": "068f7396f3d1e44ea0a2e8ad1a5a6c33846f00e4f17adad46f75f8b822a6034e",
+      "match": true
+    },
+    {
+      "path": "terms/index.html",
+      "status": 200,
+      "localSha256": "5074796494a76d4da334b14c0b2f1cb66f8bbf9e661eec0680bff430651bcb68",
+      "liveSha256": "5074796494a76d4da334b14c0b2f1cb66f8bbf9e661eec0680bff430651bcb68",
+      "match": true
+    },
+    {
+      "path": "404.html",
+      "status": 200,
+      "localSha256": "b9fe9aa33f44b4d30778dc4b434915673e1ccf4b9ce0c90e20be5bc5f09ae1d6",
+      "liveSha256": "b9fe9aa33f44b4d30778dc4b434915673e1ccf4b9ce0c90e20be5bc5f09ae1d6",
+      "match": true
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "url": "https://photo-cull-review.sociobot.in",
+  "loadMs": 859,
+  "errors": [],
+  "a11y": {
+    "title": "Photo Cull Review — plan duplicate photo moves",
+    "lang": "en",
+    "h1": 1,
+    "main": true,
+    "imgsMissingAlt": 0,
+    "buttonsUnlabeled": 0,
+    "textLength": 1401
+  }
+}

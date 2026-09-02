@@ -1,1 +1,1 @@
-Review duplicate photos and likely bursts before exporting a move plan.
+Compare duplicate photos and likely bursts, then export a move plan.

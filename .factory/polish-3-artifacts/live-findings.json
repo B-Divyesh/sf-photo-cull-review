@@ -1,0 +1,45 @@
+{
+  "checkedAt": "2026-09-02T03:48:43.406Z",
+  "base": "https://photo-cull-review.sociobot.in",
+  "mobile": {
+    "passText": "View pass",
+    "factsBottom": 841.421875,
+    "horizontalOverflow": false
+  },
+  "demo": {
+    "url": "https://photo-cull-review.sociobot.in/?demo=1",
+    "banner": "Demo — sample data, separate from your workspace",
+    "resetVisible": true,
+    "startRealVisible": true,
+    "desktop": {
+      "group": 390.421875,
+      "filename": 655.609375,
+      "keep": 749.296875
+    }
+  },
+  "checkout": {
+    "visible": "Buy Archive pass at checkout",
+    "accessible": true,
+    "dialogCopy": "Scan folders above the 750-file free limit for US$12 once. The free product handles up to 750 files. Exporting your move plan is always free.",
+    "dialogAccessible": true
+  },
+  "routeFocus": {
+    "title": "Terms — Photo Cull Review",
+    "activeText": "Terms for reviewing photo moves"
+  },
+  "notFound": {
+    "status": 404,
+    "title": "Page not found — Photo Cull Review",
+    "action": "Return to photo review"
+  },
+  "appleIcon": {
+    "href": "/icons/apple-touch-icon.png",
+    "sizes": "180x180",
+    "width": 180,
+    "height": 180
+  },
+  "scanCopy": {
+    "heading": "Checking photos for copies\nand likely bursts.",
+    "assurance": "Keep this tab open. File checks and small previews stay on this device."
+  }
+}
