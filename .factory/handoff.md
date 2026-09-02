@@ -1,57 +1,66 @@
-# Photo Cull Review — adversarial review 4 handoff
+# Photo Cull Review — polish round 4 handoff
 
 ## Result
 
-**FAIL** for candidate `1fbb79ad5f8900124cf4a20c5519c1f6713edb88` at
-<https://photo-cull-review.sociobot.in/> on 2026-09-02.
+**PASS.** The production repair is live at
+<https://photo-cull-review.sociobot.in/>. The repaired source is commit
+`54802b8` (`fix: keep demo route announcements off controls`); live-QA and
+catalog updates are in `efef8df`. Azure Static Web Apps deployment
+`fc9fbc80-0d8e-4ae1-81b5-5dd404f5c181` completed on 2 September 2026.
 
-Adversarial first-read review found one blocking mobile demo regression. No
-product code was modified. The complete report is `.factory/review-4.md`.
+The only round-4 blocker, F-4-1, is fixed. Route changes still focus the
+incoming h1 and issue a polite announcement, but the route message now lives
+in a visually hidden region. The visible toast remains for action feedback and
+can no longer cover demo decisions. The PWA bundle moved to immutable
+`app-v11` assets and a `photo-cull-shell-v12` cache so existing installs fetch
+the repaired code.
 
-## Finding to repair
+## Verification
 
-- **F-4-1 (reopens F-2-1):** at 390 × 844, the visible route
-  announcement covers the first sample filename and Keep/Move controls for 4.2
-  seconds. Keep h1 focus and the polite announcement, but make the live region
-  visually hidden or otherwise non-obscuring. Add an immediate
-  `elementFromPoint` occlusion assertion to the demo first-viewport regression.
+- Clean clone `/tmp/photo-cull-review-polish4.Szlnrj/repo`: `npm ci` passed,
+  then all 21 commands in `.factory/claims.json` passed separately and with
+  exactly one matching claim test each.
+- Local product gates: `npm test` passed 12/12; `npm run build` passed and
+  produced `dist/`; `npm run test:e2e` passed the full 58-test browser suite.
+  App JS is 38.69 kB raw / 14.18 kB gzip; CSS is 20.34 kB raw / 5.42 kB gzip.
+- The updated `@regression:demo-first-viewport` takes the actual one-click
+  path from Home. At 390×844 it verifies the demo h1 focus, the polite
+  announcement, first filename, Keep, and Move control; each center is
+  immediately returned by `elementFromPoint()`.
+- Cold production check:
+  `QA_BASE_URL=https://photo-cull-review.sociobot.in QA_EVIDENCE_DIR=.factory/polish-4-artifacts/live node .factory/live-qa.mjs`.
+  It found Home, Demo, Privacy, and Terms healthy; the designed missing route
+  returned HTTP 404; every route had one h1/main and no serious or critical
+  Axe result. The demo has four files and two groups, reset works, CSV export
+  works, only same-origin free-flow requests occur, and the populated demo
+  reloads offline under cache `photo-cull-shell-v12`.
+- Live mobile evidence at
+  `.factory/polish-4-artifacts/live/qa.json` reports
+  `routeFocus: true`, `routeAnnouncement: "Review duplicate and burst photos opened."`,
+  and pointer checks true for `IMG_2041.jpg`, `keep`, and `review`.
+  Corresponding screenshots are
+  `.factory/polish-4-artifacts/live/demo-mobile-390x844.png` and
+  `.factory/polish-4-artifacts/live/demo-desktop-1440x900.png`.
+- `/opt/fleet/lib/verify-url.sh https://photo-cull-review.sociobot.in .factory/polish-4-artifacts/live/verify-url`
+  passed: HTTP 200, 647 ms load, title/lang/h1/main/image alternatives/named
+  controls, and no console/page errors. The live `@axe-core/playwright`
+  checks cover Home, Demo, Privacy, Terms, and 404 with zero serious/critical
+  violations.
+- Live mobile Lighthouse: Performance 100, Accessibility 100, Best Practices
+  100, SEO 100; LCP 1502 ms, CLS 0, TBT 0. Full report:
+  `.factory/polish-4-artifacts/live/lighthouse-mobile.json`.
 
-## What passed
+## Documentation and operation
 
-- Cold first read passes at 390 × 844 and 1440 × 900.
-- Every landing and README sentence is at most 22 words; no jargon, banned
-  marketing term, inconsistent product term, or weak action remains.
-- All 21 claim commands pass independently from a clean clone, and every claim
-  tag occurs in exactly one test. No unlisted claim was found.
-- Demo reset, real-work isolation, same-origin free requests, populated offline
-  reload, CSV export, and error recovery pass.
-- Titles, metadata, 404, deep links, Back, h1 focus, link crawl, headers,
-  200% reflow, reduced motion, and 44 px targets pass.
-- Axe reports zero serious/critical results on Home, Demo, Privacy, Terms, and
-  404. The visual identity remains distinct and product-specific.
-- Every earlier finding except F-2-1 remains fixed on the live site and in the
-  current source/tests.
+- Demo: open `/?demo=1`; it uses the isolated
+  `photo-cull-review-demo` IndexedDB namespace. Reset reseeds only demo data;
+  Start for real discards it.
+- Build/run: `npm ci`, `npm test`, `npm run build`, then `npm run test:e2e`.
+  Deploy the contents of `dist/` with the included Static Web Apps config.
+- `.factory/polish-4.md` maps F-1-1 through F-4-1 to their final change and
+  evidence. The catalog line is verb-first and 10 words.
 
-## Reproduce
+## Known gaps
 
-```sh
-npm ci
-npm test
-npm run build
-npm run test:e2e
-QA_BASE_URL=https://photo-cull-review.sociobot.in \
-  QA_EVIDENCE_DIR=/tmp/review4-live-qa \
-  node .factory/live-qa.mjs
-```
-
-To reproduce the blocker, open Home in a fresh 390 × 844 browser context,
-choose **Try it with sample data**, and inspect the first filename and Keep
-control immediately after navigation. The toast spans y=741.31–824.00 and is
-returned by `elementFromPoint()` at both centers until its 4.2-second timer
-expires.
-
-## Known gaps and next steps
-
-Repair and deploy F-2-1, then rerun the complete adversarial review. The zero-
-finding acceptance standard is not met until the immediate mobile demo control
-is unobscured.
+None. All findings in `.factory/review-1.md` through
+`.factory/review-4.md` are closed and rechecked live.
